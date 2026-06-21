@@ -159,3 +159,107 @@ begin
   return code;
 end;
 $$;
+
+alter table profiles enable row level security;
+
+create policy "Users manage own profile"
+  on profiles for all
+  using (auth.uid() = id)
+  with check (auth.uid() = id);
+
+alter table grade_scales enable row level security;
+
+create policy "Anyone can read system scales"
+  on grade_scales for select
+  using (is_system = true);
+
+create policy "Users manage own scales"
+  on grade_scales for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+-- Seed system scales
+insert into grade_scales (user_id, label, is_system, grades) values
+(null, 'Standard 4.0', true, '[
+  {"grade":"A+","points":4.0},{"grade":"A","points":4.0},{"grade":"A-","points":3.7},
+  {"grade":"B+","points":3.3},{"grade":"B","points":3.0},{"grade":"B-","points":2.7},
+  {"grade":"C+","points":2.3},{"grade":"C","points":2.0},{"grade":"C-","points":1.7},
+  {"grade":"D+","points":1.3},{"grade":"D","points":1.0},{"grade":"F","points":0.0}
+]'::jsonb),
+(null, 'Sri Lankan UGC (Z-Score)', true, '[
+  {"grade":"A+","points":4.2},{"grade":"A","points":4.0},{"grade":"A-","points":3.7},
+  {"grade":"B+","points":3.3},{"grade":"B","points":3.0},{"grade":"B-","points":2.7},
+  {"grade":"C+","points":2.3},{"grade":"C","points":2.0},{"grade":"C-","points":1.7},
+  {"grade":"D+","points":1.3},{"grade":"D","points":1.0},{"grade":"F","points":0.0}
+]'::jsonb);
+
+alter table degrees enable row level security;
+
+create policy "Users manage own degrees"
+  on degrees for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+alter table semesters enable row level security;
+
+create policy "Users manage own semesters"
+  on semesters for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+alter table modules enable row level security;
+
+create policy "Users manage own modules"
+  on modules for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+alter table presets enable row level security;
+alter table preset_semesters enable row level security;
+alter table preset_modules enable row level security;
+
+create policy "Public presets are readable"
+  on presets for select using (is_public = true);
+
+create policy "Creators manage own presets"
+  on presets for all
+  using (auth.uid() = creator_id)
+  with check (auth.uid() = creator_id);
+
+create policy "Anyone can read public preset semesters"
+  on preset_semesters for select
+  using (
+    exists (
+      select 1 from presets p
+      where p.id = preset_semesters.preset_id and p.is_public = true
+    )
+  );
+
+create policy "Creators manage own preset semesters"
+  on preset_semesters for all
+  using (
+    exists (
+      select 1 from presets p
+      where p.id = preset_semesters.preset_id and p.creator_id = auth.uid()
+    )
+  );
+
+create policy "Anyone can read public preset modules"
+  on preset_modules for select
+  using (
+    exists (
+      select 1 from preset_semesters ps
+      join presets p on p.id = ps.preset_id
+      where ps.id = preset_modules.preset_semester_id and p.is_public = true
+    )
+  );
+
+create policy "Creators manage own preset modules"
+  on preset_modules for all
+  using (
+    exists (
+      select 1 from preset_semesters ps
+      join presets p on p.id = ps.preset_id
+      where ps.id = preset_modules.preset_semester_id and p.creator_id = auth.uid()
+    )
+  );
