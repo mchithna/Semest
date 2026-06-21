@@ -94,3 +94,68 @@ create table preset_modules (
   credits             numeric(4,1) not null,
   position            int not null default 0
 );
+
+-- Auto-create profile on sign-up
+create or replace function handle_new_user()
+returns trigger language plpgsql security definer as $$
+begin
+  insert into profiles (id, display_name)
+  values (new.id, split_part(new.email, '@', 1));
+  return new;
+end;
+$$;
+
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function handle_new_user();
+
+-- ─────────────────────────────────────────────────
+-- UPDATED_AT TRIGGER (shared)
+-- ─────────────────────────────────────────────────
+create or replace function touch_updated_at()
+returns trigger language plpgsql as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+create trigger touch_updated_at_degrees
+  before update on degrees
+  for each row execute function touch_updated_at();
+
+create trigger touch_updated_at_semesters
+  before update on semesters
+  for each row execute function touch_updated_at();
+
+create trigger touch_updated_at_presets
+  before update on presets
+  for each row execute function touch_updated_at();
+
+-- ─────────────────────────────────────────────────
+-- PRESET CODE GENERATOR (SQL function)
+-- ─────────────────────────────────────────────────
+-- Generates a unique 6-char uppercase alphanumeric code.
+-- Excludes I, O, 0, 1 to avoid visual confusion.
+-- Call via supabase.rpc('generate_preset_code') from the app.
+create or replace function generate_preset_code()
+returns text language plpgsql as $$
+declare
+  chars text := 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  code  text;
+  tries int := 0;
+begin
+  loop
+    code := '';
+    for i in 1..6 loop
+      code := code || substr(chars, floor(random() * length(chars) + 1)::int, 1);
+    end loop;
+    exit when not exists (select 1 from presets where presets.code = code);
+    tries := tries + 1;
+    if tries > 10 then
+      raise exception 'Could not generate unique preset code after 10 attempts';
+    end if;
+  end loop;
+  return code;
+end;
+$$;
