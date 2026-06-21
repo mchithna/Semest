@@ -1,7 +1,7 @@
 -- ─────────────────────────────────────────────────
 -- PROFILES
 -- ─────────────────────────────────────────────────
-create table profiles (
+create table if not exists profiles (
   id              uuid primary key references auth.users(id) on delete cascade,
   display_name    text,
   onboarded_at    timestamptz,
@@ -11,7 +11,7 @@ create table profiles (
 -- ─────────────────────────────────────────────────
 -- GRADE SCALES
 -- ─────────────────────────────────────────────────
-create table grade_scales (
+create table if not exists grade_scales (
   id          uuid primary key default gen_random_uuid(),
   user_id     uuid references auth.users(id) on delete cascade,
   label       text not null,
@@ -23,7 +23,7 @@ create table grade_scales (
 -- ─────────────────────────────────────────────────
 -- DEGREES
 -- ─────────────────────────────────────────────────
-create table degrees (
+create table if not exists degrees (
   id               uuid primary key default gen_random_uuid(),
   user_id          uuid not null references auth.users(id) on delete cascade,
   title            text not null,
@@ -37,7 +37,7 @@ create table degrees (
 -- ─────────────────────────────────────────────────
 -- SEMESTERS
 -- ─────────────────────────────────────────────────
-create table semesters (
+create table if not exists semesters (
   id          uuid primary key default gen_random_uuid(),
   degree_id   uuid not null references degrees(id) on delete cascade,
   user_id     uuid not null references auth.users(id) on delete cascade,
@@ -51,7 +51,7 @@ create table semesters (
 -- ─────────────────────────────────────────────────
 -- MODULES
 -- ─────────────────────────────────────────────────
-create table modules (
+create table if not exists modules (
   id           uuid primary key default gen_random_uuid(),
   semester_id  uuid not null references semesters(id) on delete cascade,
   user_id      uuid not null references auth.users(id) on delete cascade,
@@ -65,7 +65,7 @@ create table modules (
 -- ─────────────────────────────────────────────────
 -- PRESETS
 -- ─────────────────────────────────────────────────
-create table presets (
+create table if not exists presets (
   id              uuid primary key default gen_random_uuid(),
   code            text unique not null,
   creator_id      uuid references auth.users(id) on delete set null,
@@ -79,7 +79,7 @@ create table presets (
   updated_at      timestamptz default now()
 );
 
-create table preset_semesters (
+create table if not exists preset_semesters (
   id          uuid primary key default gen_random_uuid(),
   preset_id   uuid not null references presets(id) on delete cascade,
   title       text not null,
@@ -87,7 +87,7 @@ create table preset_semesters (
   position    int not null default 0
 );
 
-create table preset_modules (
+create table if not exists preset_modules (
   id                  uuid primary key default gen_random_uuid(),
   preset_semester_id  uuid not null references preset_semesters(id) on delete cascade,
   name                text not null,
@@ -95,23 +95,22 @@ create table preset_modules (
   position            int not null default 0
 );
 
+-- ─────────────────────────────────────────────────
+-- FUNCTIONS
+-- ─────────────────────────────────────────────────
+
 -- Auto-create profile on sign-up
 create or replace function handle_new_user()
 returns trigger language plpgsql security definer as $$
 begin
   insert into profiles (id, display_name)
-  values (new.id, split_part(new.email, '@', 1));
+  values (new.id, split_part(new.email, '@', 1))
+  on conflict (id) do nothing;
   return new;
 end;
 $$;
 
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute function handle_new_user();
-
--- ─────────────────────────────────────────────────
--- UPDATED_AT TRIGGER (shared)
--- ─────────────────────────────────────────────────
+-- Shared updated_at updater
 create or replace function touch_updated_at()
 returns trigger language plpgsql as $$
 begin
@@ -120,21 +119,6 @@ begin
 end;
 $$;
 
-create trigger touch_updated_at_degrees
-  before update on degrees
-  for each row execute function touch_updated_at();
-
-create trigger touch_updated_at_semesters
-  before update on semesters
-  for each row execute function touch_updated_at();
-
-create trigger touch_updated_at_presets
-  before update on presets
-  for each row execute function touch_updated_at();
-
--- ─────────────────────────────────────────────────
--- PRESET CODE GENERATOR (SQL function)
--- ─────────────────────────────────────────────────
 -- Generates a unique 6-char uppercase alphanumeric code.
 -- Excludes I, O, 0, 1 to avoid visual confusion.
 -- Call via supabase.rpc('generate_preset_code') from the app.
@@ -160,25 +144,59 @@ begin
 end;
 $$;
 
+-- ─────────────────────────────────────────────────
+-- TRIGGERS
+-- ─────────────────────────────────────────────────
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function handle_new_user();
+
+drop trigger if exists touch_updated_at_degrees on degrees;
+create trigger touch_updated_at_degrees
+  before update on degrees
+  for each row execute function touch_updated_at();
+
+drop trigger if exists touch_updated_at_semesters on semesters;
+create trigger touch_updated_at_semesters
+  before update on semesters
+  for each row execute function touch_updated_at();
+
+drop trigger if exists touch_updated_at_presets on presets;
+create trigger touch_updated_at_presets
+  before update on presets
+  for each row execute function touch_updated_at();
+
+-- ─────────────────────────────────────────────────
+-- RLS — PROFILES
+-- ─────────────────────────────────────────────────
 alter table profiles enable row level security;
 
+drop policy if exists "Users manage own profile" on profiles;
 create policy "Users manage own profile"
   on profiles for all
   using (auth.uid() = id)
   with check (auth.uid() = id);
 
+-- ─────────────────────────────────────────────────
+-- RLS — GRADE SCALES
+-- ─────────────────────────────────────────────────
 alter table grade_scales enable row level security;
 
+drop policy if exists "Anyone can read system scales" on grade_scales;
 create policy "Anyone can read system scales"
   on grade_scales for select
   using (is_system = true);
 
+drop policy if exists "Users manage own scales" on grade_scales;
 create policy "Users manage own scales"
   on grade_scales for all
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
--- Seed system scales
+-- ─────────────────────────────────────────────────
+-- SEED — SYSTEM GRADE SCALES
+-- ─────────────────────────────────────────────────
 insert into grade_scales (user_id, label, is_system, grades) values
 (null, 'Standard 4.0', true, '[
   {"grade":"A+","points":4.0},{"grade":"A","points":4.0},{"grade":"A-","points":3.7},
@@ -191,41 +209,60 @@ insert into grade_scales (user_id, label, is_system, grades) values
   {"grade":"B+","points":3.3},{"grade":"B","points":3.0},{"grade":"B-","points":2.7},
   {"grade":"C+","points":2.3},{"grade":"C","points":2.0},{"grade":"C-","points":1.7},
   {"grade":"D+","points":1.3},{"grade":"D","points":1.0},{"grade":"F","points":0.0}
-]'::jsonb);
+]'::jsonb)
+on conflict do nothing;
 
+-- ─────────────────────────────────────────────────
+-- RLS — DEGREES
+-- ─────────────────────────────────────────────────
 alter table degrees enable row level security;
 
+drop policy if exists "Users manage own degrees" on degrees;
 create policy "Users manage own degrees"
   on degrees for all
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
+-- ─────────────────────────────────────────────────
+-- RLS — SEMESTERS
+-- ─────────────────────────────────────────────────
 alter table semesters enable row level security;
 
+drop policy if exists "Users manage own semesters" on semesters;
 create policy "Users manage own semesters"
   on semesters for all
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
+-- ─────────────────────────────────────────────────
+-- RLS — MODULES
+-- ─────────────────────────────────────────────────
 alter table modules enable row level security;
 
+drop policy if exists "Users manage own modules" on modules;
 create policy "Users manage own modules"
   on modules for all
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
+-- ─────────────────────────────────────────────────
+-- RLS — PRESETS
+-- ─────────────────────────────────────────────────
 alter table presets enable row level security;
 alter table preset_semesters enable row level security;
 alter table preset_modules enable row level security;
 
+drop policy if exists "Public presets are readable" on presets;
 create policy "Public presets are readable"
   on presets for select using (is_public = true);
 
+drop policy if exists "Creators manage own presets" on presets;
 create policy "Creators manage own presets"
   on presets for all
   using (auth.uid() = creator_id)
   with check (auth.uid() = creator_id);
 
+drop policy if exists "Anyone can read public preset semesters" on preset_semesters;
 create policy "Anyone can read public preset semesters"
   on preset_semesters for select
   using (
@@ -235,6 +272,7 @@ create policy "Anyone can read public preset semesters"
     )
   );
 
+drop policy if exists "Creators manage own preset semesters" on preset_semesters;
 create policy "Creators manage own preset semesters"
   on preset_semesters for all
   using (
@@ -244,6 +282,7 @@ create policy "Creators manage own preset semesters"
     )
   );
 
+drop policy if exists "Anyone can read public preset modules" on preset_modules;
 create policy "Anyone can read public preset modules"
   on preset_modules for select
   using (
@@ -254,6 +293,7 @@ create policy "Anyone can read public preset modules"
     )
   );
 
+drop policy if exists "Creators manage own preset modules" on preset_modules;
 create policy "Creators manage own preset modules"
   on preset_modules for all
   using (
