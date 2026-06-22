@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from './lib/queryClient'
+import { AuthProvider } from './context/AuthContext'
 import './index.css'
 
 import LandingPage from './pages/LandingPage'
@@ -22,23 +23,25 @@ import PresetDetailPage from './pages/PresetDetailPage'
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/auth" element={<AuthPage />} />
-          <Route path="/onboarding" element={<OnboardingPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/degrees" element={<DegreesPage />} />
-          <Route path="/degrees/:degreeId/semesters" element={<SemestersPage />} />
-          <Route path="/degrees/:degreeId/semesters/new" element={<NewSemesterPage />} />
-          <Route path="/degrees/:degreeId/semesters/:id/edit" element={<EditSemesterPage />} />
-          <Route path="/settings/scales" element={<ScalesPage />} />
-          <Route path="/presets" element={<PresetsPage />} />
-          <Route path="/presets/new" element={<NewPresetPage />} />
-          <Route path="/presets/mine" element={<MyPresetsPage />} />
-          <Route path="/presets/:code" element={<PresetDetailPage />} />
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/auth" element={<AuthPage />} />
+            <Route path="/onboarding" element={<OnboardingPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/degrees" element={<DegreesPage />} />
+            <Route path="/degrees/:degreeId/semesters" element={<SemestersPage />} />
+            <Route path="/degrees/:degreeId/semesters/new" element={<NewSemesterPage />} />
+            <Route path="/degrees/:degreeId/semesters/:id/edit" element={<EditSemesterPage />} />
+            <Route path="/settings/scales" element={<ScalesPage />} />
+            <Route path="/presets" element={<PresetsPage />} />
+            <Route path="/presets/new" element={<NewPresetPage />} />
+            <Route path="/presets/mine" element={<MyPresetsPage />} />
+            <Route path="/presets/:code" element={<PresetDetailPage />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </QueryClientProvider>
   </StrictMode>,
 )
