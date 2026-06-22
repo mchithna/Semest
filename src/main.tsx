@@ -5,6 +5,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from './lib/queryClient'
 import { AuthProvider } from './context/AuthContext'
 import { Toaster } from 'sonner'
+import { ProtectedRoute } from './components/ProtectedRoute'
 import './index.css'
 
 import LandingPage from './pages/LandingPage'
@@ -30,16 +31,20 @@ createRoot(document.getElementById('root')!).render(
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/auth" element={<AuthPage />} />
-            <Route path="/onboarding" element={<OnboardingPage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/degrees" element={<DegreesPage />} />
-            <Route path="/degrees/:degreeId/semesters" element={<SemestersPage />} />
-            <Route path="/degrees/:degreeId/semesters/new" element={<NewSemesterPage />} />
-            <Route path="/degrees/:degreeId/semesters/:id/edit" element={<EditSemesterPage />} />
-            <Route path="/settings/scales" element={<ScalesPage />} />
+            
+            {/* Protected Routes */}
+            <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+            <Route path="/degrees" element={<ProtectedRoute><DegreesPage /></ProtectedRoute>} />
+            <Route path="/degrees/:degreeId/semesters" element={<ProtectedRoute><SemestersPage /></ProtectedRoute>} />
+            <Route path="/degrees/:degreeId/semesters/new" element={<ProtectedRoute><NewSemesterPage /></ProtectedRoute>} />
+            <Route path="/degrees/:degreeId/semesters/:id/edit" element={<ProtectedRoute><EditSemesterPage /></ProtectedRoute>} />
+            <Route path="/settings/scales" element={<ProtectedRoute><ScalesPage /></ProtectedRoute>} />
+            <Route path="/presets/new" element={<ProtectedRoute><NewPresetPage /></ProtectedRoute>} />
+            <Route path="/presets/mine" element={<ProtectedRoute><MyPresetsPage /></ProtectedRoute>} />
+            
+            {/* Public Preset Routes */}
             <Route path="/presets" element={<PresetsPage />} />
-            <Route path="/presets/new" element={<NewPresetPage />} />
-            <Route path="/presets/mine" element={<MyPresetsPage />} />
             <Route path="/presets/:code" element={<PresetDetailPage />} />
           </Routes>
         </BrowserRouter>

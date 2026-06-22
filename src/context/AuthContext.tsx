@@ -7,6 +7,7 @@ import {
 } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
+import { queryClient } from '@/lib/queryClient'
 
 interface AuthContextType {
   user: User | null
@@ -55,6 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const signOut = async () => {
+    queryClient.clear()
     await supabase.auth.signOut()
   }
 
