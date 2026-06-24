@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { GraduationCap, Activity, Target, Plus } from 'lucide-react'
+import { GraduationCap, Activity, Target, Plus, Trophy, BookOpen } from 'lucide-react'
 import { useDegrees } from '@/hooks/useDegrees'
+import { useSemesters } from '@/hooks/useSemesters'
+import { getCumulativeMetrics } from '@/lib/analytics'
+import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
 import {
   Select,
   SelectContent,
@@ -16,6 +19,9 @@ export default function DashboardPage() {
   const navigate = useNavigate()
   const { degrees, isLoading: isDegreesLoading } = useDegrees()
   const [activeDegreeId, setActiveDegreeId] = useState<string>('')
+
+  const activeDegree = degrees.find(d => d.id === activeDegreeId)
+  const { semesters, isLoading: isSemestersLoading } = useSemesters(activeDegreeId)
 
   // Set the first degree as active by default when loaded
   useEffect(() => {
@@ -52,6 +58,8 @@ export default function DashboardPage() {
     )
   }
 
+  const metrics = getCumulativeMetrics(semesters, activeDegree?.grade_scale?.grades || [])
+
   return (
     <div className="min-h-screen bg-[#1e293b] text-slate-100 p-8">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -84,18 +92,94 @@ export default function DashboardPage() {
         </div>
 
         {/* Metric Cards Skeleton Grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => (
-            <Card key={i} className="bg-[#273449]/50 border-[#1e3a5f] p-6 shadow-xl relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-1 h-full bg-[#1e3a5f]"></div>
-              <div className="animate-pulse space-y-4">
-                <div className="h-4 bg-[#1e3a5f] rounded w-1/2"></div>
-                <div className="h-8 bg-[#1e3a5f] rounded w-3/4"></div>
-                <div className="h-3 bg-[#1e3a5f] rounded w-full"></div>
+        {isSemestersLoading ? (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => (
+              <Card key={i} className="bg-[#273449]/50 border-[#1e3a5f] p-6 shadow-xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-1 h-full bg-[#1e3a5f]"></div>
+                <div className="animate-pulse space-y-4">
+                  <div className="h-4 bg-[#1e3a5f] rounded w-1/2"></div>
+                  <div className="h-8 bg-[#1e3a5f] rounded w-3/4"></div>
+                  <div className="h-3 bg-[#1e3a5f] rounded w-full"></div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <Card className="bg-[#273449] border-[#1e3a5f] p-6 shadow-xl relative overflow-hidden group hover:border-emerald-400/50 transition-colors">
+              <div className="absolute top-0 left-0 w-1 h-full bg-emerald-400"></div>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-3 bg-emerald-400/10 rounded-lg text-emerald-400">
+                  <GraduationCap className="w-6 h-6" />
+                </div>
+                <div>
+                  <p className="text-sm font-mono text-slate-400 uppercase tracking-widest">Cumulative GPA</p>
+                  <h3 className="text-3xl font-mono font-bold text-slate-100 mt-1">
+                    <AnimatedNumber value={metrics.cgpa} decimals={3} />
+                  </h3>
+                </div>
               </div>
+              <p className="text-xs font-mono text-slate-500 uppercase tracking-widest">
+                Overall performance
+              </p>
             </Card>
-          ))}
-        </div>
+
+            <Card className="bg-[#273449] border-[#1e3a5f] p-6 shadow-xl relative overflow-hidden group hover:border-sky-400/50 transition-colors">
+              <div className="absolute top-0 left-0 w-1 h-full bg-sky-400"></div>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-3 bg-sky-400/10 rounded-lg text-sky-400">
+                  <BookOpen className="w-6 h-6" />
+                </div>
+                <div>
+                  <p className="text-sm font-mono text-slate-400 uppercase tracking-widest">Earned Credits</p>
+                  <h3 className="text-3xl font-mono font-bold text-slate-100 mt-1">
+                    <AnimatedNumber value={metrics.earnedCredits} decimals={1} />
+                  </h3>
+                </div>
+              </div>
+              <p className="text-xs font-mono text-slate-500 uppercase tracking-widest">
+                Total completed credits
+              </p>
+            </Card>
+
+            <Card className="bg-[#273449] border-[#1e3a5f] p-6 shadow-xl relative overflow-hidden group hover:border-amber-400/50 transition-colors">
+              <div className="absolute top-0 left-0 w-1 h-full bg-amber-400"></div>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-3 bg-amber-400/10 rounded-lg text-amber-400">
+                  <Trophy className="w-6 h-6" />
+                </div>
+                <div>
+                  <p className="text-sm font-mono text-slate-400 uppercase tracking-widest">Highest Sem GPA</p>
+                  <h3 className="text-3xl font-mono font-bold text-slate-100 mt-1">
+                    <AnimatedNumber value={metrics.highestGpa} decimals={3} />
+                  </h3>
+                </div>
+              </div>
+              <p className="text-xs font-mono text-slate-500 uppercase tracking-widest">
+                Best performing semester
+              </p>
+            </Card>
+
+            <Card className="bg-[#273449] border-[#1e3a5f] p-6 shadow-xl relative overflow-hidden group hover:border-indigo-400/50 transition-colors">
+              <div className="absolute top-0 left-0 w-1 h-full bg-indigo-400"></div>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-3 bg-indigo-400/10 rounded-lg text-indigo-400">
+                  <Activity className="w-6 h-6" />
+                </div>
+                <div>
+                  <p className="text-sm font-mono text-slate-400 uppercase tracking-widest">Standing</p>
+                  <h3 className="text-lg font-mono font-bold text-slate-100 mt-3 truncate" title={metrics.standing}>
+                    {metrics.standing}
+                  </h3>
+                </div>
+              </div>
+              <p className="text-xs font-mono text-slate-500 uppercase tracking-widest">
+                Current academic status
+              </p>
+            </Card>
+          </div>
+        )}
 
         {/* Main Content Area Skeletons */}
         <div className="grid gap-6 lg:grid-cols-3">
