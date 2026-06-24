@@ -6,7 +6,7 @@ export type Degree = {
   user_id: string
   title: string
   institution: string | null
-  start_year: number | null
+  started_year: number | null
   grade_scale_id: string | null
   created_at: string
 }

@@ -41,7 +41,7 @@ export default function OnboardingPage() {
       await createDegree({
         title: title.trim(),
         institution: institution.trim() || null,
-        start_year: startYear ? parseInt(startYear, 10) : null,
+        started_year: startYear ? parseInt(startYear, 10) : null,
         grade_scale_id: scaleId === 'none' ? null : scaleId,
       })
       

@@ -106,7 +106,7 @@ export default function DegreesPage() {
                       {degree.title}
                     </h3>
                     <p className="text-sm font-mono text-slate-400 mt-1">
-                      {degree.institution || 'Unknown Institution'} {degree.start_year ? `• ${degree.start_year}` : ''}
+                      {degree.institution || 'Unknown Institution'} {degree.started_year ? `• ${degree.started_year}` : ''}
                     </p>
                   </div>
                   <div className="flex opacity-0 group-hover:opacity-100 transition-opacity gap-1">

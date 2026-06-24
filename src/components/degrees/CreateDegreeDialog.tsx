@@ -24,7 +24,7 @@ interface CreateDegreeDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   initialData?: DegreeWithScale
-  onSave: (data: { title: string; institution: string | null; start_year: number | null; grade_scale_id: string | null }) => Promise<void>
+  onSave: (data: { title: string; institution: string | null; started_year: number | null; grade_scale_id: string | null }) => Promise<void>
 }
 
 export function CreateDegreeDialog({
@@ -45,7 +45,7 @@ export function CreateDegreeDialog({
     if (open) {
       setTitle(initialData?.title ?? '')
       setInstitution(initialData?.institution ?? '')
-      setStartYear(initialData?.start_year?.toString() ?? '')
+      setStartYear(initialData?.started_year?.toString() ?? '')
       setGradeScaleId(initialData?.grade_scale_id ?? 'none')
     }
   }, [open, initialData])
@@ -58,7 +58,7 @@ export function CreateDegreeDialog({
       await onSave({
         title: title.trim(),
         institution: institution.trim() || null,
-        start_year: startYear ? parseInt(startYear, 10) : null,
+        started_year: startYear ? parseInt(startYear, 10) : null,
         grade_scale_id: gradeScaleId === 'none' ? null : gradeScaleId,
       })
       onOpenChange(false)
