@@ -5,6 +5,7 @@ import { useDegrees } from '@/hooks/useDegrees'
 import { useSemesters } from '@/hooks/useSemesters'
 import { getCumulativeMetrics } from '@/lib/analytics'
 import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
+import { GpaTrendChart } from '@/components/dashboard/GpaTrendChart'
 import {
   Select,
   SelectContent,
@@ -181,14 +182,22 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Main Content Area Skeletons */}
+        {/* Main Content Area */}
         <div className="grid gap-6 lg:grid-cols-3">
-          {/* Main Chart Skeleton */}
-          <Card className="lg:col-span-2 bg-[#273449]/50 border-[#1e3a5f] p-6 min-h-[400px] flex items-center justify-center">
-            <div className="animate-pulse flex flex-col items-center gap-4 w-full h-full justify-center">
-              <Activity className="w-12 h-12 text-[#1e3a5f] opacity-50" />
-              <div className="h-4 bg-[#1e3a5f] rounded w-48"></div>
-              <div className="h-[200px] bg-[#1e3a5f]/50 rounded w-full max-w-lg mt-4"></div>
+          {/* Main Chart */}
+          <Card className="lg:col-span-2 bg-[#273449]/50 border-[#1e3a5f] p-6 flex flex-col min-h-[400px]">
+            <div className="flex items-center gap-2 mb-6">
+              <Activity className="w-5 h-5 text-emerald-400" />
+              <h2 className="text-lg font-mono font-bold tracking-widest text-slate-100 uppercase">
+                GPA Progression
+              </h2>
+            </div>
+            <div className="flex-1 w-full min-h-[300px]">
+              {isSemestersLoading ? (
+                <div className="w-full h-full flex items-center justify-center animate-pulse bg-[#1e3a5f]/50 rounded-lg"></div>
+              ) : (
+                <GpaTrendChart semesters={semesters} gradeScale={activeDegree?.grade_scale?.grades || []} />
+              )}
             </div>
           </Card>
           
