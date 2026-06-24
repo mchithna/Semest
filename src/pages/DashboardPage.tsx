@@ -6,6 +6,7 @@ import { useSemesters } from '@/hooks/useSemesters'
 import { getCumulativeMetrics } from '@/lib/analytics'
 import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
 import { GpaTrendChart } from '@/components/dashboard/GpaTrendChart'
+import { TargetPredictor } from '@/components/dashboard/TargetPredictor'
 import {
   Select,
   SelectContent,
@@ -201,15 +202,25 @@ export default function DashboardPage() {
             </div>
           </Card>
           
-          {/* Secondary Widget Skeleton */}
-          <Card className="bg-[#273449]/50 border-[#1e3a5f] p-6 min-h-[400px] flex items-center justify-center">
-            <div className="animate-pulse flex flex-col items-center gap-4 w-full">
-              <Target className="w-12 h-12 text-[#1e3a5f] opacity-50" />
-              <div className="h-4 bg-[#1e3a5f] rounded w-32"></div>
-              <div className="h-10 bg-[#1e3a5f] rounded w-full mt-4"></div>
-              <div className="h-10 bg-[#1e3a5f] rounded w-full"></div>
-            </div>
-          </Card>
+          {/* Secondary Widget: Target Predictor */}
+          <div className="lg:col-span-1 min-h-[400px]">
+            {isSemestersLoading ? (
+              <Card className="bg-[#273449]/50 border-[#1e3a5f] p-6 h-full flex items-center justify-center">
+                <div className="animate-pulse flex flex-col items-center gap-4 w-full">
+                  <Target className="w-12 h-12 text-[#1e3a5f] opacity-50" />
+                  <div className="h-4 bg-[#1e3a5f] rounded w-32"></div>
+                  <div className="h-10 bg-[#1e3a5f] rounded w-full mt-4"></div>
+                  <div className="h-10 bg-[#1e3a5f] rounded w-full"></div>
+                </div>
+              </Card>
+            ) : (
+              <TargetPredictor 
+                currentCgpa={metrics.cgpa}
+                earnedCredits={metrics.earnedCredits}
+                gradeScale={activeDegree?.grade_scale?.grades || []}
+              />
+            )}
+          </div>
         </div>
 
       </div>
