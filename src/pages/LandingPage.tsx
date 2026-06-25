@@ -37,29 +37,8 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[#1e293b] text-slate-100 flex flex-col">
-      {/* Navbar */}
-      <nav className="w-full border-b border-[#1e3a5f] bg-[#1e293b]/50 backdrop-blur-md sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-emerald-400 font-mono font-bold text-xl tracking-widest uppercase">
-            <GraduationCap className="w-6 h-6" />
-            Semest
-          </div>
-          <div className="flex gap-4">
-            {session ? (
-              <Button onClick={() => navigate('/dashboard')} className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold font-mono text-xs uppercase tracking-widest">
-                Go to Dashboard
-              </Button>
-            ) : (
-              <Button onClick={() => navigate('/auth')} variant="outline" className="border-emerald-400/50 text-emerald-400 hover:bg-emerald-400/10 font-mono text-xs uppercase tracking-widest">
-                Sign In
-              </Button>
-            )}
-          </div>
-        </div>
-      </nav>
-
       {/* Hero Section */}
-      <main className="flex-1 flex flex-col items-center pt-24 pb-12 px-6">
+      <main className="flex-1 flex flex-col items-center pt-16 pb-12 px-6">
         <div className="text-center max-w-3xl mb-16 space-y-6">
           <h1 className="text-5xl md:text-6xl font-bold tracking-tight bg-gradient-to-br from-emerald-300 to-emerald-600 bg-clip-text text-transparent">
             Track Your Academic Journey
@@ -68,8 +47,11 @@ export default function LandingPage() {
             Calculate your GPA effortlessly, set targets for upcoming semesters, and manage your degree progress all in one place.
           </p>
           <div className="pt-4">
-            <Button size="lg" onClick={() => navigate('/auth')} className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold font-mono text-sm uppercase tracking-widest shadow-lg shadow-emerald-400/20">
+            <Button size="lg" onClick={() => navigate('/auth')} className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold font-mono text-sm uppercase tracking-widest shadow-lg shadow-emerald-400/20 mr-4">
               Get Started for Free <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+            <Button size="lg" variant="outline" onClick={() => navigate('/presets')} className="border-[#1e3a5f] text-emerald-400 hover:bg-[#1e3a5f] font-mono text-sm uppercase tracking-widest">
+              Browse Templates
             </Button>
           </div>
         </div>
@@ -95,6 +77,57 @@ export default function LandingPage() {
             />
           </div>
         </div>
+
+        {/* Feature Highlights */}
+        <div className="w-full max-w-6xl mt-24 grid md:grid-cols-3 gap-8">
+          <div className="bg-[#273449] border border-[#1e3a5f] p-8 rounded-2xl">
+            <div className="w-12 h-12 bg-emerald-400/10 text-emerald-400 rounded-xl flex items-center justify-center mb-6">
+              <GraduationCap className="w-6 h-6" />
+            </div>
+            <h3 className="text-xl font-mono font-bold text-slate-100 mb-3">Track Multiple Degrees</h3>
+            <p className="text-slate-400">
+              Easily manage different academic programs in one place. Keep track of dual degrees, majors, and minors separately.
+            </p>
+          </div>
+
+          <div className="bg-[#273449] border border-[#1e3a5f] p-8 rounded-2xl">
+            <div className="w-12 h-12 bg-sky-400/10 text-sky-400 rounded-xl flex items-center justify-center mb-6">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+            </div>
+            <h3 className="text-xl font-mono font-bold text-slate-100 mb-3">Visualize Progress</h3>
+            <p className="text-slate-400">
+              Watch your GPA climb with beautiful, interactive trend charts. Analyze your performance semester-by-semester.
+            </p>
+          </div>
+
+          <div className="bg-[#273449] border border-[#1e3a5f] p-8 rounded-2xl">
+            <div className="w-12 h-12 bg-amber-400/10 text-amber-400 rounded-xl flex items-center justify-center mb-6">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/></svg>
+            </div>
+            <h3 className="text-xl font-mono font-bold text-slate-100 mb-3">Community Templates</h3>
+            <p className="text-slate-400">
+              Don't manually enter modules. Clone complete degree structures published by other students in seconds.
+            </p>
+          </div>
+        </div>
+
+        {/* CTA Section */}
+        <div className="w-full max-w-4xl mt-24 mb-12 bg-[#273449] border border-[#1e3a5f] p-12 rounded-3xl text-center relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 to-sky-400"></div>
+          <h2 className="text-3xl font-bold text-slate-100 mb-4">Ready to optimize your grades?</h2>
+          <p className="text-slate-400 mb-8 max-w-2xl mx-auto">
+            Join thousands of students who are already using Semest to track their academic progress and discover community-built degree templates.
+          </p>
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Button size="lg" onClick={() => navigate('/auth')} className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold font-mono text-sm uppercase tracking-widest">
+              Create Free Account
+            </Button>
+            <Button size="lg" variant="outline" onClick={() => navigate('/presets')} className="border-[#1e3a5f] text-emerald-400 hover:bg-[#1e3a5f] font-mono text-sm uppercase tracking-widest">
+              Browse Templates
+            </Button>
+          </div>
+        </div>
+
       </main>
     </div>
   )
