@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card'
 import { usePreset, useApplyPreset } from '@/hooks/usePresets'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function PresetDetailPage() {
   const { code } = useParams<{ code: string }>()
@@ -43,8 +44,22 @@ export default function PresetDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#1e293b] flex items-center justify-center">
-        <Loader2 className="w-10 h-10 animate-spin text-emerald-400" />
+      <div className="min-h-screen bg-[#1e293b] text-slate-100 p-8 pb-32">
+        <div className="max-w-4xl mx-auto space-y-8">
+          <Skeleton className="h-10 w-40 bg-[#273449]" />
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-[#1e3a5f] pb-8">
+            <div className="flex-1 space-y-4 w-full">
+              <Skeleton className="h-10 w-3/4 bg-[#273449]" />
+              <Skeleton className="h-5 w-1/2 bg-[#273449]" />
+              <Skeleton className="h-24 w-full bg-[#273449]" />
+            </div>
+            <Skeleton className="h-12 w-48 bg-[#273449]" />
+          </div>
+          <div className="space-y-6">
+            <Skeleton className="h-40 w-full bg-[#273449]" />
+            <Skeleton className="h-40 w-full bg-[#273449]" />
+          </div>
+        </div>
       </div>
     )
   }
@@ -71,7 +86,7 @@ export default function PresetDetailPage() {
 
   return (
     <div className="min-h-screen bg-[#1e293b] text-slate-100 p-8 pb-32">
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-4xl mx-auto space-y-8 animate-slideUp">
         
         <div className="flex items-center gap-4 text-emerald-400 mb-6">
           <Button variant="ghost" className="p-0 hover:bg-transparent text-emerald-400 hover:text-emerald-300" onClick={() => navigate('/presets')}>

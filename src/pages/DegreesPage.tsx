@@ -6,6 +6,7 @@ import { useDegrees } from '@/hooks/useDegrees'
 import type { DegreeWithScale } from '@/lib/queries/degrees'
 import { CreateDegreeDialog } from '@/components/degrees/CreateDegreeDialog'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function DegreesPage() {
   const { degrees, isLoading, createDegree, updateDegree, deleteDegree } = useDegrees()
@@ -47,15 +48,28 @@ export default function DegreesPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#1e293b] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
+      <div className="min-h-screen bg-[#1e293b] text-slate-100 p-8">
+        <div className="max-w-6xl mx-auto space-y-8">
+          <div className="flex justify-between items-end border-b border-[#1e3a5f] pb-6">
+            <div>
+              <Skeleton className="h-8 w-48 bg-[#273449]" />
+              <Skeleton className="h-4 w-64 bg-[#273449] mt-3" />
+            </div>
+            <Skeleton className="h-9 w-32 bg-[#273449]" />
+          </div>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-40 bg-[#273449] rounded-sm" />
+            ))}
+          </div>
+        </div>
       </div>
     )
   }
 
   return (
     <div className="min-h-screen bg-[#1e293b] text-slate-100 p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-8 animate-slideUp">
         
         {/* Header */}
         <div className="flex justify-between items-end border-b border-[#1e3a5f] pb-6">

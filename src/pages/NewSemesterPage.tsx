@@ -66,7 +66,7 @@ export default function NewSemesterPage() {
 
   return (
     <div className="min-h-screen bg-[#1e293b] text-slate-100 p-8">
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-4xl mx-auto space-y-8 animate-slideUp">
         
         <div className="flex flex-col gap-2 border-b border-[#1e3a5f] pb-6">
           <Breadcrumb 

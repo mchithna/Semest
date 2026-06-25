@@ -4,6 +4,7 @@ import { Search, Loader2, Globe, Users, FileText, ArrowRight } from 'lucide-reac
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { usePublicPresets } from '@/hooks/usePresets'
 
 export default function PresetsPage() {
@@ -32,7 +33,7 @@ export default function PresetsPage() {
 
   return (
     <div className="min-h-screen bg-[#1e293b] text-slate-100 p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-8 animate-slideUp">
         
         {/* Header section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-[#1e3a5f] pb-8">
@@ -77,8 +78,10 @@ export default function PresetsPage() {
 
         {/* Templates Grid */}
         {isLoading ? (
-          <div className="flex justify-center p-12">
-            <Loader2 className="w-10 h-10 animate-spin text-emerald-400" />
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Skeleton key={i} className="h-48 bg-[#273449] rounded-xl" />
+            ))}
           </div>
         ) : filteredPresets.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-16 text-center border border-dashed border-[#1e3a5f] rounded-lg bg-[#273449]/30">

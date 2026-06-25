@@ -64,7 +64,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#1e293b] text-slate-100 p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-8 animate-slideUp">
         
         {/* Header & Degree Selector */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#1e3a5f] pb-6">

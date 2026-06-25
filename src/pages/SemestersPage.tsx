@@ -6,6 +6,7 @@ import { useSemesters } from '@/hooks/useSemesters'
 import { computeScore, totalCredits } from '@/lib/score'
 import { ClassificationBadge } from '@/components/ui/ClassificationBadge'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function SemestersPage() {
   const { degreeId } = useParams()
@@ -18,8 +19,22 @@ export default function SemestersPage() {
 
   if (isDegreesLoading || isSemestersLoading) {
     return (
-      <div className="min-h-screen bg-[#1e293b] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
+      <div className="min-h-screen bg-[#1e293b] text-slate-100 p-8">
+        <div className="max-w-6xl mx-auto space-y-8">
+          <div className="flex justify-between items-end border-b border-[#1e3a5f] pb-6">
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-5 w-32 bg-[#273449]" />
+              <Skeleton className="h-8 w-64 bg-[#273449]" />
+              <Skeleton className="h-4 w-48 bg-[#273449]" />
+            </div>
+            <Skeleton className="h-9 w-36 bg-[#273449]" />
+          </div>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-48 bg-[#273449] rounded-sm" />
+            ))}
+          </div>
+        </div>
       </div>
     )
   }
@@ -47,7 +62,7 @@ export default function SemestersPage() {
 
   return (
     <div className="min-h-screen bg-[#1e293b] text-slate-100 p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-8 animate-slideUp">
         
         {/* Header */}
         <div className="flex justify-between items-end border-b border-[#1e3a5f] pb-6">

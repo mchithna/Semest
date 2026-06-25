@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { Plus, BookTemplate, Loader2, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useMyPresets } from '@/hooks/usePresets'
 
 export default function MyPresetsPage() {
@@ -10,7 +11,7 @@ export default function MyPresetsPage() {
 
   return (
     <div className="min-h-screen bg-[#1e293b] text-slate-100 p-8">
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-4xl mx-auto space-y-8 animate-slideUp">
         
         <div className="flex items-center gap-4 text-emerald-400 mb-6">
           <Button variant="ghost" className="p-0 hover:bg-transparent text-emerald-400 hover:text-emerald-300" onClick={() => navigate('/dashboard')}>
@@ -38,8 +39,10 @@ export default function MyPresetsPage() {
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center p-12">
-            <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
+          <div className="grid gap-6 md:grid-cols-2">
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-40 bg-[#273449] rounded-xl" />
+            ))}
           </div>
         ) : !presets || presets.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 text-center border border-dashed border-[#1e3a5f] rounded-lg bg-[#273449]/30">

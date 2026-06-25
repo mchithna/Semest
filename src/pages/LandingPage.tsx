@@ -38,7 +38,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#1e293b] text-slate-100 flex flex-col">
       {/* Hero Section */}
-      <main className="flex-1 flex flex-col items-center pt-16 pb-12 px-6">
+      <main className="flex-1 flex flex-col items-center pt-16 pb-12 px-6 animate-slideUp">
         <div className="text-center max-w-3xl mb-16 space-y-6">
           <h1 className="text-5xl md:text-6xl font-bold tracking-tight bg-gradient-to-br from-emerald-300 to-emerald-600 bg-clip-text text-transparent">
             Track Your Academic Journey

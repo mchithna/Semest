@@ -40,7 +40,7 @@ export default function NewPresetPage() {
 
   return (
     <div className="min-h-screen bg-[#1e293b] text-slate-100 p-8">
-      <div className="max-w-2xl mx-auto space-y-8">
+      <div className="max-w-2xl mx-auto space-y-8 animate-slideUp">
         
         <div className="flex items-center gap-4 text-emerald-400 mb-6">
           <Button variant="ghost" className="p-0 hover:bg-transparent text-emerald-400 hover:text-emerald-300" onClick={() => navigate('/presets/mine')}>
