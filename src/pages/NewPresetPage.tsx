@@ -98,8 +98,8 @@ export default function NewPresetPage() {
               />
             </div>
 
-            <div className="flex items-center justify-between border-t border-[#1e3a5f] pt-6">
-              <div className="space-y-0.5">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-[#1e3a5f] pt-6">
+              <div className="space-y-0.5 pr-4">
                 <Label className="text-slate-100 font-mono font-bold">Make Public</Label>
                 <p className="text-slate-400 font-mono text-xs">
                   Allow anyone to discover this template in the community browser.

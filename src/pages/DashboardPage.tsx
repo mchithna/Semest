@@ -95,7 +95,7 @@ export default function DashboardPage() {
 
         {/* Metric Cards Skeleton Grid */}
         {isSemestersLoading ? (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             {[1, 2, 3, 4].map((i) => (
               <Card key={i} className="bg-[#273449]/50 border-[#1e3a5f] p-6 shadow-xl relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-1 h-full bg-[#1e3a5f]"></div>
@@ -108,7 +108,7 @@ export default function DashboardPage() {
             ))}
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             <Card className="bg-[#273449] border-[#1e3a5f] p-6 shadow-xl relative overflow-hidden group hover:border-emerald-400/50 transition-colors">
               <div className="absolute top-0 left-0 w-1 h-full bg-emerald-400"></div>
               <div className="flex items-center gap-4 mb-4">

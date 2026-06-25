@@ -26,45 +26,57 @@ type ModuleRowProps = {
 
 export function ModuleRow({ module, gradeScale, onChange, onRemove }: ModuleRowProps) {
   return (
-    <div className="flex items-center gap-2 w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
-      <Input
-        value={module.name}
-        onChange={(e) => onChange(module.id, 'name', e.target.value)}
-        placeholder="Module Name"
-        className="flex-1 min-w-[120px]"
-      />
-      <Input
-        type="number"
-        value={module.credits || ''}
-        onChange={(e) => onChange(module.id, 'credits', parseFloat(e.target.value) || 0)}
-        placeholder="Cr"
-        className="w-[80px]"
-        min={0}
-        step={0.5}
-      />
-      <Select
-        value={module.grade}
-        onValueChange={(val) => onChange(module.id, 'grade', val)}
-      >
-        <SelectTrigger className="w-[100px]">
-          <SelectValue placeholder="Grade" />
-        </SelectTrigger>
-        <SelectContent>
-          {gradeScale.map((row) => (
-            <SelectItem key={row.grade} value={row.grade}>
-              {row.grade} ({row.points})
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="text-muted-foreground hover:text-destructive"
-        onClick={() => onRemove(module.id)}
-      >
-        <Trash2 className="w-4 h-4" />
-      </Button>
+    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full animate-in fade-in slide-in-from-bottom-2 duration-300 p-3 sm:p-0 border border-[#1e3a5f] sm:border-transparent rounded-md bg-[#1e293b]/50 sm:bg-transparent">
+      <div className="flex w-full sm:flex-1 gap-2 items-center">
+        <Input
+          value={module.name}
+          onChange={(e) => onChange(module.id, 'name', e.target.value)}
+          placeholder="Module Name"
+          className="flex-1 min-w-[120px]"
+        />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="sm:hidden text-muted-foreground hover:text-destructive shrink-0"
+          onClick={() => onRemove(module.id)}
+        >
+          <Trash2 className="w-4 h-4" />
+        </Button>
+      </div>
+      <div className="flex w-full sm:w-auto gap-2 items-center">
+        <Input
+          type="number"
+          value={module.credits || ''}
+          onChange={(e) => onChange(module.id, 'credits', parseFloat(e.target.value) || 0)}
+          placeholder="Cr"
+          className="w-[80px]"
+          min={0}
+          step={0.5}
+        />
+        <Select
+          value={module.grade}
+          onValueChange={(val) => onChange(module.id, 'grade', val)}
+        >
+          <SelectTrigger className="flex-1 sm:w-[100px]">
+            <SelectValue placeholder="Grade" />
+          </SelectTrigger>
+          <SelectContent>
+            {gradeScale.map((row) => (
+              <SelectItem key={row.grade} value={row.grade}>
+                {row.grade} ({row.points})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="hidden sm:inline-flex text-muted-foreground hover:text-destructive shrink-0"
+          onClick={() => onRemove(module.id)}
+        >
+          <Trash2 className="w-4 h-4" />
+        </Button>
+      </div>
     </div>
   )
 }
