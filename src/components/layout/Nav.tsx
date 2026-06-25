@@ -1,6 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { GraduationCap, LogOut, Menu, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from '@/components/ui/sheet'
 import { useAuth } from '@/context/AuthContext'
 
 export function Nav() {
@@ -90,12 +91,72 @@ export function Nav() {
           )}
         </div>
 
-        {/* Mobile Nav Toggle placeholder */}
+        {/* Mobile Nav Toggle */}
         <div className="md:hidden flex items-center">
-          {/* We will add the Sheet in Commit 3, for now just a stub button */}
-          <Button variant="ghost" size="icon" className="text-slate-300">
-            <Menu className="h-6 w-6" />
-          </Button>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="text-slate-300 hover:text-emerald-400">
+                <Menu className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="bg-[#1e293b] border-[#1e3a5f] p-6 w-[300px]">
+              <SheetHeader className="text-left mb-8 hidden">
+                <SheetTitle className="text-emerald-400 font-mono tracking-widest uppercase">Navigation</SheetTitle>
+              </SheetHeader>
+              
+              <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-4">
+                  {navLinks.map(link => (
+                    <Link 
+                      key={link.path} 
+                      to={link.path}
+                      className={`text-lg font-mono tracking-wider uppercase transition-colors ${
+                        location.pathname.startsWith(link.path) 
+                          ? 'text-emerald-400 font-bold' 
+                          : 'text-slate-300 hover:text-emerald-400'
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
+
+                <div className="h-px w-full bg-[#1e3a5f]"></div>
+
+                {session ? (
+                  <div className="flex flex-col gap-4">
+                    <span className="text-sm font-mono text-slate-400 truncate">
+                      {session.user.email}
+                    </span>
+                    <Button 
+                      variant="outline" 
+                      onClick={handleSignOut}
+                      className="w-full justify-start border-[#1e3a5f] text-slate-300 hover:text-rose-400 hover:bg-rose-400/10 font-mono uppercase tracking-widest"
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Sign Out
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-4">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => navigate('/auth')}
+                      className="w-full justify-center border-[#1e3a5f] text-slate-300 hover:text-emerald-400 font-mono uppercase tracking-widest"
+                    >
+                      Log in
+                    </Button>
+                    <Button 
+                      onClick={() => navigate('/auth')}
+                      className="w-full justify-center bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold font-mono uppercase tracking-widest"
+                    >
+                      Get Started
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
 
       </div>
