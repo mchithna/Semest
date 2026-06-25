@@ -5,6 +5,7 @@ import { useDegrees } from '@/hooks/useDegrees'
 import { useSemesters } from '@/hooks/useSemesters'
 import { computeScore, totalCredits } from '@/lib/score'
 import { ClassificationBadge } from '@/components/ui/ClassificationBadge'
+import { Breadcrumb } from '@/components/layout/Breadcrumb'
 
 export default function SemestersPage() {
   const { degreeId } = useParams()
@@ -51,10 +52,7 @@ export default function SemestersPage() {
         {/* Header */}
         <div className="flex justify-between items-end border-b border-[#1e3a5f] pb-6">
           <div className="flex flex-col gap-2">
-            <Link to="/degrees" className="text-emerald-400 hover:text-emerald-300 flex items-center gap-2 text-sm font-mono font-bold tracking-widest uppercase">
-              <ArrowLeft className="w-4 h-4" />
-              Degrees
-            </Link>
+            <Breadcrumb items={[{ label: degree.title }]} />
             <h1 className="text-2xl font-mono font-bold tracking-widest uppercase text-slate-100">
               {degree.title}
             </h1>

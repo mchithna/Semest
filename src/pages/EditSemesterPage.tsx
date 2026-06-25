@@ -7,6 +7,7 @@ import { Calculator } from '@/components/calculator/Calculator'
 import type { ModuleData } from '@/components/calculator/ModuleRow'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Breadcrumb } from '@/components/layout/Breadcrumb'
 
 export default function EditSemesterPage() {
   const { degreeId, id: semesterId } = useParams()
@@ -71,10 +72,12 @@ export default function EditSemesterPage() {
       <div className="max-w-4xl mx-auto space-y-8">
         
         <div className="flex flex-col gap-2 border-b border-[#1e3a5f] pb-6">
-          <Link to={`/degrees/${degreeId}/semesters`} className="text-emerald-400 hover:text-emerald-300 flex items-center gap-2 text-sm font-mono font-bold tracking-widest uppercase">
-            <ArrowLeft className="w-4 h-4" />
-            Back to Semesters
-          </Link>
+          <Breadcrumb 
+            items={[
+              { label: degree.title, path: `/degrees/${degreeId}/semesters` },
+              { label: 'Edit Semester' }
+            ]} 
+          />
           <h1 className="text-2xl font-mono font-bold tracking-widest uppercase text-slate-100">
             Edit Semester
           </h1>
