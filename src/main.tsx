@@ -21,6 +21,7 @@ import PresetsPage from './pages/PresetsPage'
 import NewPresetPage from './pages/NewPresetPage'
 import MyPresetsPage from './pages/MyPresetsPage'
 import PresetDetailPage from './pages/PresetDetailPage'
+import { AppShell } from './components/layout/AppShell'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -28,25 +29,27 @@ createRoot(document.getElementById('root')!).render(
       <AuthProvider>
         <Toaster position="top-right" richColors theme="dark" />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/auth" element={<AuthPage />} />
-            
-            {/* Protected Routes */}
-            <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
-            <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-            <Route path="/degrees" element={<ProtectedRoute><DegreesPage /></ProtectedRoute>} />
-            <Route path="/degrees/:degreeId/semesters" element={<ProtectedRoute><SemestersPage /></ProtectedRoute>} />
-            <Route path="/degrees/:degreeId/semesters/new" element={<ProtectedRoute><NewSemesterPage /></ProtectedRoute>} />
-            <Route path="/degrees/:degreeId/semesters/:id/edit" element={<ProtectedRoute><EditSemesterPage /></ProtectedRoute>} />
-            <Route path="/settings/scales" element={<ProtectedRoute><ScalesPage /></ProtectedRoute>} />
-            <Route path="/presets/new" element={<ProtectedRoute><NewPresetPage /></ProtectedRoute>} />
-            <Route path="/presets/mine" element={<ProtectedRoute><MyPresetsPage /></ProtectedRoute>} />
-            
-            {/* Public Preset Routes */}
-            <Route path="/presets" element={<PresetsPage />} />
-            <Route path="/presets/:code" element={<PresetDetailPage />} />
-          </Routes>
+          <AppShell>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/auth" element={<AuthPage />} />
+              
+              {/* Protected Routes */}
+              <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+              <Route path="/degrees" element={<ProtectedRoute><DegreesPage /></ProtectedRoute>} />
+              <Route path="/degrees/:degreeId/semesters" element={<ProtectedRoute><SemestersPage /></ProtectedRoute>} />
+              <Route path="/degrees/:degreeId/semesters/new" element={<ProtectedRoute><NewSemesterPage /></ProtectedRoute>} />
+              <Route path="/degrees/:degreeId/semesters/:id/edit" element={<ProtectedRoute><EditSemesterPage /></ProtectedRoute>} />
+              <Route path="/settings/scales" element={<ProtectedRoute><ScalesPage /></ProtectedRoute>} />
+              <Route path="/presets/new" element={<ProtectedRoute><NewPresetPage /></ProtectedRoute>} />
+              <Route path="/presets/mine" element={<ProtectedRoute><MyPresetsPage /></ProtectedRoute>} />
+              
+              {/* Public Preset Routes */}
+              <Route path="/presets" element={<PresetsPage />} />
+              <Route path="/presets/:code" element={<PresetDetailPage />} />
+            </Routes>
+          </AppShell>
         </BrowserRouter>
       </AuthProvider>
     </QueryClientProvider>
