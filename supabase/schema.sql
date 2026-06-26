@@ -123,24 +123,24 @@ $$;
 -- Excludes I, O, 0, 1 to avoid visual confusion.
 -- Call via supabase.rpc('generate_preset_code') from the app.
 create or replace function generate_preset_code()
-returns text language plpgsql as $$
+returns text language plpgsql security definer set search_path = public as $$
 declare
   chars text := 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  code  text;
+  new_code  text;
   tries int := 0;
 begin
   loop
-    code := '';
+    new_code := '';
     for i in 1..6 loop
-      code := code || substr(chars, floor(random() * length(chars) + 1)::int, 1);
+      new_code := new_code || substr(chars, floor(random() * length(chars) + 1)::int, 1);
     end loop;
-    exit when not exists (select 1 from presets where presets.code = code);
+    exit when not exists (select 1 from presets where presets.code = new_code);
     tries := tries + 1;
     if tries > 10 then
       raise exception 'Could not generate unique preset code after 10 attempts';
     end if;
   end loop;
-  return code;
+  return new_code;
 end;
 $$;
 

@@ -209,10 +209,11 @@ export async function applyPresetToDegree(presetCode: string, degreeTitle?: stri
   if (degreeError) throw degreeError
 
   // 2. Increment preset use_count
-  await supabase.rpc('increment_preset_use_count', { p_id: preset.id }).catch(() => {
-    // Fallback if rpc doesn't exist
-    supabase.from('presets').update({ use_count: preset.use_count + 1 }).eq('id', preset.id).then()
-  })
+  const { error: rpcError } = await supabase.rpc('increment_preset_use_count', { p_id: preset.id })
+  if (rpcError) {
+    // Fallback if rpc doesn't exist or fails
+    await supabase.from('presets').update({ use_count: preset.use_count + 1 }).eq('id', preset.id)
+  }
 
   // 3. Create semesters and modules
   for (const pSem of preset.semesters) {

@@ -6,9 +6,11 @@ import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { usePublicPresets } from '@/hooks/usePresets'
+import { useAuth } from '@/context/AuthContext'
 
 export default function PresetsPage() {
   const navigate = useNavigate()
+  const { session } = useAuth()
   const { data: presets, isLoading } = usePublicPresets()
   const [searchQuery, setSearchQuery] = useState('')
   const [codeQuery, setCodeQuery] = useState('')
@@ -65,15 +67,26 @@ export default function PresetsPage() {
           </form>
         </div>
 
-        {/* Search Bar */}
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-          <Input
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search by title, institution..."
-            className="pl-10 bg-[#273449] border-[#1e3a5f] text-slate-100 font-mono h-12"
-          />
+        {/* Search Bar & Actions */}
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="relative w-full max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Input
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Search by title, institution..."
+              className="pl-10 bg-[#273449] border-[#1e3a5f] text-slate-100 font-mono h-12"
+            />
+          </div>
+          {session && (
+            <Button 
+              onClick={() => navigate('/presets/mine')}
+              variant="outline"
+              className="w-full sm:w-auto border-emerald-400 text-emerald-400 hover:bg-emerald-400 hover:text-slate-900 font-bold font-mono uppercase tracking-widest h-12 transition-colors"
+            >
+              My Templates
+            </Button>
+          )}
         </div>
 
         {/* Templates Grid */}
