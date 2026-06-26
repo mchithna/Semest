@@ -1,73 +1,61 @@
-# React + TypeScript + Vite
+# Semest - UniScore Track
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Semest is a web application for university students to calculate, persist, and visualize their weighted GPA / Z-score performance across semesters and degrees.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Live Calculator:** Enter modules with credit values and letter grades; the weighted score recomputes in real time.
+- **Multiple Degrees:** Manage different academic programs simultaneously.
+- **Semester Persistence:** Save semesters and view cumulative performance.
+- **Dashboard:** Visualize GPA trends over time with interactive charts.
+- **Community Templates (Presets):** Create reusable degree templates and share them via a unique 6-character code. Others can clone your template and just fill in their grades!
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Frontend:** React 18, TypeScript, Vite
+- **Styling:** Tailwind CSS, shadcn/ui
+- **Backend & Auth:** Supabase (PostgreSQL, Auth, RLS)
+- **Data Fetching:** TanStack Query (React Query)
+- **Routing:** React Router v6
+- **Charts:** Recharts
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/mchithna/Semest.git
+   cd Semest
+   ```
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+3. **Environment Variables:**
+   Create a `.env.local` file in the root directory with your Supabase credentials:
+   ```env
+   VITE_SUPABASE_URL=your_supabase_project_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+4. **Start the development server:**
+   ```bash
+   npm run dev
+   ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Deployment (Vercel)
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+This project is configured for seamless deployment to Vercel. 
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+1. Push your code to GitHub.
+2. Import the project in your Vercel dashboard.
+3. Make sure the **Framework Preset** is set to `Vite`.
+4. Add the following **Environment Variables** in the Vercel deployment settings:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+5. Deploy! The included `vercel.json` ensures that SPA client-side routing works correctly when users refresh the page.
+
+## Database Setup
+
+All database tables and Row Level Security (RLS) policies are defined in `supabase/schema.sql`. Run this file in your Supabase SQL Editor to set up the backend structure.
