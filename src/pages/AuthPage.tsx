@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Loader2, GraduationCap } from 'lucide-react'
+import { Loader2, GraduationCap, Eye, EyeOff } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -23,6 +23,7 @@ export default function AuthPage() {
   const { signIn, signUp } = useAuth()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin')
+  const [showPassword, setShowPassword] = useState(false)
 
   const {
     register,
@@ -126,13 +127,22 @@ export default function AuthPage() {
                   <Label className="text-xs tracking-widest uppercase text-slate-400 font-mono">
                     Password
                   </Label>
-                  <Input
-                    {...register('password')}
-                    type="password"
-                    placeholder="••••••••"
-                    autoComplete="current-password"
-                    className="bg-[#1e293b] border-[#1e3a5f] text-slate-100 placeholder:text-slate-600 rounded-sm focus-visible:ring-emerald-400 focus-visible:border-emerald-400"
-                  />
+                  <div className="relative">
+                    <Input
+                      {...register('password')}
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="••••••••"
+                      autoComplete="current-password"
+                      className="bg-[#1e293b] border-[#1e3a5f] text-slate-100 placeholder:text-slate-600 rounded-sm focus-visible:ring-emerald-400 focus-visible:border-emerald-400 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-emerald-400 transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                   {errors.password && (
                     <p className="text-xs text-rose-400 font-mono">{errors.password.message}</p>
                   )}
@@ -173,13 +183,22 @@ export default function AuthPage() {
                   <Label className="text-xs tracking-widest uppercase text-slate-400 font-mono">
                     Password
                   </Label>
-                  <Input
-                    {...register('password')}
-                    type="password"
-                    placeholder="••••••••"
-                    autoComplete="new-password"
-                    className="bg-[#1e293b] border-[#1e3a5f] text-slate-100 placeholder:text-slate-600 rounded-sm focus-visible:ring-emerald-400 focus-visible:border-emerald-400"
-                  />
+                  <div className="relative">
+                    <Input
+                      {...register('password')}
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="••••••••"
+                      autoComplete="new-password"
+                      className="bg-[#1e293b] border-[#1e3a5f] text-slate-100 placeholder:text-slate-600 rounded-sm focus-visible:ring-emerald-400 focus-visible:border-emerald-400 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-emerald-400 transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                   {errors.password && (
                     <p className="text-xs text-rose-400 font-mono">{errors.password.message}</p>
                   )}
