@@ -3,8 +3,9 @@ import {
   getPublicPresets,
   getMyPresets,
   getPresetByCode,
-  createPresetFromDegree,
-  applyPresetToDegree
+  publishPreset,
+  clonePreset,
+  syncPreset
 } from '../lib/queries/presets'
 
 export function usePublicPresets() {
@@ -32,8 +33,8 @@ export function usePreset(code: string) {
 export function useCreatePreset() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (params: { degreeId: string, title: string, description: string, isPublic: boolean }) => 
-      createPresetFromDegree(params.degreeId, params.title, params.description, params.isPublic),
+    mutationFn: (params: { degreeId: string, title: string, description?: string, institution?: string, isPublic?: boolean }) => 
+      publishPreset(params.degreeId, params.title, params.description, params.institution, params.isPublic),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['presets', 'mine'] })
       queryClient.invalidateQueries({ queryKey: ['presets', 'public'] })
@@ -44,11 +45,23 @@ export function useCreatePreset() {
 export function useApplyPreset() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (params: { presetCode: string, degreeTitle?: string }) => 
-      applyPresetToDegree(params.presetCode, params.degreeTitle),
+    mutationFn: (params: { presetCode: string, targetDegreeId?: string, degreeTitle?: string }) => 
+      clonePreset(params.presetCode, params.targetDegreeId, params.degreeTitle),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['degrees'] })
       queryClient.invalidateQueries({ queryKey: ['presets'] })
+    }
+  })
+}
+
+export function useSyncPreset() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (params: { presetId: string, degreeId: string }) => 
+      syncPreset(params.presetId, params.degreeId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['presets', 'mine'] })
+      queryClient.invalidateQueries({ queryKey: ['preset'] })
     }
   })
 }
