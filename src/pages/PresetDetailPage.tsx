@@ -4,6 +4,7 @@ import { ArrowLeft, Loader2, Copy, FileText, Check, GraduationCap } from 'lucide
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { usePreset, useApplyPreset } from '@/hooks/usePresets'
+import { useDegrees } from '@/hooks/useDegrees'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -13,9 +14,12 @@ export default function PresetDetailPage() {
   const navigate = useNavigate()
   const { data: preset, isLoading, isError } = usePreset(code || '')
   const applyPreset = useApplyPreset()
+  const { degrees } = useDegrees()
 
   const [isCopied, setIsCopied] = useState(false)
   const [degreeTitle, setDegreeTitle] = useState('')
+  const [cloneMode, setCloneMode] = useState<'new' | 'existing'>('new')
+  const [targetDegreeId, setTargetDegreeId] = useState<string>('')
 
   const handleCopyCode = () => {
     if (!preset) return
@@ -28,11 +32,23 @@ export default function PresetDetailPage() {
   const handleClone = () => {
     if (!preset) return
 
+    if (cloneMode === 'existing' && !targetDegreeId) {
+      toast.error('Please select a degree to append to.')
+      return
+    }
+
     applyPreset.mutate(
-      { presetCode: preset.code, degreeTitle: degreeTitle.trim() || preset.title },
+      { 
+        presetCode: preset.code, 
+        targetDegreeId: cloneMode === 'existing' ? targetDegreeId : undefined,
+        degreeTitle: cloneMode === 'new' ? (degreeTitle.trim() || preset.title) : undefined 
+      },
       {
         onSuccess: (newDegreeId) => {
           toast.success("Template successfully cloned!")
+          if (preset.scale_snapshot && (!preset.grade_scale_id || (preset.grade_scale && !preset.grade_scale.is_system))) {
+             toast.success(`Grade scale copied to your account!`)
+          }
           navigate(`/degrees/${newDegreeId}/semesters`)
         },
         onError: (err: any) => {
@@ -170,18 +186,56 @@ export default function PresetDetailPage() {
       {/* Floating Action Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-[#1e293b]/95 backdrop-blur-sm border-t border-[#1e3a5f] p-4 shadow-2xl z-50">
         <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-4 justify-between">
-          <div className="flex-1 w-full">
-            <Input 
-              value={degreeTitle}
-              onChange={e => setDegreeTitle(e.target.value)}
-              placeholder={`Name your new degree (defaults to "${preset.title}")`}
-              className="bg-[#273449] border-[#1e3a5f] text-slate-100 font-mono h-12 w-full md:max-w-md"
-            />
+          <div className="flex-1 w-full flex flex-col gap-3">
+            <div className="flex items-center gap-6">
+              <label className="flex items-center gap-2 cursor-pointer text-sm font-mono text-slate-300">
+                <input 
+                  type="radio" 
+                  name="cloneMode" 
+                  value="new"
+                  checked={cloneMode === 'new'}
+                  onChange={() => setCloneMode('new')}
+                  className="accent-emerald-400"
+                />
+                Create new degree
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer text-sm font-mono text-slate-300">
+                <input 
+                  type="radio" 
+                  name="cloneMode" 
+                  value="existing"
+                  checked={cloneMode === 'existing'}
+                  onChange={() => setCloneMode('existing')}
+                  className="accent-emerald-400"
+                />
+                Add to existing
+              </label>
+            </div>
+
+            {cloneMode === 'new' ? (
+              <Input 
+                value={degreeTitle}
+                onChange={e => setDegreeTitle(e.target.value)}
+                placeholder={`Name your new degree (defaults to "${preset.title}")`}
+                className="bg-[#273449] border-[#1e3a5f] text-slate-100 font-mono h-10 w-full md:max-w-md"
+              />
+            ) : (
+              <select 
+                value={targetDegreeId}
+                onChange={e => setTargetDegreeId(e.target.value)}
+                className="bg-[#273449] border border-[#1e3a5f] rounded-md px-3 text-slate-100 font-mono h-10 w-full md:max-w-md focus:outline-none focus:ring-2 focus:ring-emerald-400"
+              >
+                <option value="">-- Select a degree --</option>
+                {degrees.map(d => (
+                  <option key={d.id} value={d.id}>{d.title}</option>
+                ))}
+              </select>
+            )}
           </div>
           <Button 
             onClick={handleClone}
             disabled={applyPreset.isPending}
-            className="w-full md:w-auto h-12 px-8 bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold font-mono text-sm uppercase tracking-widest"
+            className="w-full md:w-auto h-12 px-8 bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold font-mono text-sm uppercase tracking-widest self-end"
           >
             {applyPreset.isPending ? (
               <Loader2 className="w-5 h-5 animate-spin mr-2" />
