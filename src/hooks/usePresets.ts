@@ -50,6 +50,7 @@ export function useApplyPreset() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['degrees'] })
       queryClient.invalidateQueries({ queryKey: ['presets'] })
+      queryClient.invalidateQueries({ queryKey: ['semesters'] })
     }
   })
 }

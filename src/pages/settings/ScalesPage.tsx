@@ -10,17 +10,26 @@ export default function ScalesPage() {
   const { scales, isLoading, createScale, updateScale, deleteScale } = useGradeScales()
   const [editorOpen, setEditorOpen] = useState(false)
   const [editingScale, setEditingScale] = useState<GradeScale | undefined>()
+  const [isReadOnly, setIsReadOnly] = useState(false)
 
   const systemScales = scales.filter(s => s.is_system)
   const userScales = scales.filter(s => !s.is_system)
 
   const handleCreate = () => {
     setEditingScale(undefined)
+    setIsReadOnly(false)
     setEditorOpen(true)
   }
 
   const handleEdit = (scale: GradeScale) => {
     setEditingScale(scale)
+    setIsReadOnly(false)
+    setEditorOpen(true)
+  }
+
+  const handleView = (scale: GradeScale) => {
+    setEditingScale(scale)
+    setIsReadOnly(true)
     setEditorOpen(true)
   }
 
@@ -80,8 +89,12 @@ export default function ScalesPage() {
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {systemScales.map((scale) => (
-              <div key={scale.id} className="bg-[#273449] border border-[#1e3a5f] rounded-sm p-5 relative overflow-hidden group">
-                <div className="absolute top-0 left-0 w-1 h-full bg-slate-500/50"></div>
+              <div 
+                key={scale.id} 
+                onClick={() => handleView(scale)}
+                className="bg-[#273449] border border-[#1e3a5f] rounded-sm p-5 relative overflow-hidden group cursor-pointer hover:border-slate-500/50 transition-all"
+              >
+                <div className="absolute top-0 left-0 w-1 h-full bg-slate-500/50 group-hover:bg-slate-400 transition-colors"></div>
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-mono text-sm font-bold text-slate-200">{scale.label}</h3>
@@ -147,6 +160,7 @@ export default function ScalesPage() {
         onOpenChange={setEditorOpen}
         initialData={editingScale}
         onSave={handleSave}
+        isReadOnly={isReadOnly}
       />
     </div>
   )

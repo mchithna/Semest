@@ -180,6 +180,11 @@ create policy "Users manage own profile"
   with check (auth.uid() = id);
 
 -- ─────────────────────────────────────────────────
+-- UNIQUE CONSTRAINT FOR SYSTEM SCALES
+-- ─────────────────────────────────────────────────
+create unique index if not exists unique_system_scale_label on grade_scales (label) where is_system = true;
+
+-- ─────────────────────────────────────────────────
 -- RLS — GRADE SCALES
 -- ─────────────────────────────────────────────────
 alter table grade_scales enable row level security;
@@ -211,7 +216,7 @@ insert into grade_scales (user_id, label, is_system, grades) values
   {"grade":"C+","points":2.3},{"grade":"C","points":2.0},{"grade":"C-","points":1.7},
   {"grade":"D+","points":1.3},{"grade":"D","points":1.0},{"grade":"F","points":0.0}
 ]'::jsonb)
-on conflict do nothing;
+on conflict (label) where is_system = true do nothing;
 
 -- ─────────────────────────────────────────────────
 -- RLS — DEGREES
@@ -424,7 +429,7 @@ begin
     returning id into v_new_sem_id;
 
     insert into modules (semester_id, user_id, name, credits, grade, position)
-    select v_new_sem_id, auth.uid(), name, credits, '', position
+    select v_new_sem_id, auth.uid(), name, credits, 'N/A', position
     from preset_modules
     where preset_semester_id = v_sem_record.id
     order by position;

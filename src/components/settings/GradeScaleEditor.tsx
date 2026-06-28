@@ -25,6 +25,7 @@ interface GradeScaleEditorProps {
   onOpenChange: (open: boolean) => void
   initialData?: GradeScale
   onSave: (label: string, grades: GradeRow[]) => Promise<void>
+  isReadOnly?: boolean
 }
 
 export function GradeScaleEditor({
@@ -32,6 +33,7 @@ export function GradeScaleEditor({
   onOpenChange,
   initialData,
   onSave,
+  isReadOnly = false,
 }: GradeScaleEditorProps) {
   const [label, setLabel] = useState('')
   const [grades, setGrades] = useState<GradeRow[]>([])
@@ -89,7 +91,7 @@ export function GradeScaleEditor({
       <DialogContent className="sm:max-w-[500px] bg-[#1e293b] border-[#1e3a5f] text-slate-100">
         <DialogHeader>
           <DialogTitle className="font-mono text-emerald-400 uppercase tracking-widest text-sm">
-            {initialData ? 'Edit Grade Scale' : 'New Grade Scale'}
+            {isReadOnly ? 'View Grade Scale' : initialData ? 'Edit Grade Scale' : 'New Grade Scale'}
           </DialogTitle>
         </DialogHeader>
 
@@ -100,16 +102,19 @@ export function GradeScaleEditor({
               value={label}
               onChange={(e) => setLabel(e.target.value)}
               placeholder="e.g. My Custom Scale"
-              className="bg-[#273449] border-[#1e3a5f] text-slate-100 rounded-sm"
+              className="bg-[#273449] border-[#1e3a5f] text-slate-100 rounded-sm disabled:opacity-75 disabled:cursor-not-allowed"
+              disabled={isReadOnly}
             />
           </div>
 
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <Label className="font-mono text-xs uppercase tracking-widest text-slate-400">Grades</Label>
-              <Button onClick={addRow} variant="outline" size="sm" className="h-7 px-2 border-[#1e3a5f] hover:bg-[#273449] hover:text-emerald-400 text-slate-400 rounded-sm">
-                <Plus className="w-4 h-4 mr-1" /> Add
-              </Button>
+              {!isReadOnly && (
+                <Button onClick={addRow} variant="outline" size="sm" className="h-7 px-2 border-[#1e3a5f] hover:bg-[#273449] hover:text-emerald-400 text-slate-400 rounded-sm">
+                  <Plus className="w-4 h-4 mr-1" /> Add
+                </Button>
+              )}
             </div>
 
             <div className="border border-[#1e3a5f] rounded-sm bg-[#273449] overflow-hidden max-h-[300px] overflow-y-auto">
@@ -118,7 +123,7 @@ export function GradeScaleEditor({
                   <TableRow className="border-[#1e3a5f] hover:bg-transparent">
                     <TableHead className="text-slate-400 font-mono text-xs uppercase h-8">Grade</TableHead>
                     <TableHead className="text-slate-400 font-mono text-xs uppercase h-8">Points</TableHead>
-                    <TableHead className="w-[50px] h-8"></TableHead>
+                    {!isReadOnly && <TableHead className="w-[50px] h-8"></TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -128,8 +133,9 @@ export function GradeScaleEditor({
                         <Input
                           value={row.grade}
                           onChange={(e) => updateRow(index, 'grade', e.target.value)}
-                          className="h-8 bg-[#1e293b] border-[#1e3a5f] text-slate-100 rounded-sm"
+                          className="h-8 bg-[#1e293b] border-[#1e3a5f] text-slate-100 rounded-sm disabled:opacity-75 disabled:cursor-not-allowed"
                           placeholder="A+"
+                          disabled={isReadOnly}
                         />
                       </TableCell>
                       <TableCell className="py-2">
@@ -140,19 +146,22 @@ export function GradeScaleEditor({
                           max="4.5"
                           value={row.points}
                           onChange={(e) => updateRow(index, 'points', parseFloat(e.target.value) || 0)}
-                          className="h-8 bg-[#1e293b] border-[#1e3a5f] text-slate-100 rounded-sm"
+                          className="h-8 bg-[#1e293b] border-[#1e3a5f] text-slate-100 rounded-sm disabled:opacity-75 disabled:cursor-not-allowed"
+                          disabled={isReadOnly}
                         />
                       </TableCell>
-                      <TableCell className="py-2 text-right">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeRow(index)}
-                          className="h-8 w-8 text-slate-400 hover:text-rose-400 hover:bg-rose-400/10 rounded-sm"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </TableCell>
+                      {!isReadOnly && (
+                        <TableCell className="py-2 text-right">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeRow(index)}
+                            className="h-8 w-8 text-slate-400 hover:text-rose-400 hover:bg-rose-400/10 rounded-sm"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                   {grades.length === 0 && (
@@ -173,15 +182,17 @@ export function GradeScaleEditor({
               onClick={() => onOpenChange(false)}
               className="border-[#1e3a5f] text-slate-300 hover:bg-[#273449] hover:text-white rounded-sm font-mono text-xs uppercase tracking-widest"
             >
-              Cancel
+              {isReadOnly ? 'Close' : 'Cancel'}
             </Button>
-            <Button
-              onClick={handleSave}
-              disabled={isSaving}
-              className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold rounded-sm font-mono text-xs uppercase tracking-widest"
-            >
-              {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Scale'}
-            </Button>
+            {!isReadOnly && (
+              <Button
+                onClick={handleSave}
+                disabled={isSaving}
+                className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold rounded-sm font-mono text-xs uppercase tracking-widest"
+              >
+                {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Scale'}
+              </Button>
+            )}
           </div>
         </div>
       </DialogContent>
