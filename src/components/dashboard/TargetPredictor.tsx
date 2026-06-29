@@ -58,17 +58,17 @@ export function TargetPredictor({ currentCgpa, earnedCredits, gradeScale }: Targ
   }
 
   return (
-    <Card className="bg-[#273449]/50 border-[#1e3a5f] p-6 flex flex-col h-full">
+    <Card className="bg-card border-border p-6 flex flex-col h-full">
       <div className="flex items-center gap-2 mb-6">
-        <Target className="w-5 h-5 text-emerald-400" />
-        <h2 className="text-lg font-mono font-bold tracking-widest text-slate-100 uppercase">
+        <Target className="w-5 h-5 text-primary" />
+        <h2 className="text-lg font-mono font-bold tracking-widest text-foreground uppercase">
           Target Predictor
         </h2>
       </div>
 
       <div className="space-y-4 mb-6">
         <div className="space-y-2">
-          <Label className="text-xs font-mono text-slate-400 uppercase tracking-widest">Desired CGPA</Label>
+          <Label className="text-xs font-mono text-muted-foreground uppercase tracking-widest">Desired CGPA</Label>
           <Input 
             type="number" 
             step="0.01" 
@@ -77,33 +77,33 @@ export function TargetPredictor({ currentCgpa, earnedCredits, gradeScale }: Targ
             value={targetCgpa} 
             onChange={(e) => setTargetCgpa(e.target.value)} 
             placeholder={`e.g. ${maxPoints.toFixed(2)}`}
-            className="bg-[#1e293b] border-[#1e3a5f] text-slate-100 font-mono"
+            className="bg-background border-border text-foreground font-mono"
           />
         </div>
         <div className="space-y-2">
-          <Label className="text-xs font-mono text-slate-400 uppercase tracking-widest">Remaining Credits</Label>
+          <Label className="text-xs font-mono text-muted-foreground uppercase tracking-widest">Remaining Credits</Label>
           <Input 
             type="number" 
             step="1" 
             min="1"
             value={remainingCredits} 
             onChange={(e) => setRemainingCredits(e.target.value)} 
-            className="bg-[#1e293b] border-[#1e3a5f] text-slate-100 font-mono"
+            className="bg-background border-border text-foreground font-mono"
           />
         </div>
       </div>
 
-      <div className="mt-auto bg-[#1e293b] rounded-lg border border-[#1e3a5f] p-4 text-center">
+      <div className="mt-auto bg-muted rounded-lg border border-border p-4 text-center">
         {requiredGpa === null ? (
-          <p className="text-sm font-mono text-slate-500">
+          <p className="text-sm font-mono text-muted-foreground">
             Enter a target CGPA to see what you need.
           </p>
         ) : (
           <div className="space-y-2">
-            <p className="text-xs font-mono text-slate-400 uppercase tracking-widest">
+            <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest">
               Required Average GPA
             </p>
-            <div className={`text-4xl font-mono font-bold ${requiredGpa > maxPoints ? 'text-rose-400' : 'text-emerald-400'}`}>
+            <div className={`text-4xl font-mono font-bold ${requiredGpa > maxPoints ? 'text-destructive' : 'text-primary'}`}>
               {requiredGpa > maxPoints ? (
                 'Impossible'
               ) : requiredGpa <= 0 ? (

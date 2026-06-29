@@ -71,52 +71,52 @@ export function CreateDegreeDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] bg-[#1e293b] border-[#1e3a5f] text-slate-100">
+      <DialogContent className="sm:max-w-[425px] bg-card border-border text-foreground">
         <DialogHeader>
-          <DialogTitle className="font-mono text-emerald-400 uppercase tracking-widest text-sm">
+          <DialogTitle className="font-mono text-primary uppercase tracking-widest text-sm">
             {initialData ? 'Edit Degree' : 'New Degree'}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 mt-4">
           <div className="space-y-2">
-            <Label className="font-mono text-xs uppercase tracking-widest text-slate-400">Title <span className="text-rose-400">*</span></Label>
+            <Label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Title <span className="text-destructive">*</span></Label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. BSc Computer Science"
-              className="bg-[#273449] border-[#1e3a5f] text-slate-100 rounded-sm"
+              className="bg-background border-border text-foreground rounded-sm"
             />
           </div>
 
           <div className="space-y-2">
-            <Label className="font-mono text-xs uppercase tracking-widest text-slate-400">Institution</Label>
+            <Label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Institution</Label>
             <Input
               value={institution}
               onChange={(e) => setInstitution(e.target.value)}
               placeholder="e.g. University of London"
-              className="bg-[#273449] border-[#1e3a5f] text-slate-100 rounded-sm"
+              className="bg-background border-border text-foreground rounded-sm"
             />
           </div>
 
           <div className="space-y-2">
-            <Label className="font-mono text-xs uppercase tracking-widest text-slate-400">Start Year</Label>
+            <Label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Start Year</Label>
             <Input
               type="number"
               value={startYear}
               onChange={(e) => setStartYear(e.target.value)}
               placeholder="e.g. 2024"
-              className="bg-[#273449] border-[#1e3a5f] text-slate-100 rounded-sm"
+              className="bg-background border-border text-foreground rounded-sm"
             />
           </div>
 
           <div className="space-y-2">
-            <Label className="font-mono text-xs uppercase tracking-widest text-slate-400">Grade Scale</Label>
+            <Label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Grade Scale</Label>
             <Select value={gradeScaleId} onValueChange={setGradeScaleId}>
-              <SelectTrigger className="bg-[#273449] border-[#1e3a5f] text-slate-100 rounded-sm">
+              <SelectTrigger className="bg-background border-border text-foreground rounded-sm">
                 <SelectValue placeholder="Select a scale" />
               </SelectTrigger>
-              <SelectContent className="bg-[#1e293b] border-[#1e3a5f] text-slate-100">
+              <SelectContent className="bg-background border-border text-foreground">
                 <SelectItem value="none">None</SelectItem>
                 {scales.map(scale => (
                   <SelectItem key={scale.id} value={scale.id}>
@@ -131,14 +131,14 @@ export function CreateDegreeDialog({
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="border-[#1e3a5f] text-slate-300 hover:bg-[#273449] hover:text-white rounded-sm font-mono text-xs uppercase tracking-widest"
+              className="border-border text-muted-foreground hover:bg-muted hover:text-foreground rounded-sm font-mono text-xs uppercase tracking-widest"
             >
               Cancel
             </Button>
             <Button
               onClick={handleSave}
               disabled={isSaving}
-              className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold rounded-sm font-mono text-xs uppercase tracking-widest"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-sm font-mono text-xs uppercase tracking-widest"
             >
               {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Degree'}
             </Button>

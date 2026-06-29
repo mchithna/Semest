@@ -10,24 +10,24 @@
     --font-sans: 'Plus Jakarta Sans', sans-serif;
   }
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
+    --background: 160 20% 98%;
+    --foreground: 160 40% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 160 40% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 160 40% 10%;
     --primary: 160 84% 39%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222 47% 11%;
+    --primary-foreground: 160 20% 98%;
+    --secondary: 160 20% 94%;
+    --secondary-foreground: 160 40% 10%;
+    --muted: 160 20% 94%;
+    --muted-foreground: 160 15% 45%;
+    --accent: 160 20% 94%;
+    --accent-foreground: 160 40% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
+    --border: 160 20% 88%;
+    --input: 160 20% 88%;
     --ring: 160 84% 39%;
     --radius: 0.5rem;
     --chart-1: 12 76% 61%;

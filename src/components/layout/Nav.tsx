@@ -3,6 +3,7 @@ import { GraduationCap, LogOut, Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from '@/components/ui/sheet'
 import { useAuth } from '@/context/AuthContext'
+import { ModeToggle } from '@/components/mode-toggle'
 
 export function Nav() {
   const { session, signOut } = useAuth()
@@ -56,6 +57,8 @@ export function Nav() {
           </div>
 
           <div className="h-6 w-px bg-border"></div>
+          
+          <ModeToggle />
 
           {session ? (
             <div className="flex items-center gap-4">
@@ -92,10 +95,11 @@ export function Nav() {
         </div>
 
         {/* Mobile Nav Toggle */}
-        <div className="md:hidden flex items-center">
+        <div className="md:hidden flex items-center gap-2">
+          <ModeToggle />
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-slate-300 hover:text-emerald-400">
+              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
                 <Menu className="h-6 w-6" />
               </Button>
             </SheetTrigger>

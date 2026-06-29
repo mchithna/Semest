@@ -6,6 +6,7 @@ import { queryClient } from './lib/queryClient'
 import { AuthProvider } from './context/AuthContext'
 import { Toaster } from 'sonner'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import { ThemeProvider } from './components/theme-provider'
 import './index.css'
 
 import LandingPage from './pages/LandingPage'
@@ -26,10 +27,11 @@ import { AppShell } from './components/layout/AppShell'
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Toaster position="top-right" richColors theme="dark" />
-        <BrowserRouter>
-          <AppShell>
+      <ThemeProvider defaultTheme="dark" storageKey="semest-theme">
+        <AuthProvider>
+          <Toaster position="top-right" richColors theme="dark" />
+          <BrowserRouter>
+            <AppShell>
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/auth" element={<AuthPage />} />
@@ -52,6 +54,7 @@ createRoot(document.getElementById('root')!).render(
           </AppShell>
         </BrowserRouter>
       </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   </StrictMode>,
 )

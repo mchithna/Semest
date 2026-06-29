@@ -70,36 +70,36 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#1e293b] px-4">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-md">
         {/* Logo / Brand */}
         <div className="flex flex-col items-center mb-8 gap-3">
-          <div className="flex items-center justify-center w-12 h-12 rounded-sm bg-emerald-400/10 border border-emerald-400/30">
-            <GraduationCap className="w-6 h-6 text-emerald-400" />
+          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 border border-primary/30">
+            <GraduationCap className="w-6 h-6 text-primary" />
           </div>
           <div className="text-center">
-            <h1 className="text-xl font-mono font-bold tracking-widest uppercase text-slate-100">
+            <h1 className="text-xl font-mono font-bold tracking-widest uppercase text-foreground">
               UniScore Track
             </h1>
-            <p className="text-xs tracking-widest uppercase text-slate-500 mt-1">
+            <p className="text-xs tracking-widest uppercase text-muted-foreground mt-1">
               Academic Performance System
             </p>
           </div>
         </div>
 
         {/* Card */}
-        <div className="bg-[#273449] border border-[#1e3a5f] rounded-sm p-8 shadow-2xl">
+        <div className="bg-card border border-border rounded-xl p-8 shadow-2xl">
           <Tabs value={activeTab} onValueChange={handleTabChange}>
-            <TabsList className="grid w-full grid-cols-2 mb-6 bg-[#1e293b] rounded-sm h-10">
+            <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted rounded-lg h-10">
               <TabsTrigger
                 value="signin"
-                className="rounded-sm text-xs tracking-widest uppercase font-mono data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-900 data-[state=active]:font-bold text-slate-400"
+                className="rounded-md text-xs tracking-widest uppercase font-mono data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold text-muted-foreground"
               >
                 Sign In
               </TabsTrigger>
               <TabsTrigger
                 value="signup"
-                className="rounded-sm text-xs tracking-widest uppercase font-mono data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-900 data-[state=active]:font-bold text-slate-400"
+                className="rounded-md text-xs tracking-widest uppercase font-mono data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold text-muted-foreground"
               >
                 Sign Up
               </TabsTrigger>
@@ -109,7 +109,7 @@ export default function AuthPage() {
             <TabsContent value="signin">
               <form onSubmit={handleSubmit(onSignIn)} className="space-y-5">
                 <div className="space-y-2">
-                  <Label className="text-xs tracking-widest uppercase text-slate-400 font-mono">
+                  <Label className="text-xs tracking-widest uppercase text-muted-foreground font-mono">
                     Email
                   </Label>
                   <Input
@@ -117,14 +117,14 @@ export default function AuthPage() {
                     type="email"
                     placeholder="you@university.edu"
                     autoComplete="email"
-                    className="bg-[#1e293b] border-[#1e3a5f] text-slate-100 placeholder:text-slate-600 rounded-sm focus-visible:ring-emerald-400 focus-visible:border-emerald-400"
+                    className="bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl focus-visible:ring-primary focus-visible:border-primary"
                   />
                   {errors.email && (
-                    <p className="text-xs text-rose-400 font-mono">{errors.email.message}</p>
+                    <p className="text-xs text-destructive font-mono">{errors.email.message}</p>
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs tracking-widest uppercase text-slate-400 font-mono">
+                  <Label className="text-xs tracking-widest uppercase text-muted-foreground font-mono">
                     Password
                   </Label>
                   <div className="relative">
@@ -133,24 +133,24 @@ export default function AuthPage() {
                       type={showPassword ? 'text' : 'password'}
                       placeholder="••••••••"
                       autoComplete="current-password"
-                      className="bg-[#1e293b] border-[#1e3a5f] text-slate-100 placeholder:text-slate-600 rounded-sm focus-visible:ring-emerald-400 focus-visible:border-emerald-400 pr-10"
+                      className="bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl focus-visible:ring-primary focus-visible:border-primary pr-10"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-emerald-400 transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                   {errors.password && (
-                    <p className="text-xs text-rose-400 font-mono">{errors.password.message}</p>
+                    <p className="text-xs text-destructive font-mono">{errors.password.message}</p>
                   )}
                 </div>
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold text-xs tracking-widest uppercase rounded-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-400/20"
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs tracking-widest uppercase rounded-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/20"
                 >
                   {isSubmitting ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -165,7 +165,7 @@ export default function AuthPage() {
             <TabsContent value="signup">
               <form onSubmit={handleSubmit(onSignUp)} className="space-y-5">
                 <div className="space-y-2">
-                  <Label className="text-xs tracking-widest uppercase text-slate-400 font-mono">
+                  <Label className="text-xs tracking-widest uppercase text-muted-foreground font-mono">
                     Email
                   </Label>
                   <Input
@@ -173,14 +173,14 @@ export default function AuthPage() {
                     type="email"
                     placeholder="you@university.edu"
                     autoComplete="email"
-                    className="bg-[#1e293b] border-[#1e3a5f] text-slate-100 placeholder:text-slate-600 rounded-sm focus-visible:ring-emerald-400 focus-visible:border-emerald-400"
+                    className="bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl focus-visible:ring-primary focus-visible:border-primary"
                   />
                   {errors.email && (
-                    <p className="text-xs text-rose-400 font-mono">{errors.email.message}</p>
+                    <p className="text-xs text-destructive font-mono">{errors.email.message}</p>
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs tracking-widest uppercase text-slate-400 font-mono">
+                  <Label className="text-xs tracking-widest uppercase text-muted-foreground font-mono">
                     Password
                   </Label>
                   <div className="relative">
@@ -189,24 +189,24 @@ export default function AuthPage() {
                       type={showPassword ? 'text' : 'password'}
                       placeholder="••••••••"
                       autoComplete="new-password"
-                      className="bg-[#1e293b] border-[#1e3a5f] text-slate-100 placeholder:text-slate-600 rounded-sm focus-visible:ring-emerald-400 focus-visible:border-emerald-400 pr-10"
+                      className="bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl focus-visible:ring-primary focus-visible:border-primary pr-10"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-emerald-400 transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                   {errors.password && (
-                    <p className="text-xs text-rose-400 font-mono">{errors.password.message}</p>
+                    <p className="text-xs text-destructive font-mono">{errors.password.message}</p>
                   )}
                 </div>
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold text-xs tracking-widest uppercase rounded-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-400/20"
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs tracking-widest uppercase rounded-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/20"
                 >
                   {isSubmitting ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -214,7 +214,7 @@ export default function AuthPage() {
                     'Create Account'
                   )}
                 </Button>
-                <p className="text-center text-xs text-slate-500 font-mono">
+                <p className="text-center text-xs text-muted-foreground font-mono">
                   Your data is private and secured by Supabase.
                 </p>
               </form>
@@ -223,7 +223,7 @@ export default function AuthPage() {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-xs text-slate-600 font-mono mt-6 tracking-widest uppercase">
+        <p className="text-center text-xs text-muted-foreground font-mono mt-6 tracking-widest uppercase">
           Calculate · Persist · Visualize
         </p>
       </div>

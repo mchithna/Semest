@@ -31,17 +31,17 @@ export default function EditSemesterPage() {
 
   if (isDegreesLoading || isSemestersLoading) {
     return (
-      <div className="min-h-screen bg-[#1e293b] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     )
   }
 
   if (!degree || !semester) {
     return (
-      <div className="min-h-screen bg-[#1e293b] text-slate-100 flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center">
         <p>Semester not found.</p>
-        <Link to={`/degrees/${degreeId}/semesters`} className="mt-4 text-emerald-400 underline">Back</Link>
+        <Link to={`/degrees/${degreeId}/semesters`} className="mt-4 text-primary underline">Back</Link>
       </div>
     )
   }
@@ -68,38 +68,38 @@ export default function EditSemesterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1e293b] text-slate-100 p-8">
+    <div className="min-h-screen bg-background text-foreground p-8">
       <div className="max-w-4xl mx-auto space-y-8 animate-slideUp">
         
-        <div className="flex flex-col gap-2 border-b border-[#1e3a5f] pb-6">
+        <div className="flex flex-col gap-2 border-b pb-6">
           <Breadcrumb 
             items={[
               { label: degree.title, path: `/degrees/${degreeId}/semesters` },
               { label: 'Edit Semester' }
             ]} 
           />
-          <h1 className="text-2xl font-mono font-bold tracking-widest uppercase text-slate-100">
+          <h1 className="text-2xl font-mono font-bold tracking-widest uppercase text-foreground">
             Edit Semester
           </h1>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 max-w-2xl mx-auto bg-[#273449] p-6 border border-[#1e3a5f] rounded-sm mb-8">
+        <div className="grid gap-6 md:grid-cols-2 max-w-2xl mx-auto bg-card p-6 border border-border rounded-xl mb-8">
           <div className="space-y-2">
-            <Label className="text-slate-300 font-mono uppercase tracking-widest text-xs">Title</Label>
+            <Label className="text-muted-foreground font-mono uppercase tracking-widest text-xs">Title</Label>
             <Input 
               value={title} 
               onChange={(e) => setTitle(e.target.value)} 
               placeholder="e.g. Year 1, Semester 1"
-              className="bg-[#1e293b] border-[#1e3a5f] text-slate-100 font-mono"
+              className="bg-background border-border text-foreground font-mono"
             />
           </div>
           <div className="space-y-2">
-            <Label className="text-slate-300 font-mono uppercase tracking-widest text-xs">Term (Optional)</Label>
+            <Label className="text-muted-foreground font-mono uppercase tracking-widest text-xs">Term (Optional)</Label>
             <Input 
               value={term} 
               onChange={(e) => setTerm(e.target.value)} 
               placeholder="e.g. Fall 2026"
-              className="bg-[#1e293b] border-[#1e3a5f] text-slate-100 font-mono"
+              className="bg-background border-border text-foreground font-mono"
             />
           </div>
         </div>

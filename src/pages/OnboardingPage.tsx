@@ -68,14 +68,14 @@ export default function OnboardingPage() {
 
   if (scalesLoading) {
     return (
-      <div className="min-h-screen bg-[#0f172a] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-slate-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
       <div className="w-full max-w-xl">
         
         {/* Progress Bar */}
@@ -83,27 +83,27 @@ export default function OnboardingPage() {
           {[1, 2, 3].map((i) => (
             <div 
               key={i} 
-              className={`h-1 flex-1 rounded-full transition-colors ${i <= step ? 'bg-emerald-400' : 'bg-[#1e293b]'}`} 
+              className={`h-1 flex-1 rounded-full transition-colors ${i <= step ? 'bg-primary' : 'bg-muted'}`} 
             />
           ))}
         </div>
 
         {/* Step 1: Welcome & Scale Pick */}
         {step === 1 && (
-          <div className="bg-[#1e293b] border border-[#1e3a5f] p-8 rounded-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <GraduationCap className="w-12 h-12 text-emerald-400 mb-6" />
-            <h1 className="text-3xl font-mono font-bold tracking-widest uppercase text-slate-100 mb-2">Welcome to Semest</h1>
-            <p className="text-slate-400 font-mono text-sm mb-8 leading-relaxed">
+          <div className="bg-card border border-border p-8 rounded-xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <GraduationCap className="w-12 h-12 text-primary mb-6" />
+            <h1 className="text-3xl font-mono font-bold tracking-widest uppercase text-foreground mb-2">Welcome to Semest</h1>
+            <p className="text-muted-foreground font-mono text-sm mb-8 leading-relaxed">
               Let's set up your academic profile. First, how does your university grade you? You can pick a standard scale now or create a custom one later in settings.
             </p>
 
             <div className="space-y-4 mb-8">
-              <Label className="font-mono text-xs uppercase tracking-widest text-slate-400">Default Grade Scale</Label>
+              <Label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Default Grade Scale</Label>
               <Select value={scaleId} onValueChange={setScaleId}>
-                <SelectTrigger className="bg-[#273449] border-[#1e3a5f] text-slate-100 rounded-sm h-12">
+                <SelectTrigger className="bg-background border-border text-foreground rounded-xl h-12">
                   <SelectValue placeholder="Select a scale" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#1e293b] border-[#1e3a5f] text-slate-100">
+                <SelectContent className="bg-background border-border text-foreground">
                   <SelectItem value="none">I'll set this up later</SelectItem>
                   {scales.map(scale => (
                     <SelectItem key={scale.id} value={scale.id}>
@@ -117,7 +117,7 @@ export default function OnboardingPage() {
             <div className="flex justify-end">
               <Button 
                 onClick={handleNextStep1}
-                className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold rounded-sm font-mono text-xs uppercase tracking-widest px-8"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl font-mono text-xs uppercase tracking-widest px-8"
               >
                 Next Step <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
@@ -127,41 +127,41 @@ export default function OnboardingPage() {
 
         {/* Step 2: First Degree */}
         {step === 2 && (
-          <div className="bg-[#1e293b] border border-[#1e3a5f] p-8 rounded-sm animate-in fade-in slide-in-from-right-8 duration-500">
-            <h2 className="text-2xl font-mono font-bold tracking-widest uppercase text-emerald-400 mb-2">Your First Degree</h2>
-            <p className="text-slate-400 font-mono text-sm mb-8 leading-relaxed">
+          <div className="bg-card border border-border p-8 rounded-xl animate-in fade-in slide-in-from-right-8 duration-500">
+            <h2 className="text-2xl font-mono font-bold tracking-widest uppercase text-primary mb-2">Your First Degree</h2>
+            <p className="text-muted-foreground font-mono text-sm mb-8 leading-relaxed">
               Create the main program you're currently studying. You can add more degrees or change these details later.
             </p>
 
             <div className="space-y-6 mb-8">
               <div className="space-y-2">
-                <Label className="font-mono text-xs uppercase tracking-widest text-slate-400">Degree Title <span className="text-rose-400">*</span></Label>
+                <Label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Degree Title <span className="text-destructive">*</span></Label>
                 <Input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. BSc Computer Science"
-                  className="bg-[#273449] border-[#1e3a5f] text-slate-100 rounded-sm h-12"
+                  className="bg-background border-border text-foreground rounded-xl h-12"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label className="font-mono text-xs uppercase tracking-widest text-slate-400">Institution</Label>
+                <Label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Institution</Label>
                 <Input
                   value={institution}
                   onChange={(e) => setInstitution(e.target.value)}
                   placeholder="e.g. University of London"
-                  className="bg-[#273449] border-[#1e3a5f] text-slate-100 rounded-sm h-12"
+                  className="bg-background border-border text-foreground rounded-xl h-12"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label className="font-mono text-xs uppercase tracking-widest text-slate-400">Start Year</Label>
+                <Label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Start Year</Label>
                 <Input
                   type="number"
                   value={startYear}
                   onChange={(e) => setStartYear(e.target.value)}
                   placeholder="e.g. 2024"
-                  className="bg-[#273449] border-[#1e3a5f] text-slate-100 rounded-sm h-12"
+                  className="bg-background border-border text-foreground rounded-xl h-12"
                 />
               </div>
             </div>
@@ -170,14 +170,14 @@ export default function OnboardingPage() {
               <Button 
                 variant="ghost"
                 onClick={() => setStep(1)}
-                className="text-slate-400 hover:text-slate-200 hover:bg-[#273449] rounded-sm font-mono text-xs uppercase tracking-widest"
+                className="text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl font-mono text-xs uppercase tracking-widest"
               >
                 Back
               </Button>
               <Button 
                 onClick={handleNextStep2}
                 disabled={isSubmitting}
-                className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold rounded-sm font-mono text-xs uppercase tracking-widest px-8"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl font-mono text-xs uppercase tracking-widest px-8"
               >
                 {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                 Complete Setup
@@ -188,15 +188,15 @@ export default function OnboardingPage() {
 
         {/* Step 3: Success */}
         {step === 3 && (
-          <div className="bg-[#1e293b] border border-[#1e3a5f] p-12 rounded-sm text-center animate-in zoom-in-95 duration-500">
-            <CheckCircle className="w-16 h-16 text-emerald-400 mx-auto mb-6" />
-            <h2 className="text-3xl font-mono font-bold tracking-widest uppercase text-slate-100 mb-4">You're All Set!</h2>
-            <p className="text-slate-400 font-mono text-sm mb-10 leading-relaxed max-w-xs mx-auto">
+          <div className="bg-card border border-border p-12 rounded-xl text-center animate-in zoom-in-95 duration-500">
+            <CheckCircle className="w-16 h-16 text-primary mx-auto mb-6" />
+            <h2 className="text-3xl font-mono font-bold tracking-widest uppercase text-foreground mb-4">You're All Set!</h2>
+            <p className="text-muted-foreground font-mono text-sm mb-10 leading-relaxed max-w-xs mx-auto">
               Your profile is ready. Let's head over to your dashboard to view your degree.
             </p>
             <Button 
               onClick={handleFinish}
-              className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold rounded-sm font-mono text-xs uppercase tracking-widest px-12 h-14"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl font-mono text-xs uppercase tracking-widest px-12 h-14"
             >
               Go to Dashboard <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
