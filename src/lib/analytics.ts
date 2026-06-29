@@ -1,12 +1,12 @@
 import type { SemesterWithModules } from './queries/semesters'
 import type { GradeRow } from './queries/gradeScales'
-import { computeScore, totalCredits } from './score'
+import { computeScore, earnedCredits } from './score'
 
 export function getCumulativeMetrics(semesters: SemesterWithModules[], gradeScale: GradeRow[]) {
   const allModules = semesters.flatMap(sem => sem.modules)
   
   const cgpa = computeScore(allModules, gradeScale)
-  const earnedCredits = totalCredits(allModules)
+  const earned = earnedCredits(allModules, gradeScale)
 
   let highestGpa = 0
   semesters.forEach(sem => {
@@ -25,7 +25,7 @@ export function getCumulativeMetrics(semesters: SemesterWithModules[], gradeScal
 
   return {
     cgpa,
-    earnedCredits,
+    earnedCredits: earned,
     highestGpa,
     standing
   }

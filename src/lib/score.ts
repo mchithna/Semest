@@ -18,6 +18,19 @@ export function totalCredits(modules: ModuleWithGrade[]): number {
   return modules.reduce((sum, mod) => sum + mod.credits, 0)
 }
 
+export function earnedCredits(modules: ModuleWithGrade[], scale: GradeRow[]): number {
+  if (scale.length === 0) return 0
+  const gradeToPoints = new Map<string, number>()
+  scale.forEach(row => gradeToPoints.set(row.grade.trim().toUpperCase(), row.points))
+  
+  return modules.reduce((sum, mod) => {
+    if (gradeToPoints.has(mod.grade.trim().toUpperCase())) {
+      return sum + mod.credits
+    }
+    return sum
+  }, 0)
+}
+
 export function computeScore(modules: ModuleWithGrade[], scale: GradeRow[]): number {
   if (modules.length === 0) return 0
   if (scale.length === 0) return 0
