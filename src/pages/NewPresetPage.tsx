@@ -18,14 +18,23 @@ export default function NewPresetPage() {
   const [selectedDegreeId, setSelectedDegreeId] = useState<string>('')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
+  const [institution, setInstitution] = useState('')
   const [isPublic, setIsPublic] = useState(true)
+
+  const handleDegreeChange = (degId: string) => {
+    setSelectedDegreeId(degId)
+    const deg = degrees.find(d => d.id === degId)
+    if (deg && deg.institution && !institution) {
+      setInstitution(deg.institution)
+    }
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedDegreeId || !title.trim()) return
 
     createPreset.mutate(
-      { degreeId: selectedDegreeId, title, description, isPublic },
+      { degreeId: selectedDegreeId, title, description, institution, isPublic },
       {
         onSuccess: () => {
           toast.success("Template published successfully!")
@@ -63,7 +72,7 @@ export default function NewPresetPage() {
             
             <div className="space-y-2">
               <Label className="text-muted-foreground font-mono text-sm uppercase tracking-widest">Select Degree to Clone</Label>
-              <Select value={selectedDegreeId} onValueChange={setSelectedDegreeId} disabled={isDegreesLoading}>
+              <Select value={selectedDegreeId} onValueChange={handleDegreeChange} disabled={isDegreesLoading}>
                 <SelectTrigger className="bg-background border-border text-foreground font-mono">
                   <SelectValue placeholder="Select one of your degrees..." />
                 </SelectTrigger>
@@ -84,6 +93,16 @@ export default function NewPresetPage() {
                 value={title}
                 onChange={e => setTitle(e.target.value)}
                 placeholder="e.g. BSc Computer Science (2024)"
+                className="bg-background border-border text-foreground font-mono"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-muted-foreground font-mono text-sm uppercase tracking-widest">Institution (Optional)</Label>
+              <Input
+                value={institution}
+                onChange={e => setInstitution(e.target.value)}
+                placeholder="e.g. University of Oxford"
                 className="bg-background border-border text-foreground font-mono"
               />
             </div>
