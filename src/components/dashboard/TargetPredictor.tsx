@@ -37,7 +37,7 @@ export function TargetPredictor({ currentCgpa, earnedCredits, gradeScale }: Targ
 
   let statusMessage = null
   let statusIcon = null
-  let statusColor = "text-slate-400"
+  let statusColor = "text-muted-foreground"
 
   if (requiredGpa !== null) {
     if (requiredGpa > maxPoints) {

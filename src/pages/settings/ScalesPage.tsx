@@ -1,10 +1,32 @@
 import { useState } from 'react'
-import { Plus, Edit2, Trash2, Shield, Loader2 } from 'lucide-react'
+import { Plus, Edit2, Trash2, Shield, Loader2, Monitor, Sun, Moon } from 'lucide-react'
 import { toast } from 'sonner'
 import { useGradeScales } from '@/hooks/useGradeScales'
 import type { GradeScale } from '@/lib/queries/gradeScales'
 import { GradeScaleEditor } from '@/components/settings/GradeScaleEditor'
 import { Button } from '@/components/ui/button'
+import { useTheme } from '@/components/theme-provider'
+
+function ThemeChoiceButton({ value, label }: { value: "light" | "dark" | "system", label: string }) {
+  const { theme, setTheme } = useTheme()
+  const isActive = theme === value
+  
+  return (
+    <button
+      onClick={() => setTheme(value)}
+      className={`flex items-center gap-2 px-4 py-2 rounded-sm text-xs font-mono font-bold uppercase tracking-widest transition-all ${
+        isActive 
+          ? 'bg-background text-foreground shadow-sm' 
+          : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+      }`}
+    >
+      {value === 'light' && <Sun className="w-3 h-3" />}
+      {value === 'dark' && <Moon className="w-3 h-3" />}
+      {value === 'system' && <Monitor className="w-3 h-3" />}
+      {label}
+    </button>
+  )
+}
 
 export default function ScalesPage() {
   const { scales, isLoading, createScale, updateScale, deleteScale } = useGradeScales()
@@ -80,6 +102,26 @@ export default function ScalesPage() {
             <Plus className="w-4 h-4 mr-2" />
             New Scale
           </Button>
+        </div>
+
+        {/* Appearance Settings */}
+        <div className="space-y-4">
+          <h2 className="text-sm font-mono font-bold tracking-widest uppercase text-muted-foreground">
+            Appearance
+          </h2>
+          <div className="bg-card border border-border rounded-sm p-5">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div>
+                <h3 className="font-mono text-sm font-bold text-foreground">Theme Preference</h3>
+                <p className="text-xs font-mono text-muted-foreground mt-1">Select your preferred color theme.</p>
+              </div>
+              <div className="flex items-center bg-muted rounded-sm p-1">
+                <ThemeChoiceButton value="light" label="Light" />
+                <ThemeChoiceButton value="dark" label="Dark" />
+                <ThemeChoiceButton value="system" label="System" />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* System Scales */}

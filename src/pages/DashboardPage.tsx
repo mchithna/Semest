@@ -51,7 +51,7 @@ export default function DashboardPage() {
         </p>
         <Button 
           onClick={() => navigate('/degrees')}
-          className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold rounded-sm font-mono text-xs uppercase tracking-widest"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-sm font-mono text-xs uppercase tracking-widest"
         >
           <Plus className="w-4 h-4 mr-2" />
           Setup Degree
@@ -72,7 +72,7 @@ export default function DashboardPage() {
             <h1 className="text-2xl font-mono font-bold tracking-widest uppercase text-primary">
               Dashboard Analytics
             </h1>
-            <p className="text-slate-400 font-mono text-sm mt-2">
+            <p className="text-muted-foreground font-mono text-sm mt-2">
               Track your academic progression and goals.
             </p>
           </div>
@@ -116,13 +116,13 @@ export default function DashboardPage() {
                   <GraduationCap className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-sm font-mono text-slate-400 uppercase tracking-widest">Cumulative GPA</p>
-                  <h3 className="text-3xl font-mono font-bold text-slate-100 mt-1">
+                  <p className="text-sm font-mono text-muted-foreground uppercase tracking-widest">Cumulative GPA</p>
+                  <h3 className="text-3xl font-mono font-bold text-foreground mt-1">
                     <AnimatedNumber value={metrics.cgpa} decimals={3} />
                   </h3>
                 </div>
               </div>
-              <p className="text-xs font-mono text-slate-500 uppercase tracking-widest">
+              <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest">
                 Overall performance
               </p>
             </Card>
@@ -134,13 +134,13 @@ export default function DashboardPage() {
                   <BookOpen className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-sm font-mono text-slate-400 uppercase tracking-widest">Earned Credits</p>
-                  <h3 className="text-3xl font-mono font-bold text-slate-100 mt-1">
+                  <p className="text-sm font-mono text-muted-foreground uppercase tracking-widest">Earned Credits</p>
+                  <h3 className="text-3xl font-mono font-bold text-foreground mt-1">
                     <AnimatedNumber value={metrics.earnedCredits} decimals={1} />
                   </h3>
                 </div>
               </div>
-              <p className="text-xs font-mono text-slate-500 uppercase tracking-widest">
+              <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest">
                 Total completed credits
               </p>
             </Card>
@@ -152,13 +152,13 @@ export default function DashboardPage() {
                   <Trophy className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-sm font-mono text-slate-400 uppercase tracking-widest">Highest Sem GPA</p>
-                  <h3 className="text-3xl font-mono font-bold text-slate-100 mt-1">
+                  <p className="text-sm font-mono text-muted-foreground uppercase tracking-widest">Highest Sem GPA</p>
+                  <h3 className="text-3xl font-mono font-bold text-foreground mt-1">
                     <AnimatedNumber value={metrics.highestGpa} decimals={3} />
                   </h3>
                 </div>
               </div>
-              <p className="text-xs font-mono text-slate-500 uppercase tracking-widest">
+              <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest">
                 Best performing semester
               </p>
             </Card>
@@ -170,13 +170,13 @@ export default function DashboardPage() {
                   <Activity className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-sm font-mono text-slate-400 uppercase tracking-widest">Standing</p>
-                  <h3 className="text-lg font-mono font-bold text-slate-100 mt-3 truncate" title={metrics.standing}>
+                  <p className="text-sm font-mono text-muted-foreground uppercase tracking-widest">Standing</p>
+                  <h3 className="text-lg font-mono font-bold text-foreground mt-3 truncate" title={metrics.standing}>
                     {metrics.standing}
                   </h3>
                 </div>
               </div>
-              <p className="text-xs font-mono text-slate-500 uppercase tracking-widest">
+              <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest">
                 Current academic status
               </p>
             </Card>

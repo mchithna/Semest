@@ -83,7 +83,7 @@ export default function DegreesPage() {
           </div>
           <Button
             onClick={handleCreate}
-            className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold rounded-sm font-mono text-xs uppercase tracking-widest"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-sm font-mono text-xs uppercase tracking-widest"
           >
             <Plus className="w-4 h-4 mr-2" />
             New Degree

@@ -62,7 +62,7 @@ export function Nav() {
 
           {session ? (
             <div className="flex items-center gap-4">
-              <span className="text-xs font-mono text-slate-400 hidden lg:inline-block">
+              <span className="text-xs font-mono text-muted-foreground hidden lg:inline-block">
                 {session.user.email}
               </span>
               <Button 
@@ -86,7 +86,7 @@ export function Nav() {
               </Button>
               <Button 
                 onClick={() => navigate('/auth')}
-                className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold font-mono text-sm uppercase tracking-widest"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold font-mono text-sm uppercase tracking-widest"
               >
                 Get Started
               </Button>
@@ -129,7 +129,7 @@ export function Nav() {
 
                 {session ? (
                   <div className="flex flex-col gap-4">
-                    <span className="text-sm font-mono text-slate-400 truncate">
+                    <span className="text-sm font-mono text-muted-foreground truncate">
                       {session.user.email}
                     </span>
                     <Button 
@@ -152,7 +152,7 @@ export function Nav() {
                     </Button>
                     <Button 
                       onClick={() => navigate('/auth')}
-                      className="w-full justify-center bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold font-mono uppercase tracking-widest"
+                      className="w-full justify-center bg-primary hover:bg-primary/90 text-primary-foreground font-bold font-mono uppercase tracking-widest"
                     >
                       Get Started
                     </Button>

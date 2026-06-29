@@ -10,7 +10,7 @@
     --font-sans: 'Plus Jakarta Sans', sans-serif;
   }
   :root {
-    --background: 160 20% 98%;
+    --background: 160 20% 96%;
     --foreground: 160 40% 10%;
     --card: 0 0% 100%;
     --card-foreground: 160 40% 10%;
@@ -20,14 +20,14 @@
     --primary-foreground: 160 20% 98%;
     --secondary: 160 20% 94%;
     --secondary-foreground: 160 40% 10%;
-    --muted: 160 20% 94%;
-    --muted-foreground: 160 15% 45%;
-    --accent: 160 20% 94%;
+    --muted: 160 20% 92%;
+    --muted-foreground: 160 15% 35%;
+    --accent: 160 20% 92%;
     --accent-foreground: 160 40% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 160 20% 88%;
-    --input: 160 20% 88%;
+    --border: 160 20% 86%;
+    --input: 160 20% 86%;
     --ring: 160 84% 39%;
     --radius: 0.5rem;
     --chart-1: 12 76% 61%;

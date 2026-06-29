@@ -37,7 +37,7 @@ export function GpaTrendChart({ semesters, gradeScale }: GpaTrendChartProps) {
 
   if (data.length === 0) {
     return (
-      <div className="w-full h-[300px] flex items-center justify-center text-slate-500 font-mono text-sm">
+      <div className="w-full h-[300px] flex items-center justify-center text-muted-foreground font-mono text-sm">
         No data to display
       </div>
     )
