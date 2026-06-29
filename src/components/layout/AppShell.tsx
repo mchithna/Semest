@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { Nav } from './Nav'
 
 interface AppShellProps {
@@ -7,7 +7,7 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   return (
-    <div className="min-h-screen bg-[#1e293b] flex flex-col font-sans">
+    <div className="min-h-screen bg-background flex flex-col font-sans">
       <Nav />
       <main className="flex-1 w-full mx-auto">
         {children}

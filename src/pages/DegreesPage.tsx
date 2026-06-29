@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Edit2, Trash2, GraduationCap, Loader2 } from 'lucide-react'
+import { Plus, Edit2, Trash2, GraduationCap } from 'lucide-react'
 import { toast } from 'sonner'
 import { useNavigate } from 'react-router-dom'
 import { useDegrees } from '@/hooks/useDegrees'
@@ -48,18 +48,18 @@ export default function DegreesPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#1e293b] text-slate-100 p-8">
+      <div className="min-h-screen bg-background text-foreground p-8">
         <div className="max-w-6xl mx-auto space-y-8">
-          <div className="flex justify-between items-end border-b border-[#1e3a5f] pb-6">
+          <div className="flex justify-between items-end border-b pb-6">
             <div>
-              <Skeleton className="h-8 w-48 bg-[#273449]" />
-              <Skeleton className="h-4 w-64 bg-[#273449] mt-3" />
+              <Skeleton className="h-8 w-48 bg-muted" />
+              <Skeleton className="h-4 w-64 bg-muted mt-3" />
             </div>
-            <Skeleton className="h-9 w-32 bg-[#273449]" />
+            <Skeleton className="h-9 w-32 bg-muted" />
           </div>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-40 bg-[#273449] rounded-sm" />
+              <Skeleton key={i} className="h-40 bg-muted rounded-sm" />
             ))}
           </div>
         </div>
@@ -68,16 +68,16 @@ export default function DegreesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1e293b] text-slate-100 p-8">
+    <div className="min-h-screen bg-background text-foreground p-8">
       <div className="max-w-6xl mx-auto space-y-8 animate-slideUp">
         
         {/* Header */}
-        <div className="flex justify-between items-end border-b border-[#1e3a5f] pb-6">
+        <div className="flex justify-between items-end border-b pb-6">
           <div>
-            <h1 className="text-2xl font-mono font-bold tracking-widest uppercase text-emerald-400">
+            <h1 className="text-2xl font-mono font-bold tracking-widest uppercase text-primary">
               My Degrees
             </h1>
-            <p className="text-slate-400 font-mono text-sm mt-2">
+            <p className="text-muted-foreground font-mono text-sm mt-2">
               Manage your academic programs.
             </p>
           </div>
@@ -92,14 +92,14 @@ export default function DegreesPage() {
 
         {/* Degrees Grid */}
         {degrees.length === 0 ? (
-          <div className="bg-[#273449] border border-[#1e3a5f] border-dashed rounded-sm p-12 text-center">
-            <GraduationCap className="w-12 h-12 text-slate-500 mx-auto mb-4 opacity-50" />
-            <h3 className="text-slate-300 font-mono text-lg mb-2">No degrees found</h3>
-            <p className="text-slate-500 font-mono text-sm mb-6">Create your first degree to start tracking your progress.</p>
+          <div className="bg-card border border-border border-dashed rounded-sm p-12 text-center">
+            <GraduationCap className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+            <h3 className="text-foreground font-mono text-lg mb-2">No degrees found</h3>
+            <p className="text-muted-foreground font-mono text-sm mb-6">Create your first degree to start tracking your progress.</p>
             <Button
               onClick={handleCreate}
               variant="outline"
-              className="border-[#1e3a5f] text-emerald-400 hover:bg-[#1e3a5f] hover:text-emerald-300 rounded-sm font-mono text-xs uppercase tracking-widest"
+              className="text-primary hover:text-primary/80 rounded-sm font-mono text-xs uppercase tracking-widest"
             >
               Create Degree
             </Button>
@@ -110,16 +110,16 @@ export default function DegreesPage() {
               <div 
                 key={degree.id} 
                 onClick={() => navigate(`/degrees/${degree.id}/semesters`)}
-                className="bg-[#273449] border border-[#1e3a5f] rounded-sm p-6 relative group transition-all hover:border-emerald-400/50 cursor-pointer flex flex-col h-full"
+                className="bg-card border border-border rounded-sm p-6 relative group transition-all hover:border-primary/50 hover:-translate-y-1 hover:shadow-2xl cursor-pointer flex flex-col h-full"
               >
-                <div className="absolute top-0 left-0 w-1 h-full bg-emerald-400/50"></div>
+                <div className="absolute top-0 left-0 w-1 h-full bg-primary/50 group-hover:bg-primary transition-colors"></div>
                 
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h3 className="font-mono text-lg font-bold text-slate-100 group-hover:text-emerald-400 transition-colors">
+                    <h3 className="font-mono text-lg font-bold text-foreground group-hover:text-primary transition-colors">
                       {degree.title}
                     </h3>
-                    <p className="text-sm font-mono text-slate-400 mt-1">
+                    <p className="text-sm font-mono text-muted-foreground mt-1">
                       {degree.institution || 'Unknown Institution'} {degree.started_year ? `• ${degree.started_year}` : ''}
                     </p>
                   </div>
@@ -128,7 +128,7 @@ export default function DegreesPage() {
                       variant="ghost"
                       size="icon"
                       onClick={(e) => handleEdit(degree, e)}
-                      className="h-8 w-8 text-slate-400 hover:text-emerald-400 hover:bg-emerald-400/10 rounded-sm"
+                      className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-sm"
                     >
                       <Edit2 className="w-4 h-4" />
                     </Button>
@@ -136,18 +136,18 @@ export default function DegreesPage() {
                       variant="ghost"
                       size="icon"
                       onClick={(e) => handleDelete(degree.id, e)}
-                      className="h-8 w-8 text-slate-400 hover:text-rose-400 hover:bg-rose-400/10 rounded-sm"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-sm"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>
 
-                <div className="mt-auto pt-4 border-t border-[#1e3a5f]/50 flex justify-between items-center">
-                  <div className="text-xs font-mono text-slate-500 uppercase tracking-widest">
-                    Scale: <span className="text-slate-300">{degree.grade_scale?.label || 'None'}</span>
+                <div className="mt-auto pt-4 border-t border-border/50 flex justify-between items-center">
+                  <div className="text-xs font-mono text-muted-foreground uppercase tracking-widest">
+                    Scale: <span className="text-foreground">{degree.grade_scale?.label || 'None'}</span>
                   </div>
-                  <div className="bg-emerald-400/10 text-emerald-400 px-2 py-1 rounded-sm text-xs font-mono font-bold tracking-widest">
+                  <div className="bg-primary/10 text-primary px-2 py-1 rounded-sm text-xs font-mono font-bold tracking-widest">
                     GPA: --
                   </div>
                 </div>

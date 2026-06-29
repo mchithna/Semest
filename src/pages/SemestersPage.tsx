@@ -1,5 +1,5 @@
-import { useParams, useNavigate, Link } from 'react-router-dom'
-import { ArrowLeft, Plus, Trash2, Edit2, Loader2, Calendar } from 'lucide-react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { Plus, Trash2, Edit2, Calendar } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useDegrees } from '@/hooks/useDegrees'
 import { useSemesters } from '@/hooks/useSemesters'

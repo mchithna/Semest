@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { GraduationCap, LogOut, Menu, User } from 'lucide-react'
+import { GraduationCap, LogOut, Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from '@/components/ui/sheet'
 import { useAuth } from '@/context/AuthContext'
@@ -24,12 +24,12 @@ export function Nav() {
   ]
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-[#1e3a5f] bg-[#1e293b]/95 backdrop-blur supports-[backdrop-filter]:bg-[#1e293b]/60">
+    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <Link to="/" className="flex items-center gap-2 text-emerald-400 hover:text-emerald-300 transition-colors">
+          <Link to="/" className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors">
             <GraduationCap className="h-6 w-6" />
             <span className="font-mono text-xl font-bold tracking-widest uppercase hidden sm:inline-block">
               UniScore Track
@@ -46,8 +46,8 @@ export function Nav() {
                 to={link.path}
                 className={`text-sm font-mono tracking-wider uppercase transition-colors ${
                   location.pathname.startsWith(link.path) 
-                    ? 'text-emerald-400 font-bold' 
-                    : 'text-slate-300 hover:text-emerald-400'
+                    ? 'text-primary font-bold' 
+                    : 'text-muted-foreground hover:text-primary'
                 }`}
               >
                 {link.label}
@@ -55,7 +55,7 @@ export function Nav() {
             ))}
           </div>
 
-          <div className="h-6 w-px bg-[#1e3a5f]"></div>
+          <div className="h-6 w-px bg-border"></div>
 
           {session ? (
             <div className="flex items-center gap-4">
@@ -66,7 +66,7 @@ export function Nav() {
                 variant="ghost" 
                 size="sm" 
                 onClick={handleSignOut}
-                className="text-slate-300 hover:text-rose-400 hover:bg-rose-400/10 font-mono text-xs uppercase tracking-widest"
+                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 font-mono text-xs uppercase tracking-widest"
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 Sign Out
@@ -77,7 +77,7 @@ export function Nav() {
               <Button 
                 variant="ghost" 
                 onClick={() => navigate('/auth')}
-                className="text-slate-300 hover:text-emerald-400 hover:bg-transparent font-mono text-sm uppercase tracking-widest"
+                className="text-muted-foreground hover:text-primary hover:bg-transparent font-mono text-sm uppercase tracking-widest"
               >
                 Log in
               </Button>
@@ -99,7 +99,7 @@ export function Nav() {
                 <Menu className="h-6 w-6" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="bg-[#1e293b] border-[#1e3a5f] p-6 w-[300px]">
+            <SheetContent side="right" className="bg-background border-border p-6 w-[300px]">
               <SheetHeader className="text-left mb-8 hidden">
                 <SheetTitle className="text-emerald-400 font-mono tracking-widest uppercase">Navigation</SheetTitle>
               </SheetHeader>
@@ -112,8 +112,8 @@ export function Nav() {
                       to={link.path}
                       className={`text-lg font-mono tracking-wider uppercase transition-colors ${
                         location.pathname.startsWith(link.path) 
-                          ? 'text-emerald-400 font-bold' 
-                          : 'text-slate-300 hover:text-emerald-400'
+                          ? 'text-primary font-bold' 
+                          : 'text-muted-foreground hover:text-primary'
                       }`}
                     >
                       {link.label}
@@ -121,7 +121,7 @@ export function Nav() {
                   ))}
                 </div>
 
-                <div className="h-px w-full bg-[#1e3a5f]"></div>
+                <div className="h-px w-full bg-border"></div>
 
                 {session ? (
                   <div className="flex flex-col gap-4">
@@ -131,7 +131,7 @@ export function Nav() {
                     <Button 
                       variant="outline" 
                       onClick={handleSignOut}
-                      className="w-full justify-start border-[#1e3a5f] text-slate-300 hover:text-rose-400 hover:bg-rose-400/10 font-mono uppercase tracking-widest"
+                      className="w-full justify-start border-border text-muted-foreground hover:text-destructive hover:bg-destructive/10 font-mono uppercase tracking-widest"
                     >
                       <LogOut className="h-4 w-4 mr-2" />
                       Sign Out
@@ -142,7 +142,7 @@ export function Nav() {
                     <Button 
                       variant="outline" 
                       onClick={() => navigate('/auth')}
-                      className="w-full justify-center border-[#1e3a5f] text-slate-300 hover:text-emerald-400 font-mono uppercase tracking-widest"
+                      className="w-full justify-center border-border text-muted-foreground hover:text-primary font-mono uppercase tracking-widest"
                     >
                       Log in
                     </Button>

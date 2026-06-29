@@ -53,29 +53,29 @@ export default function ScalesPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#1e293b] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#1e293b] text-slate-100 p-8">
+    <div className="min-h-screen bg-background text-foreground p-8">
       <div className="max-w-4xl mx-auto space-y-8">
         
         {/* Header */}
-        <div className="flex justify-between items-end border-b border-[#1e3a5f] pb-6">
+        <div className="flex justify-between items-end border-b pb-6">
           <div>
-            <h1 className="text-2xl font-mono font-bold tracking-widest uppercase text-emerald-400">
+            <h1 className="text-2xl font-mono font-bold tracking-widest uppercase text-primary">
               Grade Scales
             </h1>
-            <p className="text-slate-400 font-mono text-sm mt-2">
+            <p className="text-muted-foreground font-mono text-sm mt-2">
               Manage the grading systems used to calculate GPA.
             </p>
           </div>
           <Button
             onClick={handleCreate}
-            className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold rounded-sm font-mono text-xs uppercase tracking-widest"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-sm font-mono text-xs uppercase tracking-widest"
           >
             <Plus className="w-4 h-4 mr-2" />
             New Scale
@@ -84,7 +84,7 @@ export default function ScalesPage() {
 
         {/* System Scales */}
         <div className="space-y-4">
-          <h2 className="text-sm font-mono font-bold tracking-widest uppercase text-slate-500">
+          <h2 className="text-sm font-mono font-bold tracking-widest uppercase text-muted-foreground">
             System Scales
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -92,15 +92,15 @@ export default function ScalesPage() {
               <div 
                 key={scale.id} 
                 onClick={() => handleView(scale)}
-                className="bg-[#273449] border border-[#1e3a5f] rounded-sm p-5 relative overflow-hidden group cursor-pointer hover:border-slate-500/50 transition-all"
+                className="bg-card border border-border rounded-sm p-5 relative overflow-hidden group cursor-pointer hover:border-muted-foreground/50 transition-all hover:-translate-y-1 hover:shadow-xl"
               >
-                <div className="absolute top-0 left-0 w-1 h-full bg-slate-500/50 group-hover:bg-slate-400 transition-colors"></div>
+                <div className="absolute top-0 left-0 w-1 h-full bg-muted group-hover:bg-muted-foreground transition-colors"></div>
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="font-mono text-sm font-bold text-slate-200">{scale.label}</h3>
-                    <p className="text-xs font-mono text-slate-500 mt-1">{scale.grades.length} grades defined</p>
+                    <h3 className="font-mono text-sm font-bold text-foreground">{scale.label}</h3>
+                    <p className="text-xs font-mono text-muted-foreground mt-1">{scale.grades.length} grades defined</p>
                   </div>
-                  <div className="bg-slate-500/10 text-slate-400 px-2 py-1 rounded-sm flex items-center text-[10px] font-mono tracking-widest uppercase">
+                  <div className="bg-muted text-muted-foreground px-2 py-1 rounded-sm flex items-center text-[10px] font-mono tracking-widest uppercase">
                     <Shield className="w-3 h-3 mr-1" /> System
                   </div>
                 </div>
@@ -111,29 +111,29 @@ export default function ScalesPage() {
 
         {/* Custom Scales */}
         <div className="space-y-4">
-          <h2 className="text-sm font-mono font-bold tracking-widest uppercase text-slate-500">
+          <h2 className="text-sm font-mono font-bold tracking-widest uppercase text-muted-foreground">
             Your Custom Scales
           </h2>
           {userScales.length === 0 ? (
-            <div className="bg-[#273449] border border-[#1e3a5f] border-dashed rounded-sm p-8 text-center">
-              <p className="text-slate-400 font-mono text-sm">No custom scales created yet.</p>
+            <div className="bg-card border border-border border-dashed rounded-sm p-8 text-center">
+              <p className="text-muted-foreground font-mono text-sm">No custom scales created yet.</p>
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
               {userScales.map((scale) => (
-                <div key={scale.id} className="bg-[#273449] border border-[#1e3a5f] rounded-sm p-5 relative group transition-all hover:border-emerald-400/50">
-                  <div className="absolute top-0 left-0 w-1 h-full bg-emerald-400/50"></div>
+                <div key={scale.id} className="bg-card border border-border rounded-sm p-5 relative group transition-all hover:border-primary/50 hover:-translate-y-1 hover:shadow-xl cursor-pointer">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-primary/50 group-hover:bg-primary transition-colors"></div>
                   <div className="flex justify-between items-start">
                     <div>
-                      <h3 className="font-mono text-sm font-bold text-slate-200">{scale.label}</h3>
-                      <p className="text-xs font-mono text-slate-500 mt-1">{scale.grades.length} grades defined</p>
+                      <h3 className="font-mono text-sm font-bold text-foreground group-hover:text-primary transition-colors">{scale.label}</h3>
+                      <p className="text-xs font-mono text-muted-foreground mt-1">{scale.grades.length} grades defined</p>
                     </div>
                     <div className="flex opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => handleEdit(scale)}
-                        className="h-8 w-8 text-slate-400 hover:text-emerald-400 hover:bg-emerald-400/10 rounded-sm"
+                        className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-sm"
                       >
                         <Edit2 className="w-4 h-4" />
                       </Button>
@@ -141,7 +141,7 @@ export default function ScalesPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleDelete(scale.id)}
-                        className="h-8 w-8 text-slate-400 hover:text-rose-400 hover:bg-rose-400/10 rounded-sm"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-sm"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>

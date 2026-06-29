@@ -42,7 +42,7 @@ export async function getSemestersForDegree(degreeId: string): Promise<SemesterW
   // Ensure modules are correctly ordered by position
   return (data || []).map(sem => ({
     ...sem,
-    modules: Array.isArray(sem.modules) ? sem.modules.sort((a, b) => a.position - b.position) : []
+    modules: Array.isArray(sem.modules) ? sem.modules.sort((a: SemesterModule, b: SemesterModule) => a.position - b.position) : []
   })) as SemesterWithModules[]
 }
 

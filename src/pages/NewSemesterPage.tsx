@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { ArrowLeft, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useDegrees } from '@/hooks/useDegrees'
 import { useSemesters } from '@/hooks/useSemesters'
 import { Calculator } from '@/components/calculator/Calculator'

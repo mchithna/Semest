@@ -2,8 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { 
   getSemestersForDegree, 
   saveSemester, 
-  deleteSemester,
-  type SemesterWithModules 
+  deleteSemester
 } from '../lib/queries/semesters'
 import type { ModuleData } from '@/components/calculator/ModuleRow'
 import { toast } from 'sonner'
