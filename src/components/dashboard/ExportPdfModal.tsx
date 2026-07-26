@@ -1,11 +1,12 @@
 import React, { useState, useRef } from 'react'
 import { FileDown, Loader2, X, FileText, Sparkles, Layout } from 'lucide-react'
-import html2pdf from 'html2pdf.js'
+import { pdf } from '@react-pdf/renderer'
 import { toast } from 'sonner'
 import type { DegreeWithScale } from '@/lib/queries/degrees'
 import type { SemesterWithModules } from '@/lib/queries/semesters'
 import { PdfTemplates, type PdfExportOptions } from './PdfTemplates'
 import { PdfMiniPreview } from './PdfMiniPreview'
+import { ReactPdfDocument } from './ReactPdfDocument'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -66,28 +67,31 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
   }
 
   const handleExportPdf = async () => {
-    const printElement = printContainerRef.current
-    if (!printElement) {
-      toast.error('Unable to locate print document.')
-      return
-    }
-
     try {
       setIsExporting(true)
       const cleanFileName = (options.reportTitle || degree.title)
         .replace(/[^a-zA-Z0-9_-]/g, '_')
         .substring(0, 40)
 
-      const opt = {
-        margin: [8, 8, 8, 8] as [number, number, number, number],
-        filename: `${cleanFileName}_Report.pdf`,
-        image: { type: 'jpeg' as const, quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const },
-      }
+      const blob = await pdf(
+        <ReactPdfDocument
+          degree={degree}
+          semesters={semesters}
+          metrics={metrics}
+          options={options}
+        />
+      ).toBlob()
 
-      await html2pdf().set(opt).from(printElement).save()
-      toast.success('PDF document generated successfully!')
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${cleanFileName}_Report.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      toast.success('Vector PDF report downloaded successfully!')
       onClose()
     } catch (err: any) {
       console.error('PDF export error:', err)
