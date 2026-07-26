@@ -21,8 +21,8 @@ export const PdfMiniPreview: React.FC<PdfMiniPreviewProps> = ({
   metrics,
   options,
 }) => {
-  const isOfficial = options.theme === 'official'
   const isModern = options.theme === 'modern'
+  const isExecutive = options.theme === 'executive'
 
   return (
     <div className="flex flex-col items-center">
@@ -35,30 +35,42 @@ export const PdfMiniPreview: React.FC<PdfMiniPreviewProps> = ({
       <div
         className={`w-[260px] h-[360px] rounded-md shadow-2xl border p-4 transition-all duration-300 relative overflow-hidden flex flex-col justify-between select-none ${
           isModern
-            ? 'bg-slate-950 border-slate-800 text-slate-200'
-            : isOfficial
-            ? 'bg-white border-slate-300 text-slate-900 font-serif'
-            : 'bg-slate-50 border-slate-300 text-slate-900 font-sans'
+            ? 'bg-slate-950 border-slate-800 text-slate-200 font-mono'
+            : isExecutive
+            ? 'bg-white border-indigo-200 text-slate-900 font-sans shadow-indigo-500/10'
+            : 'bg-white border-slate-300 text-slate-900 font-serif'
         }`}
       >
         <div className="space-y-3">
           {/* Header Block */}
           <div
             className={`pb-2 border-b ${
-              isModern ? 'border-slate-800' : 'border-slate-300'
+              isModern
+                ? 'border-slate-800'
+                : isExecutive
+                ? 'border-indigo-100'
+                : 'border-slate-300'
             }`}
           >
             <div className="flex justify-between items-start">
               <div>
                 <div
                   className={`text-[11px] font-bold truncate max-w-[150px] uppercase ${
-                    isModern ? 'text-emerald-400 font-mono' : 'text-slate-900'
+                    isModern
+                      ? 'text-emerald-400 font-mono'
+                      : isExecutive
+                      ? 'text-indigo-600 font-sans'
+                      : 'text-slate-900 font-serif'
                   }`}
                 >
                   {options.reportTitle || degree?.title || 'Academic Report'}
                 </div>
                 {options.includeMetadata && (
-                  <div className="text-[8px] text-slate-400 truncate max-w-[140px]">
+                  <div
+                    className={`text-[8px] truncate max-w-[140px] ${
+                      isExecutive ? 'text-indigo-400' : 'text-slate-400'
+                    }`}
+                  >
                     {degree?.institution || 'University Name'}
                   </div>
                 )}
@@ -67,7 +79,9 @@ export const PdfMiniPreview: React.FC<PdfMiniPreviewProps> = ({
                 className={`text-[7px] px-1.5 py-0.5 rounded font-mono font-semibold uppercase ${
                   isModern
                     ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                    : 'bg-slate-200 text-slate-700'
+                    : isExecutive
+                    ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+                    : 'bg-slate-100 text-slate-800 border border-slate-300'
                 }`}
               >
                 {metrics.standing.split(' ')[0]}
@@ -76,7 +90,15 @@ export const PdfMiniPreview: React.FC<PdfMiniPreviewProps> = ({
 
             {/* Student Name Meta */}
             {options.includeName && (options.studentName || options.studentEmail) && (
-              <div className="mt-1.5 pt-1 border-t border-dashed border-slate-300/30 text-[8px] flex justify-between text-slate-400">
+              <div
+                className={`mt-1.5 pt-1 border-t border-dashed text-[8px] flex justify-between ${
+                  isModern
+                    ? 'border-slate-800 text-slate-400'
+                    : isExecutive
+                    ? 'border-indigo-100 text-slate-600'
+                    : 'border-slate-200 text-slate-600'
+                }`}
+              >
                 <span className="truncate max-w-[110px]">
                   {options.studentName || 'Student Name'}
                 </span>
@@ -92,13 +114,21 @@ export const PdfMiniPreview: React.FC<PdfMiniPreviewProps> = ({
             <div className="grid grid-cols-4 gap-1">
               <div
                 className={`p-1 rounded text-center border ${
-                  isModern ? 'bg-slate-900 border-slate-800' : 'bg-slate-100 border-slate-200'
+                  isModern
+                    ? 'bg-slate-900 border-slate-800'
+                    : isExecutive
+                    ? 'bg-indigo-50/50 border-indigo-100'
+                    : 'bg-slate-50 border-slate-200'
                 }`}
               >
                 <div className="text-[6px] uppercase text-slate-400">CGPA</div>
                 <div
                   className={`text-[9px] font-bold font-mono ${
-                    isModern ? 'text-emerald-400' : 'text-slate-900'
+                    isModern
+                      ? 'text-emerald-400'
+                      : isExecutive
+                      ? 'text-indigo-600'
+                      : 'text-slate-900'
                   }`}
                 >
                   {metrics.cgpa.toFixed(2)}
@@ -107,7 +137,11 @@ export const PdfMiniPreview: React.FC<PdfMiniPreviewProps> = ({
 
               <div
                 className={`p-1 rounded text-center border ${
-                  isModern ? 'bg-slate-900 border-slate-800' : 'bg-slate-100 border-slate-200'
+                  isModern
+                    ? 'bg-slate-900 border-slate-800'
+                    : isExecutive
+                    ? 'bg-indigo-50/50 border-indigo-100'
+                    : 'bg-slate-50 border-slate-200'
                 }`}
               >
                 <div className="text-[6px] uppercase text-slate-400">Credits</div>
@@ -118,7 +152,11 @@ export const PdfMiniPreview: React.FC<PdfMiniPreviewProps> = ({
 
               <div
                 className={`p-1 rounded text-center border ${
-                  isModern ? 'bg-slate-900 border-slate-800' : 'bg-slate-100 border-slate-200'
+                  isModern
+                    ? 'bg-slate-900 border-slate-800'
+                    : isExecutive
+                    ? 'bg-indigo-50/50 border-indigo-100'
+                    : 'bg-slate-50 border-slate-200'
                 }`}
               >
                 <div className="text-[6px] uppercase text-slate-400">Best</div>
@@ -129,11 +167,19 @@ export const PdfMiniPreview: React.FC<PdfMiniPreviewProps> = ({
 
               <div
                 className={`p-1 rounded text-center border ${
-                  isModern ? 'bg-slate-900 border-slate-800' : 'bg-slate-100 border-slate-200'
+                  isModern
+                    ? 'bg-slate-900 border-slate-800'
+                    : isExecutive
+                    ? 'bg-indigo-50/50 border-indigo-100'
+                    : 'bg-slate-50 border-slate-200'
                 }`}
               >
                 <div className="text-[6px] uppercase text-slate-400">Sems</div>
-                <div className="text-[9px] font-bold font-mono text-indigo-500">
+                <div
+                  className={`text-[9px] font-bold font-mono ${
+                    isExecutive ? 'text-indigo-600' : 'text-indigo-500'
+                  }`}
+                >
                   {semesters.length}
                 </div>
               </div>
@@ -144,7 +190,11 @@ export const PdfMiniPreview: React.FC<PdfMiniPreviewProps> = ({
           {options.includeTrendChart && (
             <div
               className={`p-1.5 rounded border ${
-                isModern ? 'bg-slate-900 border-slate-800' : 'bg-slate-100 border-slate-200'
+                isModern
+                  ? 'bg-slate-900 border-slate-800'
+                  : isExecutive
+                  ? 'bg-indigo-50/50 border-indigo-100'
+                  : 'bg-slate-50 border-slate-200'
               }`}
             >
               <div className="text-[7px] uppercase font-bold text-slate-400 mb-1">
@@ -155,7 +205,11 @@ export const PdfMiniPreview: React.FC<PdfMiniPreviewProps> = ({
                   <div
                     key={idx}
                     className={`flex-1 rounded-t ${
-                      isModern ? 'bg-emerald-500' : 'bg-slate-700'
+                      isModern
+                        ? 'bg-emerald-500'
+                        : isExecutive
+                        ? 'bg-indigo-600'
+                        : 'bg-slate-800'
                     }`}
                     style={{ height: `${val}%` }}
                   />
@@ -189,12 +243,26 @@ export const PdfMiniPreview: React.FC<PdfMiniPreviewProps> = ({
                 <div
                   key={sIdx}
                   className={`rounded border text-[7px] p-1.5 ${
-                    isModern ? 'border-slate-800 bg-slate-900/60' : 'border-slate-200 bg-slate-50'
+                    isModern
+                      ? 'border-slate-800 bg-slate-900/60'
+                      : isExecutive
+                      ? 'border-indigo-100 bg-indigo-50/30'
+                      : 'border-slate-200 bg-slate-50'
                   }`}
                 >
                   <div className="flex justify-between font-semibold border-b border-slate-300/30 pb-0.5 mb-1">
                     <span>Semester {sIdx}</span>
-                    <span className="font-mono text-emerald-500">GPA: 3.85</span>
+                    <span
+                      className={`font-mono ${
+                        isModern
+                          ? 'text-emerald-400'
+                          : isExecutive
+                          ? 'text-indigo-600'
+                          : 'text-slate-800'
+                      }`}
+                    >
+                      GPA: 3.85
+                    </span>
                   </div>
 
                   <div className="space-y-0.5">
