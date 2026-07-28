@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { GraduationCap, Activity, Target, Plus, Trophy, BookOpen } from 'lucide-react'
+import { GraduationCap, Activity, Target, Plus, Trophy, BookOpen, FileDown } from 'lucide-react'
 import { useDegrees } from '@/hooks/useDegrees'
 import { useSemesters } from '@/hooks/useSemesters'
+import { useAuth } from '@/context/AuthContext'
 import { getCumulativeMetrics } from '@/lib/analytics'
 import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
 import { GpaTrendChart } from '@/components/dashboard/GpaTrendChart'
 import { TargetPredictor } from '@/components/dashboard/TargetPredictor'
+import { ExportPdfModal } from '@/components/dashboard/ExportPdfModal'
 import {
   Select,
   SelectContent,
@@ -19,8 +21,10 @@ import { Button } from '@/components/ui/button'
 
 export default function DashboardPage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const { degrees, isLoading: isDegreesLoading } = useDegrees()
   const [activeDegreeId, setActiveDegreeId] = useState<string>('')
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false)
 
   const activeDegree = degrees.find(d => d.id === activeDegreeId)
   const { semesters, isLoading: isSemestersLoading } = useSemesters(activeDegreeId)
@@ -64,6 +68,17 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground p-8">
+      {/* Export PDF Settings Modal */}
+      <ExportPdfModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        degree={activeDegree}
+        semesters={semesters}
+        metrics={metrics}
+        defaultStudentName={user?.user_metadata?.display_name || user?.email?.split('@')[0] || ''}
+        defaultStudentEmail={user?.email || ''}
+      />
+
       <div className="max-w-6xl mx-auto space-y-8 animate-slideUp">
         
         {/* Header & Degree Selector */}
@@ -77,19 +92,31 @@ export default function DashboardPage() {
             </p>
           </div>
           
-          <div className="w-full md:w-64">
-            <Select value={activeDegreeId} onValueChange={setActiveDegreeId}>
-              <SelectTrigger className="bg-card border-border text-foreground font-mono text-sm h-10">
-                <SelectValue placeholder="Select a degree" />
-              </SelectTrigger>
-              <SelectContent className="bg-card border-border text-foreground font-mono">
-                {degrees.map((deg) => (
-                  <SelectItem key={deg.id} value={deg.id} className="cursor-pointer">
-                    {deg.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+            <Button
+              onClick={() => setIsExportModalOpen(true)}
+              disabled={!activeDegree || isSemestersLoading}
+              variant="outline"
+              className="bg-card border-border hover:bg-muted text-foreground font-mono text-sm h-10 px-4 rounded-sm"
+            >
+              <FileDown className="w-4 h-4 mr-2 text-primary" />
+              Export PDF
+            </Button>
+
+            <div className="w-full sm:w-64">
+              <Select value={activeDegreeId} onValueChange={setActiveDegreeId}>
+                <SelectTrigger className="bg-card border-border text-foreground font-mono text-sm h-10">
+                  <SelectValue placeholder="Select a degree" />
+                </SelectTrigger>
+                <SelectContent className="bg-card border-border text-foreground font-mono">
+                  {degrees.map((deg) => (
+                    <SelectItem key={deg.id} value={deg.id} className="cursor-pointer">
+                      {deg.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
 
