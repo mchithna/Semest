@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { computeScore, totalCredits, classify, type ModuleWithGrade } from './score'
+import { computeScore, totalCredits, earnedCredits, classify, type ModuleWithGrade } from './score'
 import type { GradeRow } from './queries/gradeScales'
 
 describe('Score Logic', () => {
@@ -19,6 +19,15 @@ describe('Score Logic', () => {
       { credits: 1.5, grade: 'C' },
     ]
     expect(totalCredits(modules)).toBe(8.5)
+  })
+
+  it('computes earned credits correctly (only counting modules with valid scale grades)', () => {
+    const modules: ModuleWithGrade[] = [
+      { credits: 3, grade: 'A' },
+      { credits: 4, grade: 'B' },
+      { credits: 2, grade: 'Pending' }, // Invalid grade, not earned yet
+    ]
+    expect(earnedCredits(modules, scale)).toBe(7)
   })
 
   it('computes weighted average GPA correctly', () => {
