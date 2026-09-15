@@ -37,11 +37,11 @@ export default function NewPresetPage() {
       { degreeId: selectedDegreeId, title, description, institution, isPublic },
       {
         onSuccess: () => {
-          toast.success("Template published successfully!")
+          toast.success("Preset published successfully!")
           navigate('/presets/mine')
         },
         onError: (err: any) => {
-          toast.error(err.message || "Failed to publish template.")
+          toast.error(err.message || "Failed to publish preset.")
         }
       }
     )
@@ -54,16 +54,16 @@ export default function NewPresetPage() {
         <div className="flex items-center gap-4 text-primary mb-6">
           <Button variant="ghost" className="p-0 hover:bg-transparent text-primary hover:text-primary/80" onClick={() => navigate('/presets/mine')}>
             <ArrowLeft className="w-5 h-5 mr-2" />
-            Back to My Templates
+            Back to My Presets
           </Button>
         </div>
 
         <div>
           <h1 className="text-2xl font-mono font-bold tracking-widest uppercase text-primary flex items-center gap-2">
-            <Sparkles className="w-6 h-6" /> Publish Template
+            <Sparkles className="w-6 h-6" /> Publish Preset
           </h1>
           <p className="text-muted-foreground font-mono text-sm mt-2">
-            Turn your degree structure into a template that others can clone.
+            Turn your degree structure into a preset that others can clone.
           </p>
         </div>
 
@@ -87,7 +87,7 @@ export default function NewPresetPage() {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-muted-foreground font-mono text-sm uppercase tracking-widest">Template Title</Label>
+              <Label className="text-muted-foreground font-mono text-sm uppercase tracking-widest">Preset Title</Label>
               <Input
                 required
                 value={title}
@@ -121,7 +121,7 @@ export default function NewPresetPage() {
               <div className="space-y-0.5 pr-4">
                 <Label className="text-foreground font-mono font-bold">Make Public</Label>
                 <p className="text-muted-foreground font-mono text-xs">
-                  Allow anyone to discover this template in the community browser.
+                  Allow anyone to discover this preset in the community browser.
                 </p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
@@ -143,7 +143,7 @@ export default function NewPresetPage() {
               {createPreset.isPending ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
-                'Generate Template Code'
+                'Generate Preset Code'
               )}
             </Button>
           </form>

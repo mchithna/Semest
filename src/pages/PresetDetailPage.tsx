@@ -45,14 +45,14 @@ export default function PresetDetailPage() {
       },
       {
         onSuccess: (newDegreeId) => {
-          toast.success("Template successfully cloned!")
+          toast.success("Preset successfully cloned!")
           if (preset.scale_snapshot && (!preset.grade_scale_id || (preset.grade_scale && !preset.grade_scale.is_system))) {
              toast.success(`Grade scale copied to your account!`)
           }
           navigate(`/degrees/${newDegreeId}/semesters`)
         },
         onError: (err: any) => {
-          toast.error(err.message || "Failed to clone template.")
+          toast.error(err.message || "Failed to clone preset.")
         }
       }
     )
@@ -84,13 +84,13 @@ export default function PresetDetailPage() {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-8 text-center text-foreground">
         <FileText className="w-16 h-16 text-destructive mb-6 opacity-50" />
-        <h2 className="text-2xl font-mono font-bold tracking-widest uppercase mb-2">Template Not Found</h2>
+        <h2 className="text-2xl font-mono font-bold tracking-widest uppercase mb-2">Preset Not Found</h2>
         <p className="text-muted-foreground font-mono text-sm mb-8 max-w-md">
-          The share code you entered might be invalid or the template was deleted by its creator.
+          The share code you entered might be invalid or the preset was deleted by its creator.
         </p>
         <Button onClick={() => navigate('/presets')} className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold font-mono">
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Browse Public Templates
+          Browse Public Presets
         </Button>
       </div>
     )
@@ -107,7 +107,7 @@ export default function PresetDetailPage() {
         <div className="flex items-center gap-4 text-primary mb-6">
           <Button variant="ghost" className="p-0 hover:bg-transparent text-primary hover:text-primary/80" onClick={() => navigate('/presets')}>
             <ArrowLeft className="w-5 h-5 mr-2" />
-            Back to Templates
+            Back to Presets
           </Button>
         </div>
 
@@ -138,7 +138,7 @@ export default function PresetDetailPage() {
         <div>
           <div className="flex justify-between items-end mb-6">
             <h2 className="text-xl font-mono font-bold tracking-widest uppercase text-primary">
-              Template Structure
+              Preset Structure
             </h2>
             <div className="text-right font-mono text-sm">
               <p className="text-muted-foreground">Total Credits</p>
@@ -149,7 +149,7 @@ export default function PresetDetailPage() {
           <div className="space-y-6">
             {preset.semesters.length === 0 ? (
               <div className="text-center p-8 bg-card/30 border border-dashed rounded-lg">
-                <p className="text-muted-foreground font-mono text-sm">This template contains no semesters.</p>
+                <p className="text-muted-foreground font-mono text-sm">This preset contains no semesters.</p>
               </div>
             ) : (
               preset.semesters.map((sem, i) => (

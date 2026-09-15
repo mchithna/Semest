@@ -48,7 +48,7 @@ export default function LandingPage() {
               Get Started for Free <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
             <Button size="lg" variant="outline" onClick={() => navigate('/presets')} className="text-primary hover:text-primary/80 font-mono text-sm uppercase tracking-widest">
-              Browse Templates
+              Browse Presets
             </Button>
           </div>
         </div>
@@ -101,7 +101,7 @@ export default function LandingPage() {
             <div className="w-12 h-12 bg-amber-400/10 text-amber-400 rounded-xl flex items-center justify-center mb-6">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/></svg>
             </div>
-            <h3 className="text-xl font-mono font-bold text-foreground mb-3">Community Templates</h3>
+            <h3 className="text-xl font-mono font-bold text-foreground mb-3">Community Presets</h3>
             <p className="text-muted-foreground">
               Don't manually enter modules. Clone complete degree structures published by other students in seconds.
             </p>
@@ -113,14 +113,14 @@ export default function LandingPage() {
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 to-sky-400"></div>
           <h2 className="text-3xl font-bold text-foreground mb-4">Ready to optimize your grades?</h2>
           <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Join thousands of students who are already using Semest to track their academic progress and discover community-built degree templates.
+            Join thousands of students who are already using Semest to track their academic progress and discover community-built degree presets.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Button size="lg" onClick={() => navigate('/auth')} className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold font-mono text-sm uppercase tracking-widest">
               Create Free Account
             </Button>
             <Button size="lg" variant="outline" onClick={() => navigate('/presets')} className="text-primary hover:text-primary/80 font-mono text-sm uppercase tracking-widest">
-              Browse Templates
+              Browse Presets
             </Button>
           </div>
         </div>

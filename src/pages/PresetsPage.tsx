@@ -41,10 +41,10 @@ export default function PresetsPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b pb-8">
           <div>
             <h1 className="text-3xl font-mono font-bold tracking-widest uppercase text-primary flex items-center gap-3">
-              <Globe className="w-8 h-8" /> Community Templates
+              <Globe className="w-8 h-8" /> Community Presets
             </h1>
             <p className="text-muted-foreground font-mono text-sm mt-3 max-w-lg leading-relaxed">
-              Discover degree structures published by the community. Find your major, clone the template, and start tracking your GPA instantly.
+              Discover degree structures published by the community. Find your major, clone the preset, and start tracking your GPA instantly.
             </p>
           </div>
           
@@ -84,12 +84,12 @@ export default function PresetsPage() {
               variant="outline"
               className="w-full sm:w-auto border-primary text-primary hover:bg-primary hover:text-primary-foreground font-bold font-mono uppercase tracking-widest h-12 transition-colors"
             >
-              My Templates
+              My Presets
             </Button>
           )}
         </div>
 
-        {/* Templates Grid */}
+        {/* Presets Grid */}
         {isLoading ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -99,9 +99,9 @@ export default function PresetsPage() {
         ) : filteredPresets.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-16 text-center border border-dashed rounded-lg bg-card/30">
             <FileText className="w-12 h-12 text-muted-foreground mb-4 opacity-50" />
-            <h3 className="text-lg font-mono font-bold text-foreground mb-2">No templates found</h3>
+            <h3 className="text-lg font-mono font-bold text-foreground mb-2">No presets found</h3>
             <p className="text-muted-foreground font-mono text-sm max-w-md">
-              We couldn't find any public templates matching your search criteria.
+              We couldn't find any public presets matching your search criteria.
             </p>
           </div>
         ) : (

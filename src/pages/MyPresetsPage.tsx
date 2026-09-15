@@ -22,19 +22,19 @@ export default function MyPresetsPage() {
       <div className="max-w-4xl mx-auto space-y-8 animate-slideUp">
         
         <div className="flex items-center gap-4 text-primary mb-6">
-          <Button variant="ghost" className="p-0 hover:bg-transparent text-primary hover:text-primary/80" onClick={() => navigate('/dashboard')}>
+          <Button variant="ghost" className="p-0 hover:bg-transparent text-primary hover:text-primary/80" onClick={() => navigate('/presets')}>
             <ArrowLeft className="w-5 h-5 mr-2" />
-            Back to Dashboard
+            Back to Presets
           </Button>
         </div>
 
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b pb-6">
           <div>
             <h1 className="text-2xl font-mono font-bold tracking-widest uppercase text-primary">
-              My Published Templates
+              My Published Presets
             </h1>
             <p className="text-muted-foreground font-mono text-sm mt-2">
-              Manage the degrees you have shared with the community.
+              Manage the degree presets you have shared with the community.
             </p>
           </div>
           <Button 
@@ -42,7 +42,7 @@ export default function MyPresetsPage() {
             className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold font-mono text-xs uppercase tracking-widest"
           >
             <Plus className="w-4 h-4 mr-2" />
-            Publish New Template
+            Publish New Preset
           </Button>
         </div>
 
@@ -55,9 +55,9 @@ export default function MyPresetsPage() {
         ) : !presets || presets.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 text-center border border-dashed rounded-lg bg-card/30">
             <BookTemplate className="w-12 h-12 text-muted-foreground mb-4 opacity-50" />
-            <h3 className="text-lg font-mono font-bold text-foreground mb-2">No templates published</h3>
+            <h3 className="text-lg font-mono font-bold text-foreground mb-2">No presets published</h3>
             <p className="text-muted-foreground font-mono text-sm max-w-md">
-              You haven't published any of your degrees as templates yet. Share your degree structure with others!
+              You haven't published any of your degrees as presets yet. Share your degree structure with others!
             </p>
           </div>
         ) : (
@@ -105,7 +105,7 @@ export default function MyPresetsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
           <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md shadow-2xl space-y-6">
             <div>
-              <h2 className="text-xl font-mono font-bold text-foreground mb-2">Sync Template</h2>
+              <h2 className="text-xl font-mono font-bold text-foreground mb-2">Sync Preset</h2>
               <p className="text-sm font-mono text-muted-foreground">
                 Which of your degrees should update this preset?
               </p>
@@ -124,7 +124,7 @@ export default function MyPresetsPage() {
 
             <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-md">
               <p className="text-xs font-mono text-amber-400/90 leading-relaxed">
-                ⚠ This will replace the current module list in the template. Your share code and clone count are preserved.
+                ⚠ This will replace the current module list in the preset. Your share code and clone count are preserved.
               </p>
             </div>
 
@@ -147,12 +147,12 @@ export default function MyPresetsPage() {
                     { presetId: syncPresetId, degreeId: syncDegreeId },
                     {
                       onSuccess: () => {
-                        toast.success('Template synced successfully!')
+                        toast.success('Preset synced successfully!')
                         setSyncPresetId(null)
                         setSyncDegreeId('')
                       },
                       onError: (err: any) => {
-                        toast.error(err.message || 'Failed to sync template')
+                        toast.error(err.message || 'Failed to sync preset')
                       }
                     }
                   )
