@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Loader2, Copy, FileText, Check, GraduationCap } from 'lucide-react'
+import { ArrowLeft, Loader2, Copy, FileText, Check, GraduationCap, Share2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { usePreset, useApplyPreset } from '@/hooks/usePresets'
@@ -17,6 +17,7 @@ export default function PresetDetailPage() {
   const { degrees } = useDegrees()
 
   const [isCopied, setIsCopied] = useState(false)
+  const [isLinkCopied, setIsLinkCopied] = useState(false)
   const [degreeTitle, setDegreeTitle] = useState('')
   const [cloneMode, setCloneMode] = useState<'new' | 'existing'>('new')
   const [targetDegreeId, setTargetDegreeId] = useState<string>('')
@@ -27,6 +28,15 @@ export default function PresetDetailPage() {
     setIsCopied(true)
     setTimeout(() => setIsCopied(false), 2000)
     toast.success("Share code copied to clipboard!")
+  }
+
+  const handleCopyLink = () => {
+    if (!preset) return
+    const url = `${window.location.origin}/presets/${preset.code}`
+    navigator.clipboard.writeText(url)
+    setIsLinkCopied(true)
+    setTimeout(() => setIsLinkCopied(false), 2000)
+    toast.success("Preset share link copied to clipboard!")
   }
 
   const handleClone = () => {
@@ -122,14 +132,21 @@ export default function PresetDetailPage() {
               </p>
             )}
           </div>
-          <div className="flex flex-col gap-3 min-w-[200px]">
+          <div className="flex flex-col sm:flex-row md:flex-col gap-3 min-w-[200px] w-full md:w-auto">
+            <Button 
+              onClick={handleCopyLink}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-mono font-bold h-12 transition-colors"
+            >
+              {isLinkCopied ? <Check className="w-4 h-4 mr-2" /> : <Share2 className="w-4 h-4 mr-2" />}
+              {isLinkCopied ? 'Link Copied!' : 'Share Link'}
+            </Button>
             <Button 
               onClick={handleCopyCode}
               variant="outline"
               className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground font-mono font-bold h-12 transition-colors"
             >
               {isCopied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
-              {preset.code}
+              {isCopied ? 'Code Copied!' : `Code: ${preset.code}`}
             </Button>
           </div>
         </div>

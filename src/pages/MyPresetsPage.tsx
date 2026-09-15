@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, BookTemplate, Loader2, ArrowLeft } from 'lucide-react'
+import { Plus, BookTemplate, Loader2, ArrowLeft, Share2, Check, ExternalLink, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -16,6 +16,16 @@ export default function MyPresetsPage() {
 
   const [syncPresetId, setSyncPresetId] = useState<string | null>(null)
   const [syncDegreeId, setSyncDegreeId] = useState<string>('')
+  const [copiedCode, setCopiedCode] = useState<string | null>(null)
+
+  const handleShareLink = (e: React.MouseEvent, code: string) => {
+    e.stopPropagation()
+    const url = `${window.location.origin}/presets/${code}`
+    navigator.clipboard.writeText(url)
+    setCopiedCode(code)
+    setTimeout(() => setCopiedCode(null), 2000)
+    toast.success(`Share link for preset ${code} copied to clipboard!`)
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground p-8">
@@ -63,14 +73,20 @@ export default function MyPresetsPage() {
         ) : (
           <div className="grid gap-6 md:grid-cols-2">
             {presets.map((preset) => (
-              <Card key={preset.id} className="bg-card border-border p-6 hover:border-primary/50 transition-colors flex flex-col hover:-translate-y-1 hover:shadow-xl">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="text-lg font-mono font-bold text-foreground">{preset.title}</h3>
-                    <p className="text-sm font-mono text-muted-foreground">{preset.institution || 'No Institution'}</p>
+              <Card 
+                key={preset.id} 
+                className="bg-card border-border p-6 hover:border-primary/50 transition-colors flex flex-col hover:-translate-y-1 hover:shadow-xl cursor-pointer group"
+                onClick={() => navigate(`/presets/${preset.code}`)}
+              >
+                <div className="flex justify-between items-start mb-4 gap-2">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-mono font-bold text-foreground group-hover:text-primary transition-colors">{preset.title}</h3>
+                    <p className="text-sm font-mono text-muted-foreground">{preset.institution || 'No Institution specified'}</p>
                   </div>
-                  <div className="bg-primary/10 text-primary px-3 py-1 rounded font-mono text-xs font-bold">
-                    {preset.code}
+                  <div className="flex items-center gap-2">
+                    <div className="bg-primary/10 text-primary px-3 py-1 rounded font-mono text-xs font-bold">
+                      {preset.code}
+                    </div>
                   </div>
                 </div>
                 
@@ -82,18 +98,54 @@ export default function MyPresetsPage() {
 
                 <div className="mt-auto flex flex-col gap-4 border-t pt-4">
                   <div className="flex justify-between items-center text-xs font-mono text-muted-foreground">
-                    <span className={preset.is_public ? 'text-primary' : 'text-muted-foreground'}>
+                    <span className={`px-2 py-0.5 rounded font-bold ${preset.is_public ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-500/10 text-slate-400'}`}>
                       {preset.is_public ? 'Public' : 'Private'}
                     </span>
-                    <span>{preset.use_count} uses</span>
+                    <span>{preset.use_count} clones</span>
                   </div>
-                  <Button 
-                    variant="outline"
-                    onClick={() => setSyncPresetId(preset.id)}
-                    className="w-full border-border text-foreground hover:text-primary hover:border-primary transition-colors"
-                  >
-                    Sync from degree
-                  </Button>
+
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setSyncPresetId(preset.id)
+                      }}
+                      className="flex-1 border-border text-foreground hover:text-primary hover:border-primary transition-colors text-xs font-mono"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
+                      Sync
+                    </Button>
+
+                    <Button 
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => handleShareLink(e, preset.code)}
+                      className="border-border text-foreground hover:text-primary hover:border-primary transition-colors text-xs font-mono px-3"
+                      title="Share Preset Link"
+                    >
+                      {copiedCode === preset.code ? (
+                        <Check className="w-3.5 h-3.5 text-emerald-400 mr-1" />
+                      ) : (
+                        <Share2 className="w-3.5 h-3.5 mr-1" />
+                      )}
+                      Share
+                    </Button>
+
+                    <Button 
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        navigate(`/presets/${preset.code}`)
+                      }}
+                      className="text-muted-foreground hover:text-primary transition-colors text-xs font-mono px-2"
+                      title="View Details"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
                 </div>
               </Card>
             ))}
@@ -101,13 +153,16 @@ export default function MyPresetsPage() {
         )}
       </div>
 
+      {/* Sync Preset Modal */}
       {syncPresetId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
-          <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md shadow-2xl space-y-6">
+          <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md shadow-2xl space-y-6 animate-fadeIn">
             <div>
-              <h2 className="text-xl font-mono font-bold text-foreground mb-2">Sync Preset</h2>
+              <h2 className="text-xl font-mono font-bold text-foreground mb-2 flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-primary" /> Sync Preset
+              </h2>
               <p className="text-sm font-mono text-muted-foreground">
-                Which of your degrees should update this preset?
+                Which of your current degrees should update this preset's structure?
               </p>
             </div>
 
@@ -124,7 +179,7 @@ export default function MyPresetsPage() {
 
             <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-md">
               <p className="text-xs font-mono text-amber-400/90 leading-relaxed">
-                ⚠ This will replace the current module list in the preset. Your share code and clone count are preserved.
+                ⚠ This will replace the current semester & module structure in the preset with your latest degree updates. Your share code and clone count will be preserved.
               </p>
             </div>
 
@@ -147,7 +202,7 @@ export default function MyPresetsPage() {
                     { presetId: syncPresetId, degreeId: syncDegreeId },
                     {
                       onSuccess: () => {
-                        toast.success('Preset synced successfully!')
+                        toast.success('Preset updated and synced successfully!')
                         setSyncPresetId(null)
                         setSyncDegreeId('')
                       },
@@ -160,7 +215,7 @@ export default function MyPresetsPage() {
                 className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold font-mono"
               >
                 {syncPreset.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                Sync
+                Sync Preset
               </Button>
             </div>
           </div>

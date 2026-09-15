@@ -1,12 +1,13 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, Globe, Users, FileText, ArrowRight } from 'lucide-react'
+import { Search, Globe, Users, FileText, ArrowRight, Share2, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { usePublicPresets } from '@/hooks/usePresets'
 import { useAuth } from '@/context/AuthContext'
+import { toast } from 'sonner'
 
 export default function PresetsPage() {
   const navigate = useNavigate()
@@ -14,16 +15,19 @@ export default function PresetsPage() {
   const { data: presets, isLoading } = usePublicPresets()
   const [searchQuery, setSearchQuery] = useState('')
   const [codeQuery, setCodeQuery] = useState('')
+  const [copiedCode, setCopiedCode] = useState<string | null>(null)
 
   const filteredPresets = useMemo(() => {
     if (!presets) return []
     if (!searchQuery.trim()) return presets
-    const lowerQuery = searchQuery.toLowerCase()
-    return presets.filter(p => 
-      p.title.toLowerCase().includes(lowerQuery) || 
-      (p.institution && p.institution.toLowerCase().includes(lowerQuery)) ||
-      (p.description && p.description.toLowerCase().includes(lowerQuery))
-    )
+    const lowerQuery = searchQuery.trim().toLowerCase()
+    return presets.filter(p => {
+      const titleMatch = p.title ? p.title.toLowerCase().includes(lowerQuery) : false
+      const instMatch = p.institution ? p.institution.toLowerCase().includes(lowerQuery) : false
+      const descMatch = p.description ? p.description.toLowerCase().includes(lowerQuery) : false
+      const codeMatch = p.code ? p.code.toLowerCase().includes(lowerQuery) : false
+      return titleMatch || instMatch || descMatch || codeMatch
+    })
   }, [presets, searchQuery])
 
   const handleCodeSearch = (e: React.FormEvent) => {
@@ -31,6 +35,15 @@ export default function PresetsPage() {
     if (codeQuery.trim().length === 6) {
       navigate(`/presets/${codeQuery.trim().toUpperCase()}`)
     }
+  }
+
+  const handleSharePreset = (e: React.MouseEvent, code: string) => {
+    e.stopPropagation()
+    const url = `${window.location.origin}/presets/${code}`
+    navigator.clipboard.writeText(url)
+    setCopiedCode(code)
+    setTimeout(() => setCopiedCode(null), 2000)
+    toast.success(`Share link copied for preset ${code}!`)
   }
 
   return (
@@ -74,7 +87,7 @@ export default function PresetsPage() {
             <Input
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search by title, institution..."
+              placeholder="Search by title, institution, or code..."
               className="pl-10 bg-card border-border text-foreground font-mono h-12"
             />
           </div>
@@ -109,10 +122,10 @@ export default function PresetsPage() {
             {filteredPresets.map((preset) => (
               <Card 
                 key={preset.id} 
-                className="bg-card border-border p-6 hover:border-primary/50 transition-all cursor-pointer flex flex-col group hover:shadow-lg hover:-translate-y-1"
+                className="bg-card border-border p-6 hover:border-primary/50 transition-all cursor-pointer flex flex-col group hover:shadow-lg hover:-translate-y-1 relative"
                 onClick={() => navigate(`/presets/${preset.code}`)}
               >
-                <div className="flex justify-between items-start mb-4">
+                <div className="flex justify-between items-start mb-4 gap-2">
                   <div className="flex-1">
                     <h3 className="text-lg font-mono font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2">
                       {preset.title}
@@ -121,6 +134,19 @@ export default function PresetsPage() {
                       {preset.institution || 'Unknown Institution'}
                     </p>
                   </div>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={(e) => handleSharePreset(e, preset.code)}
+                    title="Copy Preset Link"
+                    className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-muted"
+                  >
+                    {copiedCode === preset.code ? (
+                      <Check className="w-4 h-4 text-emerald-400" />
+                    ) : (
+                      <Share2 className="w-4 h-4" />
+                    )}
+                  </Button>
                 </div>
                 
                 {preset.description && (
