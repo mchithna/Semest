@@ -43,6 +43,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/degrees/:degreeId/semesters" element={<ProtectedRoute><SemestersPage /></ProtectedRoute>} />
               <Route path="/degrees/:degreeId/semesters/new" element={<ProtectedRoute><NewSemesterPage /></ProtectedRoute>} />
               <Route path="/degrees/:degreeId/semesters/:id/edit" element={<ProtectedRoute><EditSemesterPage /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><ScalesPage /></ProtectedRoute>} />
               <Route path="/settings/scales" element={<ProtectedRoute><ScalesPage /></ProtectedRoute>} />
               <Route path="/presets/new" element={<ProtectedRoute><NewPresetPage /></ProtectedRoute>} />
               <Route path="/presets/mine" element={<ProtectedRoute><MyPresetsPage /></ProtectedRoute>} />
