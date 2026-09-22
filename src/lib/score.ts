@@ -5,6 +5,16 @@ export type ModuleWithGrade = {
   grade: string
 }
 
+/** Postgres `numeric` columns arrive as strings. Addition would concatenate them. */
+export function toCredits(value: unknown): number {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : 0
+  if (typeof value === 'string' && value.trim() !== '') {
+    const parsed = Number(value)
+    return Number.isFinite(parsed) ? parsed : 0
+  }
+  return 0
+}
+
 export const CLASSIFICATION_META: Record<string, { label: string; badgeVariant: 'default' | 'secondary' | 'destructive' | 'outline'; color: string }> = {
   'First Class': { label: 'First Class', badgeVariant: 'default', color: 'bg-emerald-400 text-emerald-950' },
   'Second Upper': { label: 'Second Class (Upper)', badgeVariant: 'secondary', color: 'bg-blue-400 text-blue-950' },
@@ -15,7 +25,7 @@ export const CLASSIFICATION_META: Record<string, { label: string; badgeVariant: 
 }
 
 export function totalCredits(modules: ModuleWithGrade[]): number {
-  return modules.reduce((sum, mod) => sum + mod.credits, 0)
+  return modules.reduce((sum, mod) => sum + toCredits(mod.credits), 0)
 }
 
 export function earnedCredits(modules: ModuleWithGrade[], scale: GradeRow[]): number {
@@ -25,7 +35,7 @@ export function earnedCredits(modules: ModuleWithGrade[], scale: GradeRow[]): nu
   
   return modules.reduce((sum, mod) => {
     if (gradeToPoints.has(mod.grade.trim().toUpperCase())) {
-      return sum + mod.credits
+      return sum + toCredits(mod.credits)
     }
     return sum
   }, 0)
@@ -43,9 +53,10 @@ export function computeScore(modules: ModuleWithGrade[], scale: GradeRow[]): num
 
   for (const mod of modules) {
     const points = gradeToPoints.get(mod.grade.trim().toUpperCase())
+    const credits = toCredits(mod.credits)
     if (points !== undefined) {
-      totalPoints += points * mod.credits
-      validCredits += mod.credits
+      totalPoints += points * credits
+      validCredits += credits
     }
   }
 

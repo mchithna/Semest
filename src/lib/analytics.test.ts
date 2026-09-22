@@ -62,6 +62,29 @@ describe('Analytics Utility', () => {
     expect(metrics.standing).toBe('First Class Honors')
   })
 
+  it('keeps a numeric CGPA when module credits arrive as strings', () => {
+    const semesters: SemesterWithModules[] = [
+      {
+        id: 'sem-1',
+        degree_id: 'deg-1',
+        user_id: 'user-1',
+        title: 'Semester 1',
+        term: null,
+        sem_index: 1,
+        created_at: '',
+        updated_at: '',
+        modules: [
+          { id: 'm1', semester_id: 'sem-1', user_id: 'user-1', name: 'Math', credits: '3.0' as unknown as number, grade: 'A', position: 0, created_at: '' },
+          { id: 'm2', semester_id: 'sem-1', user_id: 'user-1', name: 'Physics', credits: '4.0' as unknown as number, grade: 'B', position: 1, created_at: '' },
+        ],
+      },
+    ]
+
+    const metrics = getCumulativeMetrics(semesters, gradeScale)
+    expect(metrics.earnedCredits).toBe(7)
+    expect(metrics.cgpa).toBeCloseTo(3.4286, 3)
+  })
+
   it('correctly classifies Academic Warning for low CGPA', () => {
     const semesters: SemesterWithModules[] = [
       {

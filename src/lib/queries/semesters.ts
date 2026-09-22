@@ -1,5 +1,6 @@
 import { supabase } from '../supabase'
 import type { ModuleData } from '@/components/calculator/ModuleRow'
+import { toCredits } from '@/lib/score'
 
 export type Semester = {
   id: string
@@ -39,10 +40,13 @@ export async function getSemestersForDegree(degreeId: string): Promise<SemesterW
 
   if (error) throw error
 
-  // Ensure modules are correctly ordered by position
   return (data || []).map(sem => ({
     ...sem,
-    modules: Array.isArray(sem.modules) ? sem.modules.sort((a: SemesterModule, b: SemesterModule) => a.position - b.position) : []
+    modules: Array.isArray(sem.modules)
+      ? sem.modules
+          .map((mod: SemesterModule) => ({ ...mod, credits: toCredits(mod.credits) }))
+          .sort((a: SemesterModule, b: SemesterModule) => a.position - b.position)
+      : []
   })) as SemesterWithModules[]
 }
 
@@ -102,7 +106,9 @@ export async function saveSemester(
 
   return {
     ...semesterData,
-    modules: modulesData.sort((a, b) => a.position - b.position)
+    modules: modulesData
+      .map((mod) => ({ ...mod, credits: toCredits(mod.credits) }))
+      .sort((a, b) => a.position - b.position)
   } as SemesterWithModules
 }
 

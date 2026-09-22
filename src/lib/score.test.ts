@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { computeScore, totalCredits, earnedCredits, classify, type ModuleWithGrade } from './score'
+import { computeScore, totalCredits, earnedCredits, classify, toCredits, type ModuleWithGrade } from './score'
 import type { GradeRow } from './queries/gradeScales'
 
 describe('Score Logic', () => {
@@ -54,6 +54,33 @@ describe('Score Logic', () => {
       { credits: 3, grade: 'a+' },
     ]
     expect(computeScore(modules, scale)).toBe(4.2)
+  })
+
+  it('treats numeric strings from the database as numbers', () => {
+    const modules = [
+      { credits: '3.0', grade: 'A' },
+      { credits: '4.0', grade: 'B' },
+      { credits: '1.5', grade: 'C' },
+    ] as unknown as ModuleWithGrade[]
+
+    // Without coercion, 0 + "3.0" + "4.0" concatenates to "03.04.0".
+    expect(totalCredits(modules)).toBe(8.5)
+    expect(earnedCredits(modules, scale)).toBe(8.5)
+    // (3*4.0 + 4*3.0 + 1.5*2.0) / 8.5 = 27 / 8.5
+    expect(computeScore(modules, scale)).toBe(3.1765)
+  })
+
+  it('treats a non-numeric credit string as zero', () => {
+    const modules = [
+      { credits: '3', grade: 'A' },
+      { credits: 'abc', grade: 'F' },
+    ] as unknown as ModuleWithGrade[]
+
+    expect(toCredits('abc')).toBe(0)
+    expect(toCredits('')).toBe(0)
+    expect(toCredits(null)).toBe(0)
+    expect(totalCredits(modules)).toBe(3)
+    expect(computeScore(modules, scale)).toBe(4)
   })
 
   it('classifies scores correctly', () => {
