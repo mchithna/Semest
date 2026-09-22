@@ -1,6 +1,7 @@
 import { supabase } from '../supabase'
 import type { ModuleData } from '@/components/calculator/ModuleRow'
 import { toCredits } from '@/lib/score'
+import { compareSemesters, nextSemesterIndex } from '@/lib/semesterOrder'
 
 export type Semester = {
   id: string
@@ -37,6 +38,7 @@ export async function getSemestersForDegree(degreeId: string): Promise<SemesterW
     `)
     .eq('degree_id', degreeId)
     .order('sem_index', { ascending: true })
+    .order('created_at', { ascending: true })
 
   if (error) throw error
 
@@ -47,7 +49,19 @@ export async function getSemestersForDegree(degreeId: string): Promise<SemesterW
           .map((mod: SemesterModule) => ({ ...mod, credits: toCredits(mod.credits) }))
           .sort((a: SemesterModule, b: SemesterModule) => a.position - b.position)
       : []
-  })) as SemesterWithModules[]
+  })).sort(compareSemesters) as SemesterWithModules[]
+}
+
+async function resolveCreateIndex(degreeId: string, semIndex: number | undefined): Promise<number> {
+  if (semIndex !== undefined) return semIndex
+
+  const { data, error } = await supabase
+    .from('semesters')
+    .select('sem_index')
+    .eq('degree_id', degreeId)
+
+  if (error) throw error
+  return nextSemesterIndex((data ?? []).map((row) => row.sem_index))
 }
 
 export async function saveSemester(
@@ -55,19 +69,29 @@ export async function saveSemester(
   title: string,
   modules: ModuleData[],
   term: string | null = null,
-  semIndex: number = 0,
+  semIndex?: number,
   semesterId?: string
 ): Promise<SemesterWithModules> {
   const { data: userData, error: authError } = await supabase.auth.getUser()
   if (authError) throw authError
 
-  // 1. Upsert Semester
-  const semesterPayload = {
+  // A missing index means "assign the next one" on create and "leave it" on edit.
+  const resolvedIndex = semesterId ? semIndex : await resolveCreateIndex(degreeId, semIndex)
+
+  const semesterPayload: {
+    degree_id: string
+    user_id: string
+    title: string
+    term: string | null
+    sem_index?: number
+  } = {
     degree_id: degreeId,
     user_id: userData.user.id,
     title,
     term,
-    sem_index: semIndex
+  }
+  if (resolvedIndex !== undefined) {
+    semesterPayload.sem_index = resolvedIndex
   }
   
   const query = semesterId 

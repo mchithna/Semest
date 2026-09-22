@@ -2,6 +2,7 @@ import React from 'react'
 import type { DegreeWithScale } from '@/lib/queries/degrees'
 import type { SemesterWithModules } from '@/lib/queries/semesters'
 import { computeScore, totalCredits } from '@/lib/score'
+import { compareSemesters } from '@/lib/semesterOrder'
 
 export type PdfExportOptions = {
   theme: 'official' | 'modern' | 'executive'
@@ -46,7 +47,7 @@ export const PdfTemplates: React.FC<PdfTemplatesProps> = ({
     day: 'numeric',
   })
 
-  const sortedSemesters = [...semesters].sort((a, b) => a.sem_index - b.sem_index)
+  const sortedSemesters = [...semesters].sort(compareSemesters)
   const gradeScale = degree.grade_scale?.grades || []
 
   // Theme-specific styles
