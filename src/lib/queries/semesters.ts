@@ -1,7 +1,7 @@
 import { supabase } from '../supabase'
 import type { ModuleData } from '@/components/calculator/ModuleRow'
 import { toCredits } from '@/lib/score'
-import { compareSemesters, nextSemesterIndex } from '@/lib/semesterOrder'
+import { compareSemesters } from '@/lib/semesterOrder'
 
 export type Semester = {
   id: string
@@ -52,18 +52,6 @@ export async function getSemestersForDegree(degreeId: string): Promise<SemesterW
   })).sort(compareSemesters) as SemesterWithModules[]
 }
 
-async function resolveCreateIndex(degreeId: string, semIndex: number | undefined): Promise<number> {
-  if (semIndex !== undefined) return semIndex
-
-  const { data, error } = await supabase
-    .from('semesters')
-    .select('sem_index')
-    .eq('degree_id', degreeId)
-
-  if (error) throw error
-  return nextSemesterIndex((data ?? []).map((row) => row.sem_index))
-}
-
 export async function saveSemester(
   degreeId: string,
   title: string,
@@ -72,68 +60,29 @@ export async function saveSemester(
   semIndex?: number,
   semesterId?: string
 ): Promise<SemesterWithModules> {
-  const { data: userData, error: authError } = await supabase.auth.getUser()
-  if (authError) throw authError
+  const { data, error } = await supabase.rpc('save_semester', {
+    p_degree_id: degreeId,
+    p_title: title,
+    p_modules: modules.map((mod) => ({
+      name: mod.name || 'Untitled Module',
+      credits: mod.credits,
+      grade: mod.grade,
+    })),
+    p_term: term,
+    p_sem_index: semIndex ?? null,
+    p_semester_id: semesterId ?? null,
+  })
 
-  // A missing index means "assign the next one" on create and "leave it" on edit.
-  const resolvedIndex = semesterId ? semIndex : await resolveCreateIndex(degreeId, semIndex)
+  if (error) throw error
+  if (!data) throw new Error('Semester save returned no data')
 
-  const semesterPayload: {
-    degree_id: string
-    user_id: string
-    title: string
-    term: string | null
-    sem_index?: number
-  } = {
-    degree_id: degreeId,
-    user_id: userData.user.id,
-    title,
-    term,
-  }
-  if (resolvedIndex !== undefined) {
-    semesterPayload.sem_index = resolvedIndex
-  }
-  
-  const query = semesterId 
-    ? supabase.from('semesters').update(semesterPayload).eq('id', semesterId).select().single()
-    : supabase.from('semesters').insert(semesterPayload).select().single()
-
-  const { data: semesterData, error: semesterError } = await query
-  if (semesterError) throw semesterError
-
-  // 2. Upsert/Delete Modules
-  // First, if editing, we might delete existing modules and re-insert.
-  if (semesterId) {
-    const { error: deleteError } = await supabase
-      .from('modules')
-      .delete()
-      .eq('semester_id', semesterData.id)
-    if (deleteError) throw deleteError
-  }
-
-  // 3. Insert new modules
-  const modulesPayload = modules.map((m, i) => ({
-    semester_id: semesterData.id,
-    user_id: userData.user.id,
-    name: m.name || 'Untitled Module',
-    credits: m.credits,
-    grade: m.grade,
-    position: i
-  }))
-
-  const { data: modulesData, error: modulesError } = await supabase
-    .from('modules')
-    .insert(modulesPayload)
-    .select()
-
-  if (modulesError) throw modulesError
-
+  const saved = data as SemesterWithModules
   return {
-    ...semesterData,
-    modules: modulesData
+    ...saved,
+    modules: (saved.modules ?? [])
       .map((mod) => ({ ...mod, credits: toCredits(mod.credits) }))
-      .sort((a, b) => a.position - b.position)
-  } as SemesterWithModules
+      .sort((a, b) => a.position - b.position),
+  }
 }
 
 export async function deleteSemester(semesterId: string): Promise<void> {

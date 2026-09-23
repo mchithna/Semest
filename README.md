@@ -58,4 +58,4 @@ This project is configured for seamless deployment to Vercel.
 
 ## Database Setup
 
-All database tables and Row Level Security (RLS) policies are defined in `supabase/schema.sql`. Run this file in your Supabase SQL Editor to set up the backend structure.
+All database tables, Row Level Security (RLS) policies, and the `save_semester` function are defined in `supabase/schema.sql`. Run this file in your Supabase SQL Editor to set up the backend structure. If the database already exists, run the `save_semester` block at the end of that file. Semester saves call that function.

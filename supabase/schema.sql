@@ -528,3 +528,124 @@ begin
   return v_result;
 end;
 $$;
+
+-- ─────────────────────────────────────────────────
+-- SAVE SEMESTER
+-- Replaces a semester's modules in the same transaction as the semester write.
+-- Existing projects: run this block in the Supabase SQL editor.
+-- ─────────────────────────────────────────────────
+create or replace function save_semester(
+  p_degree_id   uuid,
+  p_title       text,
+  p_modules     jsonb,
+  p_term        text default null,
+  p_sem_index   int default null,
+  p_semester_id uuid default null
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_semester_id uuid;
+  v_index       int;
+  v_result      jsonb;
+begin
+  if auth.uid() is null then
+    raise exception 'Not authenticated';
+  end if;
+
+  if p_modules is not null and jsonb_typeof(p_modules) <> 'array' then
+    raise exception 'Modules must be an array';
+  end if;
+
+  if not exists (
+    select 1 from degrees
+    where id = p_degree_id and user_id = auth.uid()
+  ) then
+    raise exception 'Degree not found or access denied';
+  end if;
+
+  -- Serialize saves for one degree so two creates cannot take the same index.
+  perform pg_advisory_xact_lock(hashtext('semest.save_semester'), hashtext(p_degree_id::text));
+
+  if p_semester_id is null then
+    if p_sem_index is null then
+      select coalesce(max(sem_index) + 1, 0)
+      into v_index
+      from semesters
+      where degree_id = p_degree_id;
+    else
+      v_index := p_sem_index;
+    end if;
+
+    insert into semesters (degree_id, user_id, title, term, sem_index)
+    values (p_degree_id, auth.uid(), p_title, p_term, v_index)
+    returning id into v_semester_id;
+  else
+    update semesters
+    set
+      title = p_title,
+      term = p_term,
+      sem_index = coalesce(p_sem_index, sem_index)
+    where id = p_semester_id
+      and user_id = auth.uid()
+      and degree_id = p_degree_id
+    returning id into v_semester_id;
+
+    if v_semester_id is null then
+      raise exception 'Semester not found or access denied';
+    end if;
+  end if;
+
+  delete from modules where semester_id = v_semester_id;
+
+  insert into modules (semester_id, user_id, name, credits, grade, position)
+  select
+    v_semester_id,
+    auth.uid(),
+    coalesce(nullif(btrim(elem->>'name'), ''), 'Untitled Module'),
+    coalesce((elem->>'credits')::numeric, 0),
+    coalesce(elem->>'grade', ''),
+    (ord - 1)::int
+  from jsonb_array_elements(coalesce(p_modules, '[]'::jsonb)) with ordinality as t(elem, ord);
+
+  select jsonb_build_object(
+    'id', s.id,
+    'degree_id', s.degree_id,
+    'user_id', s.user_id,
+    'title', s.title,
+    'term', s.term,
+    'sem_index', s.sem_index,
+    'created_at', s.created_at,
+    'updated_at', s.updated_at,
+    'modules', coalesce((
+      select jsonb_agg(
+        jsonb_build_object(
+          'id', m.id,
+          'semester_id', m.semester_id,
+          'user_id', m.user_id,
+          'name', m.name,
+          'credits', m.credits,
+          'grade', m.grade,
+          'position', m.position,
+          'created_at', m.created_at
+        )
+        order by m.position
+      )
+      from modules m
+      where m.semester_id = s.id
+    ), '[]'::jsonb)
+  )
+  into v_result
+  from semesters s
+  where s.id = v_semester_id;
+
+  return v_result;
+end;
+$$;
+
+revoke all on function public.save_semester(uuid, text, jsonb, text, integer, uuid) from public;
+revoke all on function public.save_semester(uuid, text, jsonb, text, integer, uuid) from anon;
+grant execute on function public.save_semester(uuid, text, jsonb, text, integer, uuid) to authenticated;
