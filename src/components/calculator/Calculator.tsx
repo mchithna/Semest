@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card'
 import confetti from 'canvas-confetti'
 import { ModuleRow, type ModuleData } from './ModuleRow'
 import type { GradeRow } from '@/lib/queries/gradeScales'
-import { computeScore, totalCredits } from '@/lib/score'
+import { computeScore, hasGradedWork, totalCredits } from '@/lib/score'
 import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
 import { ClassificationBadge } from '@/components/ui/ClassificationBadge'
 
@@ -30,6 +30,7 @@ export function Calculator({
 
   const score = computeScore(modules, gradeScale)
   const credits = totalCredits(modules)
+  const graded = hasGradedWork(modules, gradeScale)
 
   // Trigger confetti when score hits First Class threshold
   useEffect(() => {
@@ -95,7 +96,7 @@ export function Calculator({
 
         <div className="flex flex-col items-end gap-1">
           <span className="text-sm text-muted-foreground font-medium flex items-center gap-2">
-            GPA <ClassificationBadge score={score} />
+            GPA <ClassificationBadge score={score} graded={graded} />
           </span>
           <span className="text-4xl font-mono font-bold tracking-tight text-primary">
             <AnimatedNumber value={score} decimals={4} />

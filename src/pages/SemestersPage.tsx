@@ -3,7 +3,7 @@ import { Plus, Trash2, Edit2, Calendar } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useDegrees } from '@/hooks/useDegrees'
 import { useSemesters } from '@/hooks/useSemesters'
-import { computeScore, totalCredits } from '@/lib/score'
+import { computeScore, hasGradedWork, totalCredits } from '@/lib/score'
 import { ClassificationBadge } from '@/components/ui/ClassificationBadge'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -101,7 +101,8 @@ export default function SemestersPage() {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {semesters.map((sem) => {
-              const score = computeScore(sem.modules, degree.grade_scale?.grades || [])
+              const scale = degree.grade_scale?.grades || []
+              const score = computeScore(sem.modules, scale)
               const credits = totalCredits(sem.modules)
               
               return (
@@ -152,7 +153,7 @@ export default function SemestersPage() {
                     </div>
                     <div className="bg-muted text-primary px-3 py-1.5 rounded-lg text-sm font-mono font-bold tracking-widest flex items-center gap-2 border">
                       <span>GPA: {score.toFixed(2)}</span>
-                      <ClassificationBadge score={score} />
+                      <ClassificationBadge score={score} graded={hasGradedWork(sem.modules, scale)} />
                     </div>
                   </div>
                 </div>

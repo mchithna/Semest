@@ -21,7 +21,7 @@ export const CLASSIFICATION_META: Record<string, { label: string; badgeVariant: 
   'Second Lower': { label: 'Second Class (Lower)', badgeVariant: 'secondary', color: 'bg-amber-400 text-amber-950' },
   'General Pass': { label: 'General Pass', badgeVariant: 'outline', color: 'bg-slate-400 text-slate-950' },
   'Fail': { label: 'Fail', badgeVariant: 'destructive', color: 'bg-rose-400 text-rose-950' },
-  'Unknown': { label: 'Unknown', badgeVariant: 'outline', color: 'bg-slate-700 text-slate-300' },
+  'Unknown': { label: 'No Data', badgeVariant: 'outline', color: 'bg-slate-700 text-slate-300' },
 }
 
 export function totalCredits(modules: ModuleWithGrade[]): number {
@@ -64,11 +64,24 @@ export function computeScore(modules: ModuleWithGrade[], scale: GradeRow[]): num
   return Number((totalPoints / validCredits).toFixed(4))
 }
 
-export function classify(score: number): keyof typeof CLASSIFICATION_META {
+/** True when at least one module has a scale grade and a positive credit value. */
+export function hasGradedWork(modules: ModuleWithGrade[], scale: GradeRow[]): boolean {
+  if (scale.length === 0) return false
+  const grades = new Set(scale.map((row) => row.grade.trim().toUpperCase()))
+  return modules.some(
+    (mod) => grades.has(mod.grade.trim().toUpperCase()) && toCredits(mod.credits) > 0,
+  )
+}
+
+export function classify(score: number, graded = false): keyof typeof CLASSIFICATION_META {
   if (score >= 3.7) return 'First Class'
   if (score >= 3.3) return 'Second Upper'
   if (score >= 3.0) return 'Second Lower'
   if (score >= 2.0) return 'General Pass'
-  if (score > 0) return 'Fail'
+  if (score > 0 || graded) return 'Fail'
   return 'Unknown'
+}
+
+export function standingLabel(score: number, graded: boolean): string {
+  return CLASSIFICATION_META[classify(score, graded)].label
 }

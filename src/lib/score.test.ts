@@ -90,5 +90,6 @@ describe('Score Logic', () => {
     expect(classify(2.5)).toBe('General Pass')
     expect(classify(1.5)).toBe('Fail')
     expect(classify(0)).toBe('Unknown')
+    expect(classify(0, true)).toBe('Fail')
   })
 })

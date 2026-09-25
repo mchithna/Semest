@@ -59,7 +59,7 @@ describe('Analytics Utility', () => {
     expect(metrics.earnedCredits).toBe(13)
     expect(metrics.highestGpa).toBe(4.1)
     expect(metrics.cgpa).toBeCloseTo(3.7385, 3)
-    expect(metrics.standing).toBe('First Class Honors')
+    expect(metrics.standing).toBe('First Class')
   })
 
   it('keeps a numeric CGPA when module credits arrive as strings', () => {
@@ -85,7 +85,7 @@ describe('Analytics Utility', () => {
     expect(metrics.cgpa).toBeCloseTo(3.4286, 3)
   })
 
-  it('correctly classifies Academic Warning for low CGPA', () => {
+  it('classifies a low CGPA as Fail', () => {
     const semesters: SemesterWithModules[] = [
       {
         id: 'sem-1',
@@ -105,10 +105,47 @@ describe('Analytics Utility', () => {
     // GPA = 6 / 6 = 1.0
     const metrics = getCumulativeMetrics(semesters, gradeScale)
     expect(metrics.cgpa).toBe(1.0)
-    expect(metrics.standing).toBe('Academic Warning')
+    expect(metrics.standing).toBe('Fail')
   })
 
-  it('correctly classifies Upper Second Class standing', () => {
+  it('classifies an all-F record as Fail and ungraded work as No Data', () => {
+    const failed: SemesterWithModules[] = [
+      {
+        id: 'sem-1',
+        degree_id: 'deg-1',
+        user_id: 'user-1',
+        title: 'Semester 1',
+        term: null,
+        sem_index: 1,
+        created_at: '',
+        updated_at: '',
+        modules: [
+          { id: 'm1', semester_id: 'sem-1', user_id: 'user-1', name: 'Subject 1', credits: 3, grade: 'F', position: 0, created_at: '' },
+        ],
+      },
+    ]
+    expect(getCumulativeMetrics(failed, gradeScale).cgpa).toBe(0)
+    expect(getCumulativeMetrics(failed, gradeScale).standing).toBe('Fail')
+
+    const ungraded: SemesterWithModules[] = [
+      {
+        id: 'sem-1',
+        degree_id: 'deg-1',
+        user_id: 'user-1',
+        title: 'Semester 1',
+        term: null,
+        sem_index: 1,
+        created_at: '',
+        updated_at: '',
+        modules: [
+          { id: 'm1', semester_id: 'sem-1', user_id: 'user-1', name: 'Subject 1', credits: 3, grade: 'N/A', position: 0, created_at: '' },
+        ],
+      },
+    ]
+    expect(getCumulativeMetrics(ungraded, gradeScale).standing).toBe('No Data')
+  })
+
+  it('uses the same second-class cuts as the semester badge', () => {
     const semesters: SemesterWithModules[] = [
       {
         id: 'sem-1',
@@ -128,6 +165,20 @@ describe('Analytics Utility', () => {
     // GPA = (3*3.0 + 3*4.0) / 6 = 21 / 6 = 3.5
     const metrics = getCumulativeMetrics(semesters, gradeScale)
     expect(metrics.cgpa).toBe(3.5)
-    expect(metrics.standing).toBe('Upper Second Class')
+    expect(metrics.standing).toBe('Second Class (Upper)')
+
+    const lower = getCumulativeMetrics(
+      [{
+        ...semesters[0],
+        modules: [
+          { id: 'm1', semester_id: 'sem-1', user_id: 'user-1', name: 'Subject 1', credits: 3, grade: 'B', position: 0, created_at: '' },
+          { id: 'm2', semester_id: 'sem-1', user_id: 'user-1', name: 'Subject 2', credits: 3, grade: 'C', position: 1, created_at: '' },
+        ],
+      }],
+      gradeScale,
+    )
+    // GPA = (3*3.0 + 3*2.0) / 6 = 2.5 is a pass. 3.0 exactly is the lower cut.
+    expect(lower.cgpa).toBe(2.5)
+    expect(lower.standing).toBe('General Pass')
   })
 })

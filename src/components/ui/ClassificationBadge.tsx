@@ -3,10 +3,11 @@ import { CLASSIFICATION_META, classify } from '@/lib/score'
 
 interface ClassificationBadgeProps {
   score: number | string
+  graded?: boolean
 }
 
-export function ClassificationBadge({ score }: ClassificationBadgeProps) {
-  const classification = typeof score === 'number' ? classify(score) : score
+export function ClassificationBadge({ score, graded = false }: ClassificationBadgeProps) {
+  const classification = typeof score === 'number' ? classify(score, graded) : score
   const meta = CLASSIFICATION_META[classification] || CLASSIFICATION_META['Unknown']
 
   return (

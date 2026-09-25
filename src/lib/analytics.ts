@@ -1,6 +1,6 @@
 import type { SemesterWithModules } from './queries/semesters'
 import type { GradeRow } from './queries/gradeScales'
-import { computeScore, earnedCredits } from './score'
+import { computeScore, earnedCredits, hasGradedWork, standingLabel } from './score'
 
 export function getCumulativeMetrics(semesters: SemesterWithModules[], gradeScale: GradeRow[]) {
   const allModules = semesters.flatMap(sem => sem.modules)
@@ -16,12 +16,7 @@ export function getCumulativeMetrics(semesters: SemesterWithModules[], gradeScal
     }
   })
 
-  let standing = 'Good Standing'
-  if (cgpa >= 3.7) standing = 'First Class Honors'
-  else if (cgpa >= 3.0) standing = 'Upper Second Class'
-  else if (cgpa >= 2.0) standing = 'Lower Second Class'
-  else if (cgpa > 0 && cgpa < 2.0) standing = 'Academic Warning'
-  else standing = 'No Data'
+  const standing = standingLabel(cgpa, hasGradedWork(allModules, gradeScale))
 
   return {
     cgpa,
