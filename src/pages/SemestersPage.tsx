@@ -3,7 +3,7 @@ import { Plus, Trash2, Edit2, Calendar } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useDegrees } from '@/hooks/useDegrees'
 import { useSemesters } from '@/hooks/useSemesters'
-import { computeScore, hasGradedWork, totalCredits } from '@/lib/score'
+import { attemptedCredits, computeScore, earnedCredits, hasGradedWork, honorsApply } from '@/lib/score'
 import { ClassificationBadge } from '@/components/ui/ClassificationBadge'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -103,7 +103,8 @@ export default function SemestersPage() {
             {semesters.map((sem) => {
               const scale = degree.grade_scale?.grades || []
               const score = computeScore(sem.modules, scale)
-              const credits = totalCredits(sem.modules)
+              const earned = earnedCredits(sem.modules, scale)
+              const attempted = attemptedCredits(sem.modules, scale)
               
               return (
                 <div 
@@ -149,11 +150,13 @@ export default function SemestersPage() {
 
                   <div className="mt-auto pt-4 border-t flex justify-between items-center">
                     <div className="text-xs font-mono text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                      Credits: <span className="text-foreground">{credits.toFixed(1)}</span>
+                      <span className="text-foreground">{earned.toFixed(1)}</span> passing / <span className="text-foreground">{attempted.toFixed(1)}</span> graded
                     </div>
                     <div className="bg-muted text-primary px-3 py-1.5 rounded-lg text-sm font-mono font-bold tracking-widest flex items-center gap-2 border">
                       <span>GPA: {score.toFixed(2)}</span>
-                      <ClassificationBadge score={score} graded={hasGradedWork(sem.modules, scale)} />
+                      {honorsApply(scale) && (
+                        <ClassificationBadge score={score} graded={hasGradedWork(sem.modules, scale)} />
+                      )}
                     </div>
                   </div>
                 </div>

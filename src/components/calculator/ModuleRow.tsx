@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/select"
 import { Trash2 } from "lucide-react"
 import type { GradeRow } from "@/lib/queries/gradeScales"
+import { isUngradedGrade, UNGRADED_GRADE } from "@/lib/score"
 
 export type ModuleData = {
   id: string
@@ -54,13 +55,14 @@ export function ModuleRow({ module, gradeScale, onChange, onRemove }: ModuleRowP
           step={0.5}
         />
         <Select
-          value={module.grade}
+          value={!module.grade || isUngradedGrade(module.grade) ? UNGRADED_GRADE : module.grade}
           onValueChange={(val) => onChange(module.id, 'grade', val)}
         >
-          <SelectTrigger className="flex-1 sm:w-[100px]">
+          <SelectTrigger className="flex-1 sm:w-[120px]">
             <SelectValue placeholder="Grade" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value={UNGRADED_GRADE}>Not graded</SelectItem>
             {gradeScale.map((row) => (
               <SelectItem key={row.grade} value={row.grade}>
                 {row.grade} ({row.points})

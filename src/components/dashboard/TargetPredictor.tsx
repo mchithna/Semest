@@ -82,6 +82,7 @@ export function TargetPredictor({ currentCgpa, earnedCredits, gradeScale }: Targ
         </div>
         <div className="space-y-2">
           <Label className="text-xs font-mono text-muted-foreground uppercase tracking-widest">Remaining Credits</Label>
+          <p className="text-[11px] font-mono text-muted-foreground">Uses graded credits, including fails, as the current base.</p>
           <Input 
             type="number" 
             step="1" 

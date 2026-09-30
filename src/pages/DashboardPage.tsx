@@ -161,14 +161,14 @@ export default function DashboardPage() {
                   <BookOpen className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-sm font-mono text-muted-foreground uppercase tracking-widest">Earned Credits</p>
+                  <p className="text-sm font-mono text-muted-foreground uppercase tracking-widest">Passing Credits</p>
                   <h3 className="text-3xl font-mono font-bold text-foreground mt-1">
                     <AnimatedNumber value={metrics.earnedCredits} decimals={1} />
                   </h3>
                 </div>
               </div>
               <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest">
-                Total completed credits
+                {metrics.attemptedCredits.toFixed(1)} graded, including fails
               </p>
             </Card>
 
@@ -199,12 +199,12 @@ export default function DashboardPage() {
                 <div>
                   <p className="text-sm font-mono text-muted-foreground uppercase tracking-widest">Standing</p>
                   <h3 className="text-lg font-mono font-bold text-foreground mt-3 truncate" title={metrics.standing}>
-                    {metrics.standing}
+                    {metrics.standing || '—'}
                   </h3>
                 </div>
               </div>
               <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest">
-                Current academic status
+                {metrics.standing ? 'Current academic status' : 'This scale has no class band'}
               </p>
             </Card>
           </div>
@@ -243,7 +243,7 @@ export default function DashboardPage() {
             ) : (
               <TargetPredictor 
                 currentCgpa={metrics.cgpa}
-                earnedCredits={metrics.earnedCredits}
+                earnedCredits={metrics.attemptedCredits}
                 gradeScale={activeDegree?.grade_scale?.grades || []}
               />
             )}

@@ -4,12 +4,7 @@ import { Calculator } from '@/components/calculator/Calculator'
 import type { ModuleData } from '@/components/calculator/ModuleRow'
 import { Button } from '@/components/ui/button'
 import { GraduationCap, ArrowRight } from 'lucide-react'
-const DEFAULT_GUEST_SCALE = [
-  { grade: "A+", points: 4.0 }, { grade: "A", points: 4.0 }, { grade: "A-", points: 3.7 },
-  { grade: "B+", points: 3.3 }, { grade: "B", points: 3.0 }, { grade: "B-", points: 2.7 },
-  { grade: "C+", points: 2.3 }, { grade: "C", points: 2.0 }, { grade: "C-", points: 1.7 },
-  { grade: "D+", points: 1.3 }, { grade: "D", points: 1.0 }, { grade: "F", points: 0.0 }
-]
+import { GUEST_SCALE, loadGuestDraft, saveGuestDraft } from '@/lib/guestDraft'
 
 export default function LandingPage() {
   const navigate = useNavigate()
@@ -20,7 +15,7 @@ export default function LandingPage() {
     const saved = sessionStorage.getItem('semest_guest_draft')
     if (saved) {
       try {
-        setInitialModules(JSON.parse(saved))
+        setInitialModules(loadGuestDraft(saved)?.modules ?? [])
       } catch (e) {
         // ignore
       }
@@ -28,7 +23,7 @@ export default function LandingPage() {
   }, [])
 
   const handleGuestSave = (modules: ModuleData[]) => {
-    sessionStorage.setItem('semest_guest_draft', JSON.stringify(modules))
+    saveGuestDraft(modules)
     navigate('/auth')
   }
 
@@ -69,7 +64,7 @@ export default function LandingPage() {
             <Calculator 
               key={initialModules.length ? 'loaded' : 'empty'}
               initialModules={initialModules}
-              gradeScale={DEFAULT_GUEST_SCALE}
+              gradeScale={GUEST_SCALE}
               onSave={handleGuestSave}
             />
           </div>

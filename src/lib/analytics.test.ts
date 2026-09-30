@@ -143,6 +143,10 @@ describe('Analytics Utility', () => {
       },
     ]
     expect(getCumulativeMetrics(ungraded, gradeScale).standing).toBe('No Data')
+
+    const wideScale = [{ grade: 'A', points: 10 }]
+    const wide = getCumulativeMetrics(failed, wideScale)
+    expect(wide.standing).toBe('')
   })
 
   it('uses the same second-class cuts as the semester badge', () => {

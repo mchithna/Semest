@@ -71,7 +71,7 @@ export function GradeScaleEditor({
     
     for (const g of grades) {
       if (!g.grade.trim()) return toast.error('Grade names cannot be empty')
-      if (g.points < 0 || g.points > 4.5) return toast.error('Points must be between 0 and 4.5')
+      if (g.points < 0 || g.points > 100) return toast.error('Points must be between 0 and 100')
     }
 
     setIsSaving(true)
@@ -143,7 +143,7 @@ export function GradeScaleEditor({
                           type="number"
                           step="0.1"
                           min="0"
-                          max="4.5"
+                          max="100"
                           value={row.points}
                           onChange={(e) => updateRow(index, 'points', parseFloat(e.target.value) || 0)}
                           className="h-8 bg-background border-border text-foreground rounded-sm disabled:opacity-75 disabled:cursor-not-allowed"

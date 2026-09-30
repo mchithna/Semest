@@ -10,7 +10,7 @@ import {
 } from 'recharts'
 import type { SemesterWithModules } from '@/lib/queries/semesters'
 import type { GradeRow } from '@/lib/queries/gradeScales'
-import { computeScore, earnedCredits } from '@/lib/score'
+import { computeScore, hasGradedWork } from '@/lib/score'
 import { compareSemesters } from '@/lib/semesterOrder'
 
 type GpaTrendChartProps = {
@@ -22,7 +22,7 @@ export function GpaTrendChart({ semesters, gradeScale }: GpaTrendChartProps) {
   const data = useMemo(() => {
     // Sort semesters to ensure chronological order if not already
     const sorted = [...semesters].sort(compareSemesters)
-    const validSemesters = sorted.filter(sem => earnedCredits(sem.modules, gradeScale) > 0)
+    const validSemesters = sorted.filter(sem => hasGradedWork(sem.modules, gradeScale))
     
     return validSemesters.map((sem, i) => {
       const gpa = computeScore(sem.modules, gradeScale)

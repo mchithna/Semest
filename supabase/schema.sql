@@ -210,13 +210,17 @@ insert into grade_scales (user_id, label, is_system, grades) values
   {"grade":"C+","points":2.3},{"grade":"C","points":2.0},{"grade":"C-","points":1.7},
   {"grade":"D+","points":1.3},{"grade":"D","points":1.0},{"grade":"F","points":0.0}
 ]'::jsonb),
-(null, 'Sri Lankan UGC (Z-Score)', true, '[
+(null, 'Sri Lankan UGC GPA', true, '[
   {"grade":"A+","points":4.2},{"grade":"A","points":4.0},{"grade":"A-","points":3.7},
   {"grade":"B+","points":3.3},{"grade":"B","points":3.0},{"grade":"B-","points":2.7},
   {"grade":"C+","points":2.3},{"grade":"C","points":2.0},{"grade":"C-","points":1.7},
   {"grade":"D+","points":1.3},{"grade":"D","points":1.0},{"grade":"F","points":0.0}
 ]'::jsonb)
 on conflict (label) where is_system = true do nothing;
+
+update grade_scales
+set label = 'Sri Lankan UGC GPA'
+where is_system = true and label = 'Sri Lankan UGC (Z-Score)';
 
 -- ─────────────────────────────────────────────────
 -- RLS — DEGREES
@@ -429,7 +433,7 @@ begin
     returning id into v_new_sem_id;
 
     insert into modules (semester_id, user_id, name, credits, grade, position)
-    select v_new_sem_id, auth.uid(), name, credits, 'N/A', position
+    select v_new_sem_id, auth.uid(), name, credits, 'Not graded', position
     from preset_modules
     where preset_semester_id = v_sem_record.id
     order by position;

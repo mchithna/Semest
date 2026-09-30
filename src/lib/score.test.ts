@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { computeScore, totalCredits, earnedCredits, classify, toCredits, type ModuleWithGrade } from './score'
+import { attemptedCredits, computeScore, totalCredits, earnedCredits, ungradedCredits, classify, toCredits, type ModuleWithGrade } from './score'
 import type { GradeRow } from './queries/gradeScales'
 
 describe('Score Logic', () => {
@@ -28,6 +28,18 @@ describe('Score Logic', () => {
       { credits: 2, grade: 'Pending' }, // Invalid grade, not earned yet
     ]
     expect(earnedCredits(modules, scale)).toBe(7)
+  })
+
+  it('counts a failing grade as attempted, not earned', () => {
+    const modules: ModuleWithGrade[] = [
+      { credits: 3, grade: 'A' },
+      { credits: 4, grade: 'F' },
+      { credits: 2, grade: 'Not graded' },
+    ]
+    expect(earnedCredits(modules, scale)).toBe(3)
+    expect(attemptedCredits(modules, scale)).toBe(7)
+    expect(ungradedCredits(modules, scale)).toBe(2)
+    expect(computeScore(modules, scale)).toBeCloseTo(12 / 7, 4)
   })
 
   it('computes weighted average GPA correctly', () => {
