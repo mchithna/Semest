@@ -197,8 +197,8 @@ create policy "Anyone can read system scales"
 drop policy if exists "Users manage own scales" on grade_scales;
 create policy "Users manage own scales"
   on grade_scales for all
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
+  using (auth.uid() = user_id and is_system = false)
+  with check (auth.uid() = user_id and is_system = false);
 
 -- ─────────────────────────────────────────────────
 -- SEED — SYSTEM GRADE SCALES
@@ -327,7 +327,7 @@ create or replace function publish_preset(
   p_is_public   boolean default true
 )
 returns text
-language plpgsql security definer as $$
+language plpgsql security definer set search_path = public as $$
 declare
   v_code          text;
   v_preset_id     uuid;
@@ -380,7 +380,7 @@ create or replace function clone_preset(
   p_degree_title      text default null
 )
 returns uuid
-language plpgsql security definer as $$
+language plpgsql security definer set search_path = public as $$
 declare
   v_preset          record;
   v_degree_id       uuid;
@@ -452,7 +452,7 @@ create or replace function sync_preset(
   p_degree_id uuid
 )
 returns void
-language plpgsql security definer as $$
+language plpgsql security definer set search_path = public as $$
 declare
   v_scale_snap  jsonb;
   v_scale_id    uuid;
@@ -495,7 +495,7 @@ $$;
 -- Get Preset with Scale
 create or replace function get_preset_with_scale(p_code text)
 returns jsonb
-language plpgsql security definer as $$
+language plpgsql security definer set search_path = public as $$
 declare
   v_result jsonb;
 begin
@@ -603,6 +603,14 @@ begin
     end if;
   end if;
 
+  if exists (
+    select 1
+    from jsonb_array_elements(coalesce(p_modules, '[]'::jsonb)) elem
+    where coalesce((elem->>'credits')::numeric, 0) <= 0
+  ) then
+    raise exception 'Credits must be greater than 0';
+  end if;
+
   delete from modules where semester_id = v_semester_id;
 
   insert into modules (semester_id, user_id, name, credits, grade, position)
@@ -610,7 +618,7 @@ begin
     v_semester_id,
     auth.uid(),
     coalesce(nullif(btrim(elem->>'name'), ''), 'Untitled Module'),
-    coalesce((elem->>'credits')::numeric, 0),
+    (elem->>'credits')::numeric,
     coalesce(elem->>'grade', ''),
     (ord - 1)::int
   from jsonb_array_elements(coalesce(p_modules, '[]'::jsonb)) with ordinality as t(elem, ord);
@@ -653,3 +661,60 @@ $$;
 revoke all on function public.save_semester(uuid, text, jsonb, text, integer, uuid) from public;
 revoke all on function public.save_semester(uuid, text, jsonb, text, integer, uuid) from anon;
 grant execute on function public.save_semester(uuid, text, jsonb, text, integer, uuid) to authenticated;
+
+-- ─────────────────────────────────────────────────
+-- SAFETY
+-- Renumber duplicate semester indexes, then lock the rules.
+-- Existing projects: run this block in the Supabase SQL editor.
+-- ─────────────────────────────────────────────────
+update grade_scales
+set is_system = false
+where is_system = true and user_id is not null;
+
+alter table grade_scales drop constraint if exists grade_scales_system_owner;
+alter table grade_scales
+  add constraint grade_scales_system_owner
+  check ((is_system = true and user_id is null) or (is_system = false and user_id is not null));
+
+update modules set credits = 0.5 where credits <= 0;
+update preset_modules set credits = 0.5 where credits <= 0;
+
+alter table modules drop constraint if exists modules_credits_positive;
+alter table modules add constraint modules_credits_positive check (credits > 0);
+
+alter table preset_modules drop constraint if exists preset_modules_credits_positive;
+alter table preset_modules add constraint preset_modules_credits_positive check (credits > 0);
+
+with ranked as (
+  select
+    id,
+    (row_number() over (partition by degree_id order by sem_index, created_at, id) - 1) as new_index
+  from semesters
+)
+update semesters s
+set sem_index = ranked.new_index
+from ranked
+where s.id = ranked.id
+  and s.sem_index is distinct from ranked.new_index;
+
+create unique index if not exists semesters_degree_sem_index_unique
+  on semesters (degree_id, sem_index);
+
+revoke all on function public.generate_preset_code() from public;
+revoke all on function public.generate_preset_code() from anon;
+grant execute on function public.generate_preset_code() to authenticated;
+
+revoke all on function public.publish_preset(uuid, text, text, text, boolean) from public;
+revoke all on function public.publish_preset(uuid, text, text, text, boolean) from anon;
+grant execute on function public.publish_preset(uuid, text, text, text, boolean) to authenticated;
+
+revoke all on function public.clone_preset(text, uuid, text) from public;
+revoke all on function public.clone_preset(text, uuid, text) from anon;
+grant execute on function public.clone_preset(text, uuid, text) to authenticated;
+
+revoke all on function public.sync_preset(uuid, uuid) from public;
+revoke all on function public.sync_preset(uuid, uuid) from anon;
+grant execute on function public.sync_preset(uuid, uuid) to authenticated;
+
+revoke all on function public.get_preset_with_scale(text) from public;
+grant execute on function public.get_preset_with_scale(text) to anon, authenticated;

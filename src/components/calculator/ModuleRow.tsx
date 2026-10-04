@@ -51,7 +51,7 @@ export function ModuleRow({ module, gradeScale, onChange, onRemove }: ModuleRowP
           onChange={(e) => onChange(module.id, 'credits', parseFloat(e.target.value) || 0)}
           placeholder="Cr"
           className="w-[80px]"
-          min={0}
+          min={0.5}
           step={0.5}
         />
         <Select
