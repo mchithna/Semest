@@ -1,17 +1,22 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   getPublicPresets,
   getMyPresets,
   getPresetByCode,
   publishPreset,
   clonePreset,
-  syncPreset
+  syncPreset,
+  updatePreset,
+  deletePreset
 } from '../lib/queries/presets'
 
-export function usePublicPresets() {
-  return useQuery({
-    queryKey: ['presets', 'public'],
-    queryFn: getPublicPresets
+export function usePublicPresets(search = '') {
+  return useInfiniteQuery({
+    queryKey: ['presets', 'public', search],
+    queryFn: ({ pageParam }) => getPublicPresets(pageParam, search),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, _pages, lastPageParam) =>
+      lastPage.hasMore ? lastPageParam + 1 : undefined,
   })
 }
 
@@ -51,6 +56,29 @@ export function useApplyPreset() {
       queryClient.invalidateQueries({ queryKey: ['degrees'] })
       queryClient.invalidateQueries({ queryKey: ['presets'] })
       queryClient.invalidateQueries({ queryKey: ['semesters'] })
+    }
+  })
+}
+
+export function useUpdatePreset() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (params: { presetId: string; title: string; description?: string; institution?: string; isPublic: boolean }) =>
+      updatePreset(params.presetId, params),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['presets'] })
+      queryClient.invalidateQueries({ queryKey: ['preset'] })
+    }
+  })
+}
+
+export function useDeletePreset() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (presetId: string) => deletePreset(presetId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['presets'] })
+      queryClient.invalidateQueries({ queryKey: ['preset'] })
     }
   })
 }

@@ -133,21 +133,29 @@ export default function PresetDetailPage() {
             )}
           </div>
           <div className="flex flex-col sm:flex-row md:flex-col gap-3 min-w-[200px] w-full md:w-auto">
-            <Button 
-              onClick={handleCopyLink}
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-mono font-bold h-12 transition-colors"
-            >
-              {isLinkCopied ? <Check className="w-4 h-4 mr-2" /> : <Share2 className="w-4 h-4 mr-2" />}
-              {isLinkCopied ? 'Link Copied!' : 'Share Link'}
-            </Button>
-            <Button 
-              onClick={handleCopyCode}
-              variant="outline"
-              className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground font-mono font-bold h-12 transition-colors"
-            >
-              {isCopied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
-              {isCopied ? 'Code Copied!' : `Code: ${preset.code}`}
-            </Button>
+            {preset.is_public ? (
+              <>
+                <Button 
+                  onClick={handleCopyLink}
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-mono font-bold h-12 transition-colors"
+                >
+                  {isLinkCopied ? <Check className="w-4 h-4 mr-2" /> : <Share2 className="w-4 h-4 mr-2" />}
+                  {isLinkCopied ? 'Link Copied!' : 'Share Link'}
+                </Button>
+                <Button 
+                  onClick={handleCopyCode}
+                  variant="outline"
+                  className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground font-mono font-bold h-12 transition-colors"
+                >
+                  {isCopied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
+                  {isCopied ? 'Code Copied!' : `Code: ${preset.code}`}
+                </Button>
+              </>
+            ) : (
+              <p className="font-mono text-sm text-muted-foreground">
+                Private preset. Code {preset.code} is not shared publicly.
+              </p>
+            )}
           </div>
         </div>
 

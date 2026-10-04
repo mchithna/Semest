@@ -425,6 +425,9 @@ begin
     v_degree_id := p_target_degree_id;
     select coalesce(max(sem_index) + 1, 0) into v_next_sem_index
     from semesters where degree_id = v_degree_id;
+    if v_scale_id is not null then
+      update degrees set grade_scale_id = v_scale_id where id = v_degree_id;
+    end if;
   end if;
 
   for v_sem_record in select * from preset_semesters where preset_id = v_preset.id order by sem_index loop

@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, BookTemplate, Loader2, ArrowLeft, Share2, Check, ExternalLink, RefreshCw } from 'lucide-react'
+import { Plus, BookTemplate, Loader2, ArrowLeft, Share2, Check, ExternalLink, RefreshCw, Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useMyPresets, useSyncPreset } from '@/hooks/usePresets'
+import { useDeletePreset, useMyPresets, useSyncPreset, useUpdatePreset } from '@/hooks/usePresets'
 import { useDegrees } from '@/hooks/useDegrees'
 import { toast } from 'sonner'
 
@@ -13,8 +14,15 @@ export default function MyPresetsPage() {
   const { data: presets, isLoading } = useMyPresets()
   const { degrees } = useDegrees()
   const syncPreset = useSyncPreset()
+  const updatePreset = useUpdatePreset()
+  const deletePreset = useDeletePreset()
 
   const [syncPresetId, setSyncPresetId] = useState<string | null>(null)
+  const [editPresetId, setEditPresetId] = useState<string | null>(null)
+  const [editTitle, setEditTitle] = useState('')
+  const [editDescription, setEditDescription] = useState('')
+  const [editInstitution, setEditInstitution] = useState('')
+  const [editPublic, setEditPublic] = useState(true)
   const [syncDegreeId, setSyncDegreeId] = useState<string>('')
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
 
@@ -118,20 +126,39 @@ export default function MyPresetsPage() {
                       Sync
                     </Button>
 
-                    <Button 
+                    <Button
                       variant="outline"
                       size="sm"
-                      onClick={(e) => handleShareLink(e, preset.code)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setEditPresetId(preset.id)
+                        setEditTitle(preset.title)
+                        setEditDescription(preset.description || '')
+                        setEditInstitution(preset.institution || '')
+                        setEditPublic(preset.is_public)
+                      }}
                       className="border-border text-foreground hover:text-primary hover:border-primary transition-colors text-xs font-mono px-3"
-                      title="Share Preset Link"
                     >
-                      {copiedCode === preset.code ? (
-                        <Check className="w-3.5 h-3.5 text-emerald-400 mr-1" />
-                      ) : (
-                        <Share2 className="w-3.5 h-3.5 mr-1" />
-                      )}
-                      Share
+                      <Pencil className="w-3.5 h-3.5 mr-1" />
+                      Edit
                     </Button>
+
+                    {preset.is_public && (
+                      <Button 
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => handleShareLink(e, preset.code)}
+                        className="border-border text-foreground hover:text-primary hover:border-primary transition-colors text-xs font-mono px-3"
+                        title="Share Preset Link"
+                      >
+                        {copiedCode === preset.code ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-400 mr-1" />
+                        ) : (
+                          <Share2 className="w-3.5 h-3.5 mr-1" />
+                        )}
+                        Share
+                      </Button>
+                    )}
 
                     <Button 
                       variant="ghost"
@@ -217,6 +244,73 @@ export default function MyPresetsPage() {
                 {syncPreset.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                 Sync Preset
               </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editPresetId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
+          <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md shadow-2xl space-y-4">
+            <h2 className="text-xl font-mono font-bold text-foreground">Edit preset</h2>
+            <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} placeholder="Title" className="font-mono" />
+            <Input value={editInstitution} onChange={(e) => setEditInstitution(e.target.value)} placeholder="Institution" className="font-mono" />
+            <textarea
+              value={editDescription}
+              onChange={(e) => setEditDescription(e.target.value)}
+              placeholder="Description"
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm font-mono min-h-[80px]"
+            />
+            <label className="flex items-center gap-2 font-mono text-sm text-muted-foreground">
+              <input type="checkbox" checked={editPublic} onChange={(e) => setEditPublic(e.target.checked)} className="accent-primary" />
+              Public
+            </label>
+            <div className="flex justify-between gap-3 pt-2">
+              <Button
+                variant="ghost"
+                className="text-destructive font-mono"
+                disabled={deletePreset.isPending}
+                onClick={() => {
+                  if (!confirm('Delete this preset? The share code will stop working.')) return
+                  deletePreset.mutate(editPresetId, {
+                    onSuccess: () => {
+                      toast.success('Preset deleted')
+                      setEditPresetId(null)
+                    },
+                    onError: (err: any) => toast.error(err.message || 'Failed to delete preset'),
+                  })
+                }}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </Button>
+              <div className="flex gap-2">
+                <Button variant="ghost" className="font-mono" onClick={() => setEditPresetId(null)}>Cancel</Button>
+                <Button
+                  className="font-mono"
+                  disabled={!editTitle.trim() || updatePreset.isPending}
+                  onClick={() => {
+                    updatePreset.mutate(
+                      {
+                        presetId: editPresetId,
+                        title: editTitle.trim(),
+                        description: editDescription,
+                        institution: editInstitution,
+                        isPublic: editPublic,
+                      },
+                      {
+                        onSuccess: () => {
+                          toast.success('Preset updated')
+                          setEditPresetId(null)
+                        },
+                        onError: (err: any) => toast.error(err.message || 'Failed to update preset'),
+                      }
+                    )
+                  }}
+                >
+                  Save
+                </Button>
+              </div>
             </div>
           </div>
         </div>

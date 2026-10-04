@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search, Globe, Users, FileText, ArrowRight, Share2, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -12,23 +12,11 @@ import { toast } from 'sonner'
 export default function PresetsPage() {
   const navigate = useNavigate()
   const { session } = useAuth()
-  const { data: presets, isLoading } = usePublicPresets()
   const [searchQuery, setSearchQuery] = useState('')
   const [codeQuery, setCodeQuery] = useState('')
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
-
-  const filteredPresets = useMemo(() => {
-    if (!presets) return []
-    if (!searchQuery.trim()) return presets
-    const lowerQuery = searchQuery.trim().toLowerCase()
-    return presets.filter(p => {
-      const titleMatch = p.title ? p.title.toLowerCase().includes(lowerQuery) : false
-      const instMatch = p.institution ? p.institution.toLowerCase().includes(lowerQuery) : false
-      const descMatch = p.description ? p.description.toLowerCase().includes(lowerQuery) : false
-      const codeMatch = p.code ? p.code.toLowerCase().includes(lowerQuery) : false
-      return titleMatch || instMatch || descMatch || codeMatch
-    })
-  }, [presets, searchQuery])
+  const { data, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } = usePublicPresets(searchQuery)
+  const filteredPresets = data?.pages.flatMap((page) => page.presets) ?? []
 
   const handleCodeSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -166,6 +154,19 @@ export default function PresetsPage() {
                 </div>
               </Card>
             ))}
+          </div>
+        )}
+
+        {hasNextPage && (
+          <div className="flex justify-center">
+            <Button
+              variant="outline"
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              className="font-mono uppercase tracking-widest"
+            >
+              {isFetchingNextPage ? 'Loading…' : 'Load more'}
+            </Button>
           </div>
         )}
       </div>
