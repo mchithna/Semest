@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -24,6 +24,12 @@ export default function AuthPage() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin')
   const [showPassword, setShowPassword] = useState(false)
+  const [confirmEmail, setConfirmEmail] = useState<string | null>(null)
+  const [mode, setMode] = useState<'auth' | 'forgot' | 'recovery'>('auth')
+  const [resetEmail, setResetEmail] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [resetSent, setResetSent] = useState(false)
+  const [busy, setBusy] = useState(false)
 
   const {
     register,
@@ -59,14 +65,56 @@ export default function AuthPage() {
     await redirectAfterSignIn()
   }
 
+  useEffect(() => {
+    const { data } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') setMode('recovery')
+    })
+    return () => data.subscription.unsubscribe()
+  }, [])
+
   const onSignUp = async (data: FormData) => {
-    const { error } = await signUp(data.email, data.password)
+    const { error, needsConfirmation } = await signUp(data.email, data.password)
     if (error) {
       toast.error(error.message)
       return
     }
-    // New user — always go to onboarding
+    if (needsConfirmation) {
+      setConfirmEmail(data.email)
+      return
+    }
     navigate('/onboarding')
+  }
+
+  const sendReset = async (event: React.FormEvent) => {
+    event.preventDefault()
+    setBusy(true)
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+      redirectTo: `${window.location.origin}/auth`,
+    })
+    setBusy(false)
+    if (error) {
+      toast.error(error.message)
+      return
+    }
+    setResetSent(true)
+  }
+
+  const saveNewPassword = async (event: React.FormEvent) => {
+    event.preventDefault()
+    if (newPassword.length < 6) {
+      toast.error('Password must be at least 6 characters')
+      return
+    }
+    setBusy(true)
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    setBusy(false)
+    if (error) {
+      toast.error(error.message)
+      return
+    }
+    toast.success('Password updated')
+    setMode('auth')
+    navigate('/dashboard')
   }
 
   return (
@@ -89,6 +137,44 @@ export default function AuthPage() {
 
         {/* Card */}
         <div className="bg-card border border-border rounded-xl p-8 shadow-2xl">
+          {confirmEmail && (
+            <div className="space-y-4 text-center">
+              <h2 className="font-mono text-sm uppercase tracking-widest text-foreground">Check your email</h2>
+              <p className="text-sm text-muted-foreground font-mono">
+                We sent a confirmation link to {confirmEmail}. Open it, then sign in.
+              </p>
+              <Button variant="outline" className="font-mono" onClick={() => setConfirmEmail(null)}>Back to sign in</Button>
+            </div>
+          )}
+
+          {mode === 'forgot' && !confirmEmail && (
+            <form onSubmit={sendReset} className="space-y-5">
+              <h2 className="font-mono text-sm uppercase tracking-widest text-foreground">Reset password</h2>
+              {resetSent ? (
+                <p className="text-sm text-muted-foreground font-mono">If that email has an account, a reset link is on its way.</p>
+              ) : (
+                <Input type="email" required value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} placeholder="you@university.edu" className="font-mono" />
+              )}
+              {!resetSent && (
+                <Button type="submit" disabled={busy} className="w-full font-mono uppercase tracking-widest text-xs">
+                  {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send reset link'}
+                </Button>
+              )}
+              <Button type="button" variant="ghost" className="w-full font-mono" onClick={() => setMode('auth')}>Back</Button>
+            </form>
+          )}
+
+          {mode === 'recovery' && !confirmEmail && (
+            <form onSubmit={saveNewPassword} className="space-y-5">
+              <h2 className="font-mono text-sm uppercase tracking-widest text-foreground">Choose a new password</h2>
+              <Input type="password" required value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password" className="font-mono" />
+              <Button type="submit" disabled={busy} className="w-full font-mono uppercase tracking-widest text-xs">
+                {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Update password'}
+              </Button>
+            </form>
+          )}
+
+          {mode === 'auth' && !confirmEmail && (
           <Tabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted rounded-lg h-10">
               <TabsTrigger
@@ -147,6 +233,9 @@ export default function AuthPage() {
                     <p className="text-xs text-destructive font-mono">{errors.password.message}</p>
                   )}
                 </div>
+                <button type="button" onClick={() => setMode('forgot')} className="text-xs font-mono text-muted-foreground hover:text-primary">
+                  Forgot password?
+                </button>
                 <Button
                   type="submit"
                   disabled={isSubmitting}
@@ -220,6 +309,7 @@ export default function AuthPage() {
               </form>
             </TabsContent>
           </Tabs>
+          )}
         </div>
 
         {/* Footer */}

@@ -14,6 +14,7 @@ import { useTheme } from '@/components/theme-provider'
 import { useAuth } from '@/context/AuthContext'
 import { useDegrees } from '@/hooks/useDegrees'
 import { supabase } from '@/lib/supabase'
+import { getProfile, updateDisplayName } from '@/lib/queries/profiles'
 
 function ThemeChoiceButton({ value, label }: { value: "light" | "dark" | "system", label: string }) {
   const { theme, setTheme } = useTheme()
@@ -51,6 +52,8 @@ export default function ScalesPage() {
   const [showSystemScales, setShowSystemScales] = useState(false)
   const [showAccountDetails, setShowAccountDetails] = useState(false)
   const [showDataBackup, setShowDataBackup] = useState(false)
+  const [displayName, setDisplayName] = useState('')
+  const [savingName, setSavingName] = useState(false)
 
   const systemScales = scales.filter(s => s.is_system)
   const userScales = scales.filter(s => !s.is_system)
@@ -343,7 +346,13 @@ export default function ScalesPage() {
         {/* 4. ACCOUNT & SECURITY (Abstracted / Collapsible) */}
         <Card className="bg-card border-border overflow-hidden">
           <button 
-            onClick={() => setShowAccountDetails(!showAccountDetails)}
+            onClick={() => {
+              const next = !showAccountDetails
+              setShowAccountDetails(next)
+              if (next) {
+                getProfile().then((profile) => setDisplayName(profile?.display_name || '')).catch(() => {})
+              }
+            }}
             className="w-full p-5 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
           >
             <div className="flex items-center gap-3">
@@ -378,6 +387,34 @@ export default function ScalesPage() {
                   <span className="text-emerald-400 font-bold flex items-center gap-1">
                     <Check className="w-3.5 h-3.5" /> Authenticated
                   </span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Display name</label>
+                <div className="flex gap-2">
+                  <input
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    className="flex-1 h-10 rounded-md border border-border bg-background px-3 font-mono text-sm"
+                  />
+                  <Button
+                    disabled={savingName || !displayName.trim()}
+                    onClick={async () => {
+                      setSavingName(true)
+                      try {
+                        await updateDisplayName(displayName)
+                        toast.success('Display name saved')
+                      } catch (err: any) {
+                        toast.error(err.message)
+                      } finally {
+                        setSavingName(false)
+                      }
+                    }}
+                    className="font-mono text-xs uppercase tracking-widest"
+                  >
+                    Save
+                  </Button>
                 </div>
               </div>
 

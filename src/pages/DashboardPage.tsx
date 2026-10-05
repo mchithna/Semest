@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { getProfile } from '@/lib/queries/profiles'
 import { useNavigate } from 'react-router-dom'
 import { GraduationCap, Activity, Target, Plus, Trophy, BookOpen, FileDown } from 'lucide-react'
 import { useDegrees } from '@/hooks/useDegrees'
@@ -25,6 +26,15 @@ export default function DashboardPage() {
   const { degrees, isLoading: isDegreesLoading } = useDegrees()
   const [activeDegreeId, setActiveDegreeId] = useState<string>('')
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+  const [studentName, setStudentName] = useState('')
+
+  useEffect(() => {
+    getProfile()
+      .then((profile) => {
+        setStudentName(profile?.display_name || user?.email?.split('@')[0] || '')
+      })
+      .catch(() => setStudentName(user?.email?.split('@')[0] || ''))
+  }, [user])
 
   const activeDegree = degrees.find(d => d.id === activeDegreeId)
   const { semesters, isLoading: isSemestersLoading } = useSemesters(activeDegreeId)
@@ -75,7 +85,7 @@ export default function DashboardPage() {
         degree={activeDegree}
         semesters={semesters}
         metrics={metrics}
-        defaultStudentName={user?.user_metadata?.display_name || user?.email?.split('@')[0] || ''}
+        defaultStudentName={studentName}
         defaultStudentEmail={user?.email || ''}
       />
 

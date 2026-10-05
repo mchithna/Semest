@@ -37,7 +37,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/auth" element={<AuthPage />} />
               
               {/* Protected Routes */}
-              <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
+              <Route path="/onboarding" element={<ProtectedRoute allowIncomplete><OnboardingPage /></ProtectedRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
               <Route path="/degrees" element={<ProtectedRoute><DegreesPage /></ProtectedRoute>} />
               <Route path="/degrees/:degreeId/semesters" element={<ProtectedRoute><SemestersPage /></ProtectedRoute>} />
