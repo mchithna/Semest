@@ -46,6 +46,19 @@ function pointsByGrade(scale: GradeRow[]): Map<string, number> {
   return gradeToPoints
 }
 
+export type RetakeModule = ModuleWithGrade & {
+  id: string
+  retakes_module_id?: string | null
+}
+
+/** Drops an earlier attempt when a later module points at it. The later attempt is kept. */
+export function withoutReplacedAttempts<T extends { id: string; retakes_module_id?: string | null }>(modules: T[]): T[] {
+  const replaced = new Set(
+    modules.map((mod) => mod.retakes_module_id).filter((id): id is string => Boolean(id)),
+  )
+  return modules.filter((mod) => !replaced.has(mod.id))
+}
+
 export function totalCredits(modules: ModuleWithGrade[]): number {
   return modules.reduce((sum, mod) => sum + toCredits(mod.credits), 0)
 }

@@ -58,6 +58,7 @@ create table if not exists modules (
   name         text not null,
   credits      numeric(4,1) not null,
   grade        text not null,
+  retakes_module_id uuid references modules(id) on delete set null,
   position     int not null default 0,
   created_at   timestamptz default now()
 );
@@ -614,17 +615,68 @@ begin
     raise exception 'Credits must be greater than 0';
   end if;
 
-  delete from modules where semester_id = v_semester_id;
+  declare
+    v_keep uuid[] := '{}';
+    v_mod_id uuid;
+    v_retake uuid;
+    v_elem jsonb;
+    v_ord int;
+  begin
+    for v_elem, v_ord in
+      select elem, ord
+      from jsonb_array_elements(coalesce(p_modules, '[]'::jsonb)) with ordinality as t(elem, ord)
+    loop
+      v_mod_id := null;
+      if coalesce(v_elem->>'id', '') ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then
+        update modules
+        set
+          name = coalesce(nullif(btrim(v_elem->>'name'), ''), 'Untitled Module'),
+          credits = (v_elem->>'credits')::numeric,
+          grade = coalesce(v_elem->>'grade', ''),
+          position = (v_ord - 1)::int
+        where id = (v_elem->>'id')::uuid
+          and semester_id = v_semester_id
+          and user_id = auth.uid()
+        returning id into v_mod_id;
+      end if;
 
-  insert into modules (semester_id, user_id, name, credits, grade, position)
-  select
-    v_semester_id,
-    auth.uid(),
-    coalesce(nullif(btrim(elem->>'name'), ''), 'Untitled Module'),
-    (elem->>'credits')::numeric,
-    coalesce(elem->>'grade', ''),
-    (ord - 1)::int
-  from jsonb_array_elements(coalesce(p_modules, '[]'::jsonb)) with ordinality as t(elem, ord);
+      if v_mod_id is null then
+        insert into modules (semester_id, user_id, name, credits, grade, position)
+        values (
+          v_semester_id,
+          auth.uid(),
+          coalesce(nullif(btrim(v_elem->>'name'), ''), 'Untitled Module'),
+          (v_elem->>'credits')::numeric,
+          coalesce(v_elem->>'grade', ''),
+          (v_ord - 1)::int
+        )
+        returning id into v_mod_id;
+      end if;
+
+      v_keep := v_keep || v_mod_id;
+      v_retake := null;
+      if coalesce(v_elem->>'retakesModuleId', '') ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then
+        v_retake := (v_elem->>'retakesModuleId')::uuid;
+      end if;
+      if v_retake is not null and exists (
+        select 1
+        from modules earlier
+        join semesters sem on sem.id = earlier.semester_id
+        where earlier.id = v_retake
+          and earlier.user_id = auth.uid()
+          and sem.degree_id = p_degree_id
+          and earlier.id <> v_mod_id
+      ) then
+        update modules set retakes_module_id = v_retake where id = v_mod_id;
+      else
+        update modules set retakes_module_id = null where id = v_mod_id;
+      end if;
+    end loop;
+
+    delete from modules
+    where semester_id = v_semester_id
+      and not (id = any(v_keep));
+  end;
 
   select jsonb_build_object(
     'id', s.id,
@@ -644,6 +696,7 @@ begin
           'name', m.name,
           'credits', m.credits,
           'grade', m.grade,
+          'retakes_module_id', m.retakes_module_id,
           'position', m.position,
           'created_at', m.created_at
         )
@@ -721,3 +774,5 @@ grant execute on function public.sync_preset(uuid, uuid) to authenticated;
 
 revoke all on function public.get_preset_with_scale(text) from public;
 grant execute on function public.get_preset_with_scale(text) to anon, authenticated;
+
+alter table modules add column if not exists retakes_module_id uuid references modules(id) on delete set null;

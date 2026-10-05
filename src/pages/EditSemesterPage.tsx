@@ -50,8 +50,15 @@ export default function EditSemesterPage() {
     id: m.id,
     name: m.name,
     credits: m.credits,
-    grade: m.grade
+    grade: m.grade,
+    retakesModuleId: m.retakes_module_id || null,
   }))
+  const priorModules = semesters
+    .filter((item) => item.id !== semester.id)
+    .flatMap((item) => item.modules.map((mod) => ({
+      id: mod.id,
+      label: `${item.title}: ${mod.name}`,
+    })))
 
   const handleSave = async (modules: ModuleData[]) => {
     try {
@@ -107,6 +114,7 @@ export default function EditSemesterPage() {
         <Calculator 
           initialModules={initialModules}
           gradeScale={degree.grade_scale?.grades || []}
+          priorModules={priorModules}
           onSave={handleSave}
           isSaving={isSaving}
         />

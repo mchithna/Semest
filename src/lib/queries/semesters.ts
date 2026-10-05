@@ -21,6 +21,7 @@ export type SemesterModule = {
   name: string
   credits: number
   grade: string
+  retakes_module_id?: string | null
   position: number
   created_at: string
 }
@@ -64,9 +65,11 @@ export async function saveSemester(
     p_degree_id: degreeId,
     p_title: title,
     p_modules: modules.map((mod) => ({
+      id: mod.id,
       name: mod.name || 'Untitled Module',
       credits: mod.credits,
       grade: mod.grade,
+      retakesModuleId: mod.retakesModuleId || null,
     })),
     p_term: term,
     p_sem_index: semIndex ?? null,

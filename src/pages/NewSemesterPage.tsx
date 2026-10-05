@@ -16,7 +16,7 @@ export default function NewSemesterPage() {
   const navigate = useNavigate()
   
   const { degrees, isLoading: isDegreesLoading } = useDegrees()
-  const { saveSemester, isSaving } = useSemesters(degreeId || '')
+  const { semesters, saveSemester, isSaving } = useSemesters(degreeId || '')
 
   const [title, setTitle] = useState('Year 1, Semester 1')
   const [term, setTerm] = useState('')
@@ -112,6 +112,10 @@ export default function NewSemesterPage() {
           key={initialModules.length ? 'loaded' : 'empty'}
           initialModules={initialModules}
           gradeScale={degree.grade_scale?.grades || []}
+          priorModules={semesters.flatMap((item) => item.modules.map((mod) => ({
+            id: mod.id,
+            label: `${item.title}: ${mod.name}`,
+          })))}
           onSave={handleSave}
           isSaving={isSaving}
         />

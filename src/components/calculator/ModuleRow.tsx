@@ -16,16 +16,23 @@ export type ModuleData = {
   name: string
   credits: number
   grade: string
+  retakesModuleId?: string | null
+}
+
+export type PriorModuleOption = {
+  id: string
+  label: string
 }
 
 type ModuleRowProps = {
   module: ModuleData
   gradeScale: GradeRow[]
-  onChange: (id: string, field: keyof Omit<ModuleData, 'id'>, value: string | number) => void
+  priorModules?: PriorModuleOption[]
+  onChange: (id: string, field: keyof Omit<ModuleData, 'id'>, value: string | number | null) => void
   onRemove: (id: string) => void
 }
 
-export function ModuleRow({ module, gradeScale, onChange, onRemove }: ModuleRowProps) {
+export function ModuleRow({ module, gradeScale, priorModules = [], onChange, onRemove }: ModuleRowProps) {
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full animate-in fade-in slide-in-from-bottom-2 duration-300 p-3 sm:p-0 border border-[#1e3a5f] sm:border-transparent rounded-md bg-[#1e293b]/50 sm:bg-transparent">
       <div className="flex w-full sm:flex-1 gap-2 items-center">
@@ -70,6 +77,22 @@ export function ModuleRow({ module, gradeScale, onChange, onRemove }: ModuleRowP
             ))}
           </SelectContent>
         </Select>
+        {priorModules.length > 0 && (
+          <Select
+            value={module.retakesModuleId || 'none'}
+            onValueChange={(val) => onChange(module.id, 'retakesModuleId', val === 'none' ? null : val)}
+          >
+            <SelectTrigger className="flex-1 sm:w-[160px]">
+              <SelectValue placeholder="Retake" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Not a retake</SelectItem>
+              {priorModules.map((prior) => (
+                <SelectItem key={prior.id} value={prior.id}>{prior.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
         <Button
           variant="ghost"
           size="icon"

@@ -255,6 +255,7 @@ export default function DashboardPage() {
                 currentCgpa={metrics.cgpa}
                 earnedCredits={metrics.attemptedCredits}
                 gradeScale={activeDegree?.grade_scale?.grades || []}
+                initialRemaining={metrics.ungradedCredits}
               />
             )}
           </div>

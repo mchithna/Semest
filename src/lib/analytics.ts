@@ -1,9 +1,9 @@
 import type { SemesterWithModules } from './queries/semesters'
 import type { GradeRow } from './queries/gradeScales'
-import { attemptedCredits, computeScore, earnedCredits, hasGradedWork, standingLabel, ungradedCredits } from './score'
+import { attemptedCredits, computeScore, earnedCredits, hasGradedWork, standingLabel, ungradedCredits, withoutReplacedAttempts } from './score'
 
 export function getCumulativeMetrics(semesters: SemesterWithModules[], gradeScale: GradeRow[]) {
-  const allModules = semesters.flatMap(sem => sem.modules)
+  const allModules = withoutReplacedAttempts(semesters.flatMap(sem => sem.modules))
   
   const cgpa = computeScore(allModules, gradeScale)
   const earned = earnedCredits(allModules, gradeScale)

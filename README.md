@@ -1,6 +1,6 @@
 # Semest - UniScore Track
 
-Semest is a web application for university students to calculate, persist, and visualize their weighted GPA / Z-score performance across semesters and degrees.
+Semest is a web application for university students to calculate, persist, and visualize their weighted GPA across semesters and degrees.
 
 ## Features
 
@@ -12,11 +12,11 @@ Semest is a web application for university students to calculate, persist, and v
 
 ## Tech Stack
 
-- **Frontend:** React 18, TypeScript, Vite
+- **Frontend:** React 19, TypeScript, Vite
 - **Styling:** Tailwind CSS, shadcn/ui
 - **Backend & Auth:** Supabase (PostgreSQL, Auth, RLS)
 - **Data Fetching:** TanStack Query (React Query)
-- **Routing:** React Router v6
+- **Routing:** React Router 7
 - **Charts:** Recharts
 
 ## Getting Started

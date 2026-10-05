@@ -15,6 +15,11 @@ import { useAuth } from '@/context/AuthContext'
 import { useDegrees } from '@/hooks/useDegrees'
 import { supabase } from '@/lib/supabase'
 import { getProfile, updateDisplayName } from '@/lib/queries/profiles'
+import { parseBackup } from '@/lib/backup'
+import { createDegree } from '@/lib/queries/degrees'
+import { createGradeScale } from '@/lib/queries/gradeScales'
+import { saveSemester } from '@/lib/queries/semesters'
+import { queryClient } from '@/lib/queryClient'
 
 function ThemeChoiceButton({ value, label }: { value: "light" | "dark" | "system", label: string }) {
   const { theme, setTheme } = useTheme()
@@ -47,6 +52,7 @@ export default function ScalesPage() {
   const [editingScale, setEditingScale] = useState<GradeScale | undefined>()
   const [isReadOnly, setIsReadOnly] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
+  const [isImporting, setIsImporting] = useState(false)
 
   // Abstracted / Collapsible Card States
   const [showSystemScales, setShowSystemScales] = useState(false)
@@ -142,6 +148,52 @@ export default function ScalesPage() {
       toast.error(err.message || 'Failed to export backup data')
     } finally {
       setIsExporting(false)
+    }
+  }
+
+  const handleImportData = async (file: File) => {
+    setIsImporting(true)
+    try {
+      const backup = parseBackup(JSON.parse(await file.text()))
+      const scaleIds = new Map<string, string>()
+      for (const scale of backup.customScales) {
+        if (scale.is_system) continue
+        const created = await createGradeScale(`${scale.label} (imported)`, scale.grades)
+        if (scale.id) scaleIds.set(scale.id, created.id)
+      }
+      for (const degree of backup.degrees) {
+        if (!degree?.title) continue
+        const mappedScale = degree.grade_scale_id ? scaleIds.get(degree.grade_scale_id) : null
+        const keptSystemScale = scales.some((scale) => scale.is_system && scale.id === degree.grade_scale_id)
+          ? degree.grade_scale_id
+          : null
+        const created = await createDegree({
+          title: `${degree.title} (imported)`,
+          institution: degree.institution || null,
+          started_year: degree.started_year || null,
+          grade_scale_id: mappedScale || keptSystemScale || null,
+        })
+        for (const semester of degree.semesters || []) {
+          await saveSemester(
+            created.id,
+            semester.title || 'Semester',
+            (semester.modules || []).filter((mod) => Number(mod.credits) > 0).map((mod) => ({
+              id: crypto.randomUUID(),
+              name: mod.name || 'Untitled Module',
+              credits: Number(mod.credits),
+              grade: mod.grade || 'Not graded',
+            })),
+            semester.term || null,
+            semester.sem_index,
+          )
+        }
+      }
+      await queryClient.invalidateQueries()
+      toast.success('Backup imported as new degrees')
+    } catch (err: any) {
+      toast.error(err.message || 'Could not import that file')
+    } finally {
+      setIsImporting(false)
     }
   }
 
@@ -470,6 +522,22 @@ export default function ScalesPage() {
                   {isExporting ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" /> : <Download className="w-3.5 h-3.5 mr-1.5" />}
                   Download Backup
                 </Button>
+                <label className="block">
+                  <input
+                    type="file"
+                    accept="application/json"
+                    className="hidden"
+                    disabled={isImporting}
+                    onChange={(event) => {
+                      const file = event.target.files?.[0]
+                      event.target.value = ''
+                      if (file) handleImportData(file)
+                    }}
+                  />
+                  <span className="inline-flex w-full h-9 items-center justify-center rounded-md border border-border font-mono text-xs uppercase tracking-widest cursor-pointer">
+                    {isImporting ? 'Importing…' : 'Import backup'}
+                  </span>
+                </label>
               </div>
 
               <div className="p-4 bg-card border border-border rounded space-y-3 flex flex-col justify-between">
