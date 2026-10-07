@@ -8,6 +8,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      pako: path.resolve(__dirname, "node_modules/browserify-zlib/node_modules/pako"),
     },
   },
 })

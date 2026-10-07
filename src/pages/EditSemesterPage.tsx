@@ -5,6 +5,7 @@ import { useDegrees } from '@/hooks/useDegrees'
 import { useSemesters } from '@/hooks/useSemesters'
 import { Calculator } from '@/components/calculator/Calculator'
 import type { ModuleData } from '@/components/calculator/ModuleRow'
+import { earlierModuleOptions } from '@/lib/priorModules'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
@@ -53,12 +54,7 @@ export default function EditSemesterPage() {
     grade: m.grade,
     retakesModuleId: m.retakes_module_id || null,
   }))
-  const priorModules = semesters
-    .filter((item) => item.id !== semester.id)
-    .flatMap((item) => item.modules.map((mod) => ({
-      id: mod.id,
-      label: `${item.title}: ${mod.name}`,
-    })))
+  const priorModules = earlierModuleOptions(semesters, semester.sem_index)
 
   const handleSave = async (modules: ModuleData[]) => {
     try {
