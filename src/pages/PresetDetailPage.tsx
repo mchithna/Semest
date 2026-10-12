@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Loader2, Copy, FileText, Check, GraduationCap } from 'lucide-react'
+import { ArrowLeft, Loader2, Copy, FileText, Check, GraduationCap, Share2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { usePreset, useApplyPreset } from '@/hooks/usePresets'
@@ -17,6 +17,7 @@ export default function PresetDetailPage() {
   const { degrees } = useDegrees()
 
   const [isCopied, setIsCopied] = useState(false)
+  const [isLinkCopied, setIsLinkCopied] = useState(false)
   const [degreeTitle, setDegreeTitle] = useState('')
   const [cloneMode, setCloneMode] = useState<'new' | 'existing'>('new')
   const [targetDegreeId, setTargetDegreeId] = useState<string>('')
@@ -27,6 +28,15 @@ export default function PresetDetailPage() {
     setIsCopied(true)
     setTimeout(() => setIsCopied(false), 2000)
     toast.success("Share code copied to clipboard!")
+  }
+
+  const handleCopyLink = () => {
+    if (!preset) return
+    const url = `${window.location.origin}/presets/${preset.code}`
+    navigator.clipboard.writeText(url)
+    setIsLinkCopied(true)
+    setTimeout(() => setIsLinkCopied(false), 2000)
+    toast.success("Preset share link copied to clipboard!")
   }
 
   const handleClone = () => {
@@ -45,14 +55,14 @@ export default function PresetDetailPage() {
       },
       {
         onSuccess: (newDegreeId) => {
-          toast.success("Template successfully cloned!")
+          toast.success("Preset successfully cloned!")
           if (preset.scale_snapshot && (!preset.grade_scale_id || (preset.grade_scale && !preset.grade_scale.is_system))) {
              toast.success(`Grade scale copied to your account!`)
           }
           navigate(`/degrees/${newDegreeId}/semesters`)
         },
         onError: (err: any) => {
-          toast.error(err.message || "Failed to clone template.")
+          toast.error(err.message || "Failed to clone preset.")
         }
       }
     )
@@ -84,13 +94,13 @@ export default function PresetDetailPage() {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-8 text-center text-foreground">
         <FileText className="w-16 h-16 text-destructive mb-6 opacity-50" />
-        <h2 className="text-2xl font-mono font-bold tracking-widest uppercase mb-2">Template Not Found</h2>
+        <h2 className="text-2xl font-mono font-bold tracking-widest uppercase mb-2">Preset Not Found</h2>
         <p className="text-muted-foreground font-mono text-sm mb-8 max-w-md">
-          The share code you entered might be invalid or the template was deleted by its creator.
+          The share code you entered might be invalid or the preset was deleted by its creator.
         </p>
         <Button onClick={() => navigate('/presets')} className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold font-mono">
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Browse Public Templates
+          Browse Public Presets
         </Button>
       </div>
     )
@@ -107,7 +117,7 @@ export default function PresetDetailPage() {
         <div className="flex items-center gap-4 text-primary mb-6">
           <Button variant="ghost" className="p-0 hover:bg-transparent text-primary hover:text-primary/80" onClick={() => navigate('/presets')}>
             <ArrowLeft className="w-5 h-5 mr-2" />
-            Back to Templates
+            Back to Presets
           </Button>
         </div>
 
@@ -122,15 +132,30 @@ export default function PresetDetailPage() {
               </p>
             )}
           </div>
-          <div className="flex flex-col gap-3 min-w-[200px]">
-            <Button 
-              onClick={handleCopyCode}
-              variant="outline"
-              className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground font-mono font-bold h-12 transition-colors"
-            >
-              {isCopied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
-              {preset.code}
-            </Button>
+          <div className="flex flex-col sm:flex-row md:flex-col gap-3 min-w-[200px] w-full md:w-auto">
+            {preset.is_public ? (
+              <>
+                <Button 
+                  onClick={handleCopyLink}
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-mono font-bold h-12 transition-colors"
+                >
+                  {isLinkCopied ? <Check className="w-4 h-4 mr-2" /> : <Share2 className="w-4 h-4 mr-2" />}
+                  {isLinkCopied ? 'Link Copied!' : 'Share Link'}
+                </Button>
+                <Button 
+                  onClick={handleCopyCode}
+                  variant="outline"
+                  className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground font-mono font-bold h-12 transition-colors"
+                >
+                  {isCopied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
+                  {isCopied ? 'Code Copied!' : `Code: ${preset.code}`}
+                </Button>
+              </>
+            ) : (
+              <p className="font-mono text-sm text-muted-foreground">
+                Private preset. Code {preset.code} is not shared publicly.
+              </p>
+            )}
           </div>
         </div>
 
@@ -138,7 +163,7 @@ export default function PresetDetailPage() {
         <div>
           <div className="flex justify-between items-end mb-6">
             <h2 className="text-xl font-mono font-bold tracking-widest uppercase text-primary">
-              Template Structure
+              Preset Structure
             </h2>
             <div className="text-right font-mono text-sm">
               <p className="text-muted-foreground">Total Credits</p>
@@ -149,7 +174,7 @@ export default function PresetDetailPage() {
           <div className="space-y-6">
             {preset.semesters.length === 0 ? (
               <div className="text-center p-8 bg-card/30 border border-dashed rounded-lg">
-                <p className="text-muted-foreground font-mono text-sm">This template contains no semesters.</p>
+                <p className="text-muted-foreground font-mono text-sm">This preset contains no semesters.</p>
               </div>
             ) : (
               preset.semesters.map((sem, i) => (

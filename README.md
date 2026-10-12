@@ -1,6 +1,6 @@
 # Semest - UniScore Track
 
-Semest is a web application for university students to calculate, persist, and visualize their weighted GPA / Z-score performance across semesters and degrees.
+Semest is a web application for university students to calculate, persist, and visualize their weighted GPA across semesters and degrees.
 
 ## Features
 
@@ -12,11 +12,11 @@ Semest is a web application for university students to calculate, persist, and v
 
 ## Tech Stack
 
-- **Frontend:** React 18, TypeScript, Vite
+- **Frontend:** React 19, TypeScript, Vite
 - **Styling:** Tailwind CSS, shadcn/ui
 - **Backend & Auth:** Supabase (PostgreSQL, Auth, RLS)
 - **Data Fetching:** TanStack Query (React Query)
-- **Routing:** React Router v6
+- **Routing:** React Router 7
 - **Charts:** Recharts
 
 ## Getting Started
@@ -58,4 +58,4 @@ This project is configured for seamless deployment to Vercel.
 
 ## Database Setup
 
-All database tables and Row Level Security (RLS) policies are defined in `supabase/schema.sql`. Run this file in your Supabase SQL Editor to set up the backend structure.
+All database tables, Row Level Security (RLS) policies, and the `save_semester` function are defined in `supabase/schema.sql`. Run this file in your Supabase SQL Editor to set up the backend structure. If the database already exists, run the `save_semester` block at the end of that file. Semester saves call that function.

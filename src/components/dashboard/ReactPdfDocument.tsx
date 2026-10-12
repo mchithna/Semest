@@ -3,7 +3,8 @@ import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/rendere
 import type { DegreeWithScale } from '@/lib/queries/degrees'
 import type { SemesterWithModules } from '@/lib/queries/semesters'
 import type { PdfExportOptions } from './PdfTemplates'
-import { computeScore } from '@/lib/score'
+import { computeScore, totalCredits } from '@/lib/score'
+import { compareSemesters } from '@/lib/semesterOrder'
 
 // Register standard fonts
 Font.register({
@@ -260,7 +261,7 @@ export const ReactPdfDocument: React.FC<ReactPdfDocumentProps> = ({
   metrics,
   options,
 }) => {
-  const sortedSemesters = [...semesters].sort((a, b) => a.sem_index - b.sem_index)
+  const sortedSemesters = [...semesters].sort(compareSemesters)
   const gradeScale = degree.grade_scale?.grades || []
   const styles = getThemeStyles(options.theme)
 
@@ -362,7 +363,7 @@ export const ReactPdfDocument: React.FC<ReactPdfDocumentProps> = ({
         {options.includeModules &&
           sortedSemesters.map((sem, idx) => {
             const semGpa = computeScore(sem.modules, gradeScale)
-            const semCredits = sem.modules.reduce((sum, m) => sum + m.credits, 0)
+            const semCredits = totalCredits(sem.modules)
 
             return (
               <View key={sem.id || idx} style={styles.semesterCard} wrap={false}>

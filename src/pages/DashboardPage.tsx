@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { getProfile } from '@/lib/queries/profiles'
 import { useNavigate } from 'react-router-dom'
 import { GraduationCap, Activity, Target, Plus, Trophy, BookOpen, FileDown } from 'lucide-react'
 import { useDegrees } from '@/hooks/useDegrees'
@@ -25,6 +26,15 @@ export default function DashboardPage() {
   const { degrees, isLoading: isDegreesLoading } = useDegrees()
   const [activeDegreeId, setActiveDegreeId] = useState<string>('')
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+  const [studentName, setStudentName] = useState('')
+
+  useEffect(() => {
+    getProfile()
+      .then((profile) => {
+        setStudentName(profile?.display_name || user?.email?.split('@')[0] || '')
+      })
+      .catch(() => setStudentName(user?.email?.split('@')[0] || ''))
+  }, [user])
 
   const activeDegree = degrees.find(d => d.id === activeDegreeId)
   const { semesters, isLoading: isSemestersLoading } = useSemesters(activeDegreeId)
@@ -75,7 +85,7 @@ export default function DashboardPage() {
         degree={activeDegree}
         semesters={semesters}
         metrics={metrics}
-        defaultStudentName={user?.user_metadata?.display_name || user?.email?.split('@')[0] || ''}
+        defaultStudentName={studentName}
         defaultStudentEmail={user?.email || ''}
       />
 
@@ -161,14 +171,14 @@ export default function DashboardPage() {
                   <BookOpen className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-sm font-mono text-muted-foreground uppercase tracking-widest">Earned Credits</p>
+                  <p className="text-sm font-mono text-muted-foreground uppercase tracking-widest">Passing Credits</p>
                   <h3 className="text-3xl font-mono font-bold text-foreground mt-1">
                     <AnimatedNumber value={metrics.earnedCredits} decimals={1} />
                   </h3>
                 </div>
               </div>
               <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest">
-                Total completed credits
+                {metrics.attemptedCredits.toFixed(1)} graded, including fails
               </p>
             </Card>
 
@@ -199,12 +209,12 @@ export default function DashboardPage() {
                 <div>
                   <p className="text-sm font-mono text-muted-foreground uppercase tracking-widest">Standing</p>
                   <h3 className="text-lg font-mono font-bold text-foreground mt-3 truncate" title={metrics.standing}>
-                    {metrics.standing}
+                    {metrics.standing || '—'}
                   </h3>
                 </div>
               </div>
               <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest">
-                Current academic status
+                {metrics.standing ? 'Current academic status' : 'This scale has no class band'}
               </p>
             </Card>
           </div>
@@ -243,8 +253,9 @@ export default function DashboardPage() {
             ) : (
               <TargetPredictor 
                 currentCgpa={metrics.cgpa}
-                earnedCredits={metrics.earnedCredits}
+                earnedCredits={metrics.attemptedCredits}
                 gradeScale={activeDegree?.grade_scale?.grades || []}
+                initialRemaining={metrics.ungradedCredits}
               />
             )}
           </div>

@@ -5,32 +5,40 @@ import { useDegrees } from '@/hooks/useDegrees'
 import { useSemesters } from '@/hooks/useSemesters'
 import { Calculator } from '@/components/calculator/Calculator'
 import type { ModuleData } from '@/components/calculator/ModuleRow'
+import { earlierModuleOptions } from '@/lib/priorModules'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
+import { loadGuestDraft, sameGradeScale } from '@/lib/guestDraft'
+import { toast } from 'sonner'
 
 export default function NewSemesterPage() {
   const { degreeId } = useParams()
   const navigate = useNavigate()
   
   const { degrees, isLoading: isDegreesLoading } = useDegrees()
-  const { saveSemester, isSaving } = useSemesters(degreeId || '')
+  const { semesters, saveSemester, isSaving } = useSemesters(degreeId || '')
 
   const [title, setTitle] = useState('Year 1, Semester 1')
   const [term, setTerm] = useState('')
   const [initialModules, setInitialModules] = useState<ModuleData[]>([])
 
   useEffect(() => {
+    if (isDegreesLoading) return
     const saved = sessionStorage.getItem('semest_guest_draft')
-    if (saved) {
-      try {
-        setInitialModules(JSON.parse(saved))
-        sessionStorage.removeItem('semest_guest_draft') // Clear it after loading
-      } catch (e) {
-        // ignore
+    if (!saved) return
+    try {
+      const draft = loadGuestDraft(saved)
+      if (draft) setInitialModules(draft.modules)
+      sessionStorage.removeItem('semest_guest_draft')
+      const degreeScale = degrees.find((item) => item.id === degreeId)?.grade_scale?.grades
+      if (draft && degreeScale && !sameGradeScale(draft.grades, degreeScale)) {
+        toast.warning(`This draft was calculated on ${draft.scaleLabel}. This degree uses a different scale, so the GPA can change.`)
       }
+    } catch {
+      sessionStorage.removeItem('semest_guest_draft')
     }
-  }, [])
+  }, [isDegreesLoading, degrees, degreeId])
 
   const degree = degrees.find(d => d.id === degreeId)
 
@@ -105,6 +113,7 @@ export default function NewSemesterPage() {
           key={initialModules.length ? 'loaded' : 'empty'}
           initialModules={initialModules}
           gradeScale={degree.grade_scale?.grades || []}
+          priorModules={earlierModuleOptions(semesters, null)}
           onSave={handleSave}
           isSaving={isSaving}
         />

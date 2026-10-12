@@ -58,6 +58,7 @@ create table if not exists modules (
   name         text not null,
   credits      numeric(4,1) not null,
   grade        text not null,
+  retakes_module_id uuid references modules(id) on delete set null,
   position     int not null default 0,
   created_at   timestamptz default now()
 );
@@ -197,8 +198,8 @@ create policy "Anyone can read system scales"
 drop policy if exists "Users manage own scales" on grade_scales;
 create policy "Users manage own scales"
   on grade_scales for all
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
+  using (auth.uid() = user_id and is_system = false)
+  with check (auth.uid() = user_id and is_system = false);
 
 -- ─────────────────────────────────────────────────
 -- SEED — SYSTEM GRADE SCALES
@@ -210,13 +211,17 @@ insert into grade_scales (user_id, label, is_system, grades) values
   {"grade":"C+","points":2.3},{"grade":"C","points":2.0},{"grade":"C-","points":1.7},
   {"grade":"D+","points":1.3},{"grade":"D","points":1.0},{"grade":"F","points":0.0}
 ]'::jsonb),
-(null, 'Sri Lankan UGC (Z-Score)', true, '[
+(null, 'Sri Lankan UGC GPA', true, '[
   {"grade":"A+","points":4.2},{"grade":"A","points":4.0},{"grade":"A-","points":3.7},
   {"grade":"B+","points":3.3},{"grade":"B","points":3.0},{"grade":"B-","points":2.7},
   {"grade":"C+","points":2.3},{"grade":"C","points":2.0},{"grade":"C-","points":1.7},
   {"grade":"D+","points":1.3},{"grade":"D","points":1.0},{"grade":"F","points":0.0}
 ]'::jsonb)
 on conflict (label) where is_system = true do nothing;
+
+update grade_scales
+set label = 'Sri Lankan UGC GPA'
+where is_system = true and label = 'Sri Lankan UGC (Z-Score)';
 
 -- ─────────────────────────────────────────────────
 -- RLS — DEGREES
@@ -323,7 +328,7 @@ create or replace function publish_preset(
   p_is_public   boolean default true
 )
 returns text
-language plpgsql security definer as $$
+language plpgsql security definer set search_path = public as $$
 declare
   v_code          text;
   v_preset_id     uuid;
@@ -376,7 +381,7 @@ create or replace function clone_preset(
   p_degree_title      text default null
 )
 returns uuid
-language plpgsql security definer as $$
+language plpgsql security definer set search_path = public as $$
 declare
   v_preset          record;
   v_degree_id       uuid;
@@ -421,6 +426,9 @@ begin
     v_degree_id := p_target_degree_id;
     select coalesce(max(sem_index) + 1, 0) into v_next_sem_index
     from semesters where degree_id = v_degree_id;
+    if v_scale_id is not null then
+      update degrees set grade_scale_id = v_scale_id where id = v_degree_id;
+    end if;
   end if;
 
   for v_sem_record in select * from preset_semesters where preset_id = v_preset.id order by sem_index loop
@@ -429,7 +437,7 @@ begin
     returning id into v_new_sem_id;
 
     insert into modules (semester_id, user_id, name, credits, grade, position)
-    select v_new_sem_id, auth.uid(), name, credits, 'N/A', position
+    select v_new_sem_id, auth.uid(), name, credits, 'Not graded', position
     from preset_modules
     where preset_semester_id = v_sem_record.id
     order by position;
@@ -448,7 +456,7 @@ create or replace function sync_preset(
   p_degree_id uuid
 )
 returns void
-language plpgsql security definer as $$
+language plpgsql security definer set search_path = public as $$
 declare
   v_scale_snap  jsonb;
   v_scale_id    uuid;
@@ -491,7 +499,7 @@ $$;
 -- Get Preset with Scale
 create or replace function get_preset_with_scale(p_code text)
 returns jsonb
-language plpgsql security definer as $$
+language plpgsql security definer set search_path = public as $$
 declare
   v_result jsonb;
 begin
@@ -528,3 +536,243 @@ begin
   return v_result;
 end;
 $$;
+
+-- ─────────────────────────────────────────────────
+-- SAVE SEMESTER
+-- Replaces a semester's modules in the same transaction as the semester write.
+-- Existing projects: run this block in the Supabase SQL editor.
+-- ─────────────────────────────────────────────────
+create or replace function save_semester(
+  p_degree_id   uuid,
+  p_title       text,
+  p_modules     jsonb,
+  p_term        text default null,
+  p_sem_index   int default null,
+  p_semester_id uuid default null
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_semester_id uuid;
+  v_index       int;
+  v_result      jsonb;
+begin
+  if auth.uid() is null then
+    raise exception 'Not authenticated';
+  end if;
+
+  if p_modules is not null and jsonb_typeof(p_modules) <> 'array' then
+    raise exception 'Modules must be an array';
+  end if;
+
+  if not exists (
+    select 1 from degrees
+    where id = p_degree_id and user_id = auth.uid()
+  ) then
+    raise exception 'Degree not found or access denied';
+  end if;
+
+  -- Serialize saves for one degree so two creates cannot take the same index.
+  perform pg_advisory_xact_lock(hashtext('semest.save_semester'), hashtext(p_degree_id::text));
+
+  if p_semester_id is null then
+    if p_sem_index is null then
+      select coalesce(max(sem_index) + 1, 0)
+      into v_index
+      from semesters
+      where degree_id = p_degree_id;
+    else
+      v_index := p_sem_index;
+    end if;
+
+    insert into semesters (degree_id, user_id, title, term, sem_index)
+    values (p_degree_id, auth.uid(), p_title, p_term, v_index)
+    returning id into v_semester_id;
+  else
+    update semesters
+    set
+      title = p_title,
+      term = p_term,
+      sem_index = coalesce(p_sem_index, sem_index)
+    where id = p_semester_id
+      and user_id = auth.uid()
+      and degree_id = p_degree_id
+    returning id into v_semester_id;
+
+    if v_semester_id is null then
+      raise exception 'Semester not found or access denied';
+    end if;
+  end if;
+
+  if exists (
+    select 1
+    from jsonb_array_elements(coalesce(p_modules, '[]'::jsonb)) elem
+    where coalesce((elem->>'credits')::numeric, 0) <= 0
+  ) then
+    raise exception 'Credits must be greater than 0';
+  end if;
+
+  declare
+    v_keep uuid[] := '{}';
+    v_mod_id uuid;
+    v_retake uuid;
+    v_elem jsonb;
+    v_ord int;
+  begin
+    for v_elem, v_ord in
+      select elem, ord
+      from jsonb_array_elements(coalesce(p_modules, '[]'::jsonb)) with ordinality as t(elem, ord)
+    loop
+      v_mod_id := null;
+      if coalesce(v_elem->>'id', '') ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then
+        update modules
+        set
+          name = coalesce(nullif(btrim(v_elem->>'name'), ''), 'Untitled Module'),
+          credits = (v_elem->>'credits')::numeric,
+          grade = coalesce(v_elem->>'grade', ''),
+          position = (v_ord - 1)::int
+        where id = (v_elem->>'id')::uuid
+          and semester_id = v_semester_id
+          and user_id = auth.uid()
+        returning id into v_mod_id;
+      end if;
+
+      if v_mod_id is null then
+        insert into modules (semester_id, user_id, name, credits, grade, position)
+        values (
+          v_semester_id,
+          auth.uid(),
+          coalesce(nullif(btrim(v_elem->>'name'), ''), 'Untitled Module'),
+          (v_elem->>'credits')::numeric,
+          coalesce(v_elem->>'grade', ''),
+          (v_ord - 1)::int
+        )
+        returning id into v_mod_id;
+      end if;
+
+      v_keep := v_keep || v_mod_id;
+      v_retake := null;
+      if coalesce(v_elem->>'retakesModuleId', '') ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then
+        v_retake := (v_elem->>'retakesModuleId')::uuid;
+      end if;
+      if v_retake is not null and exists (
+        select 1
+        from modules earlier
+        join semesters sem on sem.id = earlier.semester_id
+        where earlier.id = v_retake
+          and earlier.user_id = auth.uid()
+          and sem.degree_id = p_degree_id
+          and earlier.id <> v_mod_id
+      ) then
+        update modules set retakes_module_id = v_retake where id = v_mod_id;
+      else
+        update modules set retakes_module_id = null where id = v_mod_id;
+      end if;
+    end loop;
+
+    delete from modules
+    where semester_id = v_semester_id
+      and not (id = any(v_keep));
+  end;
+
+  select jsonb_build_object(
+    'id', s.id,
+    'degree_id', s.degree_id,
+    'user_id', s.user_id,
+    'title', s.title,
+    'term', s.term,
+    'sem_index', s.sem_index,
+    'created_at', s.created_at,
+    'updated_at', s.updated_at,
+    'modules', coalesce((
+      select jsonb_agg(
+        jsonb_build_object(
+          'id', m.id,
+          'semester_id', m.semester_id,
+          'user_id', m.user_id,
+          'name', m.name,
+          'credits', m.credits,
+          'grade', m.grade,
+          'retakes_module_id', m.retakes_module_id,
+          'position', m.position,
+          'created_at', m.created_at
+        )
+        order by m.position
+      )
+      from modules m
+      where m.semester_id = s.id
+    ), '[]'::jsonb)
+  )
+  into v_result
+  from semesters s
+  where s.id = v_semester_id;
+
+  return v_result;
+end;
+$$;
+
+revoke all on function public.save_semester(uuid, text, jsonb, text, integer, uuid) from public;
+revoke all on function public.save_semester(uuid, text, jsonb, text, integer, uuid) from anon;
+grant execute on function public.save_semester(uuid, text, jsonb, text, integer, uuid) to authenticated;
+
+-- ─────────────────────────────────────────────────
+-- SAFETY
+-- Renumber duplicate semester indexes, then lock the rules.
+-- Existing projects: run this block in the Supabase SQL editor.
+-- ─────────────────────────────────────────────────
+update grade_scales
+set is_system = false
+where is_system = true and user_id is not null;
+
+alter table grade_scales drop constraint if exists grade_scales_system_owner;
+alter table grade_scales
+  add constraint grade_scales_system_owner
+  check ((is_system = true and user_id is null) or (is_system = false and user_id is not null));
+
+update modules set credits = 0.5 where credits <= 0;
+update preset_modules set credits = 0.5 where credits <= 0;
+
+alter table modules drop constraint if exists modules_credits_positive;
+alter table modules add constraint modules_credits_positive check (credits > 0);
+
+alter table preset_modules drop constraint if exists preset_modules_credits_positive;
+alter table preset_modules add constraint preset_modules_credits_positive check (credits > 0);
+
+with ranked as (
+  select
+    id,
+    (row_number() over (partition by degree_id order by sem_index, created_at, id) - 1) as new_index
+  from semesters
+)
+update semesters s
+set sem_index = ranked.new_index
+from ranked
+where s.id = ranked.id
+  and s.sem_index is distinct from ranked.new_index;
+
+create unique index if not exists semesters_degree_sem_index_unique
+  on semesters (degree_id, sem_index);
+
+revoke all on function public.generate_preset_code() from public;
+revoke all on function public.generate_preset_code() from anon;
+grant execute on function public.generate_preset_code() to authenticated;
+
+revoke all on function public.publish_preset(uuid, text, text, text, boolean) from public;
+revoke all on function public.publish_preset(uuid, text, text, text, boolean) from anon;
+grant execute on function public.publish_preset(uuid, text, text, text, boolean) to authenticated;
+
+revoke all on function public.clone_preset(text, uuid, text) from public;
+revoke all on function public.clone_preset(text, uuid, text) from anon;
+grant execute on function public.clone_preset(text, uuid, text) to authenticated;
+
+revoke all on function public.sync_preset(uuid, uuid) from public;
+revoke all on function public.sync_preset(uuid, uuid) from anon;
+grant execute on function public.sync_preset(uuid, uuid) to authenticated;
+
+revoke all on function public.get_preset_with_scale(text) from public;
+grant execute on function public.get_preset_with_scale(text) to anon, authenticated;
+
+alter table modules add column if not exists retakes_module_id uuid references modules(id) on delete set null;

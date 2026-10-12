@@ -114,7 +114,21 @@ export default function OnboardingPage() {
               </Select>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-between">
+              <Button
+                variant="ghost"
+                onClick={async () => {
+                  try {
+                    await completeOnboarding()
+                    navigate('/dashboard')
+                  } catch (err: any) {
+                    toast.error(err.message)
+                  }
+                }}
+                className="text-muted-foreground font-mono text-xs uppercase tracking-widest"
+              >
+                Skip for now
+              </Button>
               <Button 
                 onClick={handleNextStep1}
                 className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl font-mono text-xs uppercase tracking-widest px-8"

@@ -3,10 +3,25 @@ import { Plus, Edit2, Trash2, GraduationCap } from 'lucide-react'
 import { toast } from 'sonner'
 import { useNavigate } from 'react-router-dom'
 import { useDegrees } from '@/hooks/useDegrees'
+import { useSemesters } from '@/hooks/useSemesters'
+import { getCumulativeMetrics } from '@/lib/analytics'
+import { honorsApply } from '@/lib/score'
 import type { DegreeWithScale } from '@/lib/queries/degrees'
 import { CreateDegreeDialog } from '@/components/degrees/CreateDegreeDialog'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+
+function DegreeGpa({ degreeId, grades }: { degreeId: string; grades: { grade: string; points: number }[] }) {
+  const { semesters, isLoading } = useSemesters(degreeId)
+  if (isLoading) return <span className="text-xs font-mono text-muted-foreground">GPA …</span>
+  const metrics = getCumulativeMetrics(semesters, grades)
+  const label = honorsApply(grades) && metrics.standing ? metrics.standing : ''
+  return (
+    <div className="bg-primary/10 text-primary px-2 py-1 rounded-sm text-xs font-mono font-bold tracking-widest">
+      GPA: {metrics.cgpa.toFixed(2)}{label ? ` · ${label}` : ''}
+    </div>
+  )
+}
 
 export default function DegreesPage() {
   const { degrees, isLoading, createDegree, updateDegree, deleteDegree } = useDegrees()
@@ -147,9 +162,7 @@ export default function DegreesPage() {
                   <div className="text-xs font-mono text-muted-foreground uppercase tracking-widest">
                     Scale: <span className="text-foreground">{degree.grade_scale?.label || 'None'}</span>
                   </div>
-                  <div className="bg-primary/10 text-primary px-2 py-1 rounded-sm text-xs font-mono font-bold tracking-widest">
-                    GPA: --
-                  </div>
+                  <DegreeGpa degreeId={degree.id} grades={degree.grade_scale?.grades || []} />
                 </div>
               </div>
             ))}

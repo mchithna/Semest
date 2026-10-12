@@ -19,7 +19,7 @@ export function Nav() {
     { label: 'Dashboard', path: '/dashboard' },
     { label: 'Degrees', path: '/degrees' },
     { label: 'Presets', path: '/presets' },
-    { label: 'Settings', path: '/settings/scales' },
+    { label: 'Settings', path: '/settings' },
   ] : [
     { label: 'Browse Presets', path: '/presets' },
   ]

@@ -10,11 +10,14 @@ type TargetPredictorProps = {
   currentCgpa: number
   earnedCredits: number
   gradeScale: GradeRow[]
+  initialRemaining?: number
 }
 
-export function TargetPredictor({ currentCgpa, earnedCredits, gradeScale }: TargetPredictorProps) {
+export function TargetPredictor({ currentCgpa, earnedCredits, gradeScale, initialRemaining = 0 }: TargetPredictorProps) {
   const [targetCgpa, setTargetCgpa] = useState<string>('')
-  const [remainingCredits, setRemainingCredits] = useState<string>('30')
+  const [remainingCredits, setRemainingCredits] = useState<string>(
+    initialRemaining > 0 ? String(initialRemaining) : ''
+  )
 
   const maxPoints = gradeScale.length > 0 ? Math.max(...gradeScale.map(g => g.points)) : 4.0
 
@@ -82,6 +85,7 @@ export function TargetPredictor({ currentCgpa, earnedCredits, gradeScale }: Targ
         </div>
         <div className="space-y-2">
           <Label className="text-xs font-mono text-muted-foreground uppercase tracking-widest">Remaining Credits</Label>
+          <p className="text-[11px] font-mono text-muted-foreground">Uses graded credits, including fails, as the current base.</p>
           <Input 
             type="number" 
             step="1" 

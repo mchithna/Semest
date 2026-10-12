@@ -41,23 +41,37 @@ export type PresetFull = PresetWithScale & {
   semesters: PresetSemester[]
 }
 
-export async function getPublicPresets(): Promise<PresetWithScale[]> {
-  const { data, error } = await supabase
+export const PUBLIC_PRESET_PAGE_SIZE = 12
+
+export async function getPublicPresets(page = 0, search = ''): Promise<{ presets: PresetWithScale[]; hasMore: boolean }> {
+  const from = page * PUBLIC_PRESET_PAGE_SIZE
+  const to = from + PUBLIC_PRESET_PAGE_SIZE - 1
+  let query = supabase
     .from('presets')
     .select(`
       *,
       grade_scale:grade_scales(*)
-    `)
+    `, { count: 'exact' })
     .eq('is_public', true)
     .order('use_count', { ascending: false })
     .order('created_at', { ascending: false })
+    .range(from, to)
 
+  const term = search.trim().replace(/[,]/g, ' ')
+  if (term) {
+    const pattern = `%${term}%`
+    query = query.or(`title.ilike.${pattern},institution.ilike.${pattern},description.ilike.${pattern},code.ilike.${pattern}`)
+  }
+
+  const { data, error, count } = await query
   if (error) throw error
-  
-  return data?.map(d => ({
+
+  const presets = (data ?? []).map(d => ({
     ...d,
     grade_scale: (Array.isArray(d.grade_scale) ? d.grade_scale[0] : d.grade_scale) || d.scale_snapshot
   })) as PresetWithScale[]
+
+  return { presets, hasMore: (count ?? 0) > to + 1 }
 }
 
 export async function getMyPresets(): Promise<PresetWithScale[]> {
@@ -127,6 +141,27 @@ export async function clonePreset(
   });
   if (error) throw error;
   return data as string;
+}
+
+export async function updatePreset(
+  presetId: string,
+  fields: { title: string; description?: string; institution?: string; isPublic: boolean }
+): Promise<void> {
+  const { error } = await supabase
+    .from('presets')
+    .update({
+      title: fields.title,
+      description: fields.description ?? null,
+      institution: fields.institution ?? null,
+      is_public: fields.isPublic,
+    })
+    .eq('id', presetId)
+  if (error) throw error
+}
+
+export async function deletePreset(presetId: string): Promise<void> {
+  const { error } = await supabase.from('presets').delete().eq('id', presetId)
+  if (error) throw error
 }
 
 export async function syncPreset(

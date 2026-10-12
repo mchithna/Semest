@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { computeScore, totalCredits, classify, type ModuleWithGrade } from './score'
+import { attemptedCredits, computeScore, totalCredits, earnedCredits, ungradedCredits, classify, toCredits, type ModuleWithGrade } from './score'
 import type { GradeRow } from './queries/gradeScales'
 
 describe('Score Logic', () => {
@@ -19,6 +19,27 @@ describe('Score Logic', () => {
       { credits: 1.5, grade: 'C' },
     ]
     expect(totalCredits(modules)).toBe(8.5)
+  })
+
+  it('computes earned credits correctly (only counting modules with valid scale grades)', () => {
+    const modules: ModuleWithGrade[] = [
+      { credits: 3, grade: 'A' },
+      { credits: 4, grade: 'B' },
+      { credits: 2, grade: 'Pending' }, // Invalid grade, not earned yet
+    ]
+    expect(earnedCredits(modules, scale)).toBe(7)
+  })
+
+  it('counts a failing grade as attempted, not earned', () => {
+    const modules: ModuleWithGrade[] = [
+      { credits: 3, grade: 'A' },
+      { credits: 4, grade: 'F' },
+      { credits: 2, grade: 'Not graded' },
+    ]
+    expect(earnedCredits(modules, scale)).toBe(3)
+    expect(attemptedCredits(modules, scale)).toBe(7)
+    expect(ungradedCredits(modules, scale)).toBe(2)
+    expect(computeScore(modules, scale)).toBeCloseTo(12 / 7, 4)
   })
 
   it('computes weighted average GPA correctly', () => {
@@ -47,6 +68,33 @@ describe('Score Logic', () => {
     expect(computeScore(modules, scale)).toBe(4.2)
   })
 
+  it('treats numeric strings from the database as numbers', () => {
+    const modules = [
+      { credits: '3.0', grade: 'A' },
+      { credits: '4.0', grade: 'B' },
+      { credits: '1.5', grade: 'C' },
+    ] as unknown as ModuleWithGrade[]
+
+    // Without coercion, 0 + "3.0" + "4.0" concatenates to "03.04.0".
+    expect(totalCredits(modules)).toBe(8.5)
+    expect(earnedCredits(modules, scale)).toBe(8.5)
+    // (3*4.0 + 4*3.0 + 1.5*2.0) / 8.5 = 27 / 8.5
+    expect(computeScore(modules, scale)).toBe(3.1765)
+  })
+
+  it('treats a non-numeric credit string as zero', () => {
+    const modules = [
+      { credits: '3', grade: 'A' },
+      { credits: 'abc', grade: 'F' },
+    ] as unknown as ModuleWithGrade[]
+
+    expect(toCredits('abc')).toBe(0)
+    expect(toCredits('')).toBe(0)
+    expect(toCredits(null)).toBe(0)
+    expect(totalCredits(modules)).toBe(3)
+    expect(computeScore(modules, scale)).toBe(4)
+  })
+
   it('classifies scores correctly', () => {
     expect(classify(3.8)).toBe('First Class')
     expect(classify(3.5)).toBe('Second Upper')
@@ -54,5 +102,6 @@ describe('Score Logic', () => {
     expect(classify(2.5)).toBe('General Pass')
     expect(classify(1.5)).toBe('Fail')
     expect(classify(0)).toBe('Unknown')
+    expect(classify(0, true)).toBe('Fail')
   })
 })

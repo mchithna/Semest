@@ -29,8 +29,8 @@ export function useSemesters(degreeId: string) {
       degreeId, 
       params.title, 
       params.modules, 
-      params.term || null, 
-      params.semIndex || 0, 
+      params.term || null,
+      params.semIndex,
       params.semesterId
     ),
     onSuccess: () => {

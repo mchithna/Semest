@@ -1,17 +1,18 @@
-import { useState, useEffect } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { Plus, Save } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import confetti from 'canvas-confetti'
-import { ModuleRow, type ModuleData } from './ModuleRow'
+import { ModuleRow, type ModuleData, type PriorModuleOption } from './ModuleRow'
 import type { GradeRow } from '@/lib/queries/gradeScales'
-import { computeScore, totalCredits } from '@/lib/score'
+import { computeScore, hasGradedWork, honorsApply, totalCredits } from '@/lib/score'
 import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
 import { ClassificationBadge } from '@/components/ui/ClassificationBadge'
 
 type CalculatorProps = {
   initialModules?: ModuleData[]
   gradeScale: GradeRow[]
+  priorModules?: PriorModuleOption[]
   onSave?: (modules: ModuleData[]) => void
   isSaving?: boolean
 }
@@ -19,6 +20,7 @@ type CalculatorProps = {
 export function Calculator({
   initialModules = [],
   gradeScale,
+  priorModules = [],
   onSave,
   isSaving = false,
 }: CalculatorProps) {
@@ -30,10 +32,14 @@ export function Calculator({
 
   const score = computeScore(modules, gradeScale)
   const credits = totalCredits(modules)
+  const graded = hasGradedWork(modules, gradeScale)
+  const previousScore = useRef<{ score: number; credits: number } | null>(null)
 
-  // Trigger confetti when score hits First Class threshold
   useEffect(() => {
-    if (score >= 3.7 && credits >= 12) {
+    const previous = previousScore.current
+    const isFirst = score >= 3.7 && credits >= 12
+    const wasFirst = previous !== null && previous.score >= 3.7 && previous.credits >= 12
+    if (previous && isFirst && !wasFirst) {
       confetti({
         particleCount: 100,
         spread: 70,
@@ -41,6 +47,7 @@ export function Calculator({
         colors: ['#aa3bff', '#c084fc', '#f4f3ec'],
       })
     }
+    previousScore.current = { score, credits }
   }, [score, credits])
 
   const handleAddModule = () => {
@@ -50,7 +57,7 @@ export function Calculator({
     ])
   }
 
-  const handleUpdateModule = (id: string, field: keyof Omit<ModuleData, 'id'>, value: string | number) => {
+  const handleUpdateModule = (id: string, field: keyof Omit<ModuleData, 'id'>, value: string | number | null) => {
     setModules(
       modules.map((m) => (m.id === id ? { ...m, [field]: value } : m))
     )
@@ -68,6 +75,7 @@ export function Calculator({
             key={module.id}
             module={module}
             gradeScale={gradeScale}
+            priorModules={priorModules}
             onChange={handleUpdateModule}
             onRemove={handleRemoveModule}
           />
@@ -95,7 +103,7 @@ export function Calculator({
 
         <div className="flex flex-col items-end gap-1">
           <span className="text-sm text-muted-foreground font-medium flex items-center gap-2">
-            GPA <ClassificationBadge score={score} />
+            GPA {honorsApply(gradeScale) && <ClassificationBadge score={score} graded={graded} />}
           </span>
           <span className="text-4xl font-mono font-bold tracking-tight text-primary">
             <AnimatedNumber value={score} decimals={4} />
