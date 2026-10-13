@@ -7,6 +7,7 @@ import { ModuleRow, type ModuleData, type PriorModuleOption } from './ModuleRow'
 import type { GradeRow } from '@/lib/queries/gradeScales'
 import { computeScore, hasGradedWork, honorsApply, totalCredits } from '@/lib/score'
 import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
+import { prefersReducedMotion } from '@/lib/motion'
 import { ClassificationBadge } from '@/components/ui/ClassificationBadge'
 
 type CalculatorProps = {
@@ -39,7 +40,7 @@ export function Calculator({
     const previous = previousScore.current
     const isFirst = score >= 3.7 && credits >= 12
     const wasFirst = previous !== null && previous.score >= 3.7 && previous.credits >= 12
-    if (previous && isFirst && !wasFirst) {
+    if (previous && isFirst && !wasFirst && !prefersReducedMotion()) {
       confetti({
         particleCount: 100,
         spread: 70,

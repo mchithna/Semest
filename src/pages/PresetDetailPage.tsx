@@ -209,7 +209,7 @@ export default function PresetDetailPage() {
       </div>
 
       {/* Floating Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t p-4 shadow-2xl z-50">
+      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-xs border-t p-4 shadow-2xl z-50">
         <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-4 justify-between">
           <div className="flex-1 w-full flex flex-col gap-3">
             <div className="flex items-center gap-6">
@@ -248,7 +248,7 @@ export default function PresetDetailPage() {
               <select 
                 value={targetDegreeId}
                 onChange={e => setTargetDegreeId(e.target.value)}
-                className="bg-card border border-border rounded-md px-3 text-foreground font-mono h-10 w-full md:max-w-md focus:outline-none focus:ring-2 focus:ring-primary"
+                className="bg-card border border-border rounded-md px-3 text-foreground font-mono h-10 w-full md:max-w-md focus:outline-hidden focus:ring-2 focus:ring-primary"
               >
                 <option value="">-- Select a degree --</option>
                 {degrees.map(d => (

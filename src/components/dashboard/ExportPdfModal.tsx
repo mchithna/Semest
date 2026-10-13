@@ -102,7 +102,7 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
       {/* Hidden PDF Printable Component */}
       <PdfTemplates
         degree={degree}

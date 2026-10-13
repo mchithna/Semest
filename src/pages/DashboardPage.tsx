@@ -147,7 +147,7 @@ export default function DashboardPage() {
         ) : (
           <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             <Card className="relative overflow-hidden p-6 rounded-xl border border-white/10 bg-white/5 backdrop-blur-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.36)] group transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_8px_32px_0_rgba(0,0,0,0.6)] hover:bg-white/10 hover:border-white/20">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent opacity-40 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent opacity-40 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
               <div className="flex items-center gap-4 mb-4">
                 <div className="p-3 bg-primary/10 rounded-lg text-primary">
                   <GraduationCap className="w-6 h-6" />
@@ -165,7 +165,7 @@ export default function DashboardPage() {
             </Card>
 
             <Card className="relative overflow-hidden p-6 rounded-xl border border-white/10 bg-white/5 backdrop-blur-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.36)] group transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_8px_32px_0_rgba(0,0,0,0.6)] hover:bg-white/10 hover:border-white/20">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-sky-400/20 via-transparent to-transparent opacity-40 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,var(--tw-gradient-stops))] from-sky-400/20 via-transparent to-transparent opacity-40 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
               <div className="flex items-center gap-4 mb-4">
                 <div className="p-3 bg-sky-400/10 rounded-lg text-sky-400">
                   <BookOpen className="w-6 h-6" />
@@ -183,7 +183,7 @@ export default function DashboardPage() {
             </Card>
 
             <Card className="relative overflow-hidden p-6 rounded-xl border border-white/10 bg-white/5 backdrop-blur-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.36)] group transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_8px_32px_0_rgba(0,0,0,0.6)] hover:bg-white/10 hover:border-white/20">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-amber-400/20 via-transparent to-transparent opacity-40 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,var(--tw-gradient-stops))] from-amber-400/20 via-transparent to-transparent opacity-40 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
               <div className="flex items-center gap-4 mb-4">
                 <div className="p-3 bg-amber-400/10 rounded-lg text-amber-400">
                   <Trophy className="w-6 h-6" />
@@ -201,7 +201,7 @@ export default function DashboardPage() {
             </Card>
 
             <Card className="relative overflow-hidden p-6 rounded-xl border border-white/10 bg-white/5 backdrop-blur-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.36)] group transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_8px_32px_0_rgba(0,0,0,0.6)] hover:bg-white/10 hover:border-white/20">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-indigo-400/20 via-transparent to-transparent opacity-40 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,var(--tw-gradient-stops))] from-indigo-400/20 via-transparent to-transparent opacity-40 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
               <div className="flex items-center gap-4 mb-4">
                 <div className="p-3 bg-indigo-400/10 rounded-lg text-indigo-400">
                   <Activity className="w-6 h-6" />

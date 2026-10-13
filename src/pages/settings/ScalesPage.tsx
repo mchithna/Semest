@@ -30,7 +30,7 @@ function ThemeChoiceButton({ value, label }: { value: "light" | "dark" | "system
       onClick={() => setTheme(value)}
       className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-mono font-bold uppercase tracking-widest transition-all ${
         isActive 
-          ? 'bg-background text-foreground shadow-sm border border-border' 
+          ? 'bg-background text-foreground shadow-xs border border-border' 
           : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
       }`}
     >

@@ -19,7 +19,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
       
       {items.map((item, index) => (
         <div key={index} className="flex items-center">
-          <ChevronRight className="w-4 h-4 mx-2 flex-shrink-0 text-muted-foreground" />
+          <ChevronRight className="w-4 h-4 mx-2 shrink-0 text-muted-foreground" />
           {item.path ? (
             <Link to={item.path} className="hover:text-emerald-400 transition-colors truncate max-w-[150px] sm:max-w-[200px]">
               {item.label}

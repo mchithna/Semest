@@ -32,7 +32,7 @@ export default function LandingPage() {
       {/* Hero Section */}
       <main className="flex-1 flex flex-col items-center pt-16 pb-12 px-6 animate-slideUp">
         <div className="text-center max-w-3xl mb-16 space-y-6">
-          <h1 className="text-5xl md:text-6xl font-bold tracking-tight bg-gradient-to-br from-emerald-300 to-emerald-600 bg-clip-text text-transparent">
+          <h1 className="text-5xl md:text-6xl font-bold tracking-tight bg-linear-to-br from-emerald-300 to-emerald-600 bg-clip-text text-transparent">
             Track Your Academic Journey
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -49,7 +49,7 @@ export default function LandingPage() {
         </div>
 
         {/* Guest Calculator Demo */}
-        <div className="w-full max-w-4xl bg-gradient-to-b from-border/50 to-transparent p-1 rounded-3xl">
+        <div className="w-full max-w-4xl bg-linear-to-b from-border/50 to-transparent p-1 rounded-3xl">
           <div className="w-full bg-card rounded-[22px] p-6 md:p-12 border shadow-2xl">
             <div className="text-center mb-8">
               <h2 className="text-2xl font-mono font-bold tracking-widest text-foreground uppercase mb-2">
@@ -105,7 +105,7 @@ export default function LandingPage() {
 
         {/* CTA Section */}
         <div className="w-full max-w-4xl mt-24 mb-12 bg-card border p-12 rounded-3xl text-center relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 to-sky-400"></div>
+          <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-emerald-400 to-sky-400"></div>
           <h2 className="text-3xl font-bold text-foreground mb-4">Ready to optimize your grades?</h2>
           <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
             Join thousands of students who are already using Semest to track their academic progress and discover community-built degree presets.

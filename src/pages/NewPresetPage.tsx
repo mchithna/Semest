@@ -113,7 +113,7 @@ export default function NewPresetPage() {
                 value={description}
                 onChange={e => setDescription(e.target.value)}
                 placeholder="Briefly describe the focus of this degree..."
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground font-mono min-h-[100px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-transparent"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground font-mono min-h-[100px] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-transparent"
               />
             </div>
 
@@ -131,7 +131,7 @@ export default function NewPresetPage() {
                   checked={isPublic} 
                   onChange={e => setIsPublic(e.target.checked)} 
                 />
-                <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-background after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-foreground/50 after:border-foreground/20 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                <div className="w-11 h-6 bg-muted peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-background after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-foreground/50 after:border-foreground/20 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
               </label>
             </div>
 

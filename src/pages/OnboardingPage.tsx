@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { useGradeScales } from '@/hooks/useGradeScales'
 import { useDegrees } from '@/hooks/useDegrees'
 import { completeOnboarding } from '@/lib/queries/profiles'
+import { prefersReducedMotion } from '@/lib/motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -49,7 +50,7 @@ export default function OnboardingPage() {
       await completeOnboarding()
       
       setStep(3)
-      confetti({
+      if (!prefersReducedMotion()) confetti({
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },

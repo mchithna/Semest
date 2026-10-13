@@ -182,7 +182,7 @@ export default function MyPresetsPage() {
 
       {/* Sync Preset Modal */}
       {syncPresetId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-xs">
           <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md shadow-2xl space-y-6 animate-fadeIn">
             <div>
               <h2 className="text-xl font-mono font-bold text-foreground mb-2 flex items-center gap-2">
@@ -196,7 +196,7 @@ export default function MyPresetsPage() {
             <select 
               value={syncDegreeId}
               onChange={e => setSyncDegreeId(e.target.value)}
-              className="bg-background border border-border rounded-md px-3 text-foreground font-mono h-10 w-full focus:outline-none focus:ring-2 focus:ring-primary"
+              className="bg-background border border-border rounded-md px-3 text-foreground font-mono h-10 w-full focus:outline-hidden focus:ring-2 focus:ring-primary"
             >
               <option value="">-- Select a degree --</option>
               {degrees.map(d => (
@@ -250,7 +250,7 @@ export default function MyPresetsPage() {
       )}
 
       {editPresetId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-xs">
           <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md shadow-2xl space-y-4">
             <h2 className="text-xl font-mono font-bold text-foreground">Edit preset</h2>
             <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} placeholder="Title" className="font-mono" />
