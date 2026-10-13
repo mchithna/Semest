@@ -80,8 +80,9 @@ export function CreateDegreeDialog({
 
         <div className="space-y-4 mt-4">
           <div className="space-y-2">
-            <Label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Title <span className="text-destructive">*</span></Label>
+            <Label htmlFor="degree-title" className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Title <span className="text-destructive">*</span></Label>
             <Input
+              id="degree-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. BSc Computer Science"
@@ -90,8 +91,9 @@ export function CreateDegreeDialog({
           </div>
 
           <div className="space-y-2">
-            <Label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Institution</Label>
+            <Label htmlFor="degree-institution" className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Institution</Label>
             <Input
+              id="degree-institution"
               value={institution}
               onChange={(e) => setInstitution(e.target.value)}
               placeholder="e.g. University of London"
@@ -100,8 +102,9 @@ export function CreateDegreeDialog({
           </div>
 
           <div className="space-y-2">
-            <Label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Start Year</Label>
+            <Label htmlFor="degree-start-year" className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Start Year</Label>
             <Input
+              id="degree-start-year"
               type="number"
               value={startYear}
               onChange={(e) => setStartYear(e.target.value)}
@@ -111,9 +114,9 @@ export function CreateDegreeDialog({
           </div>
 
           <div className="space-y-2">
-            <Label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Grade Scale</Label>
+            <Label htmlFor="degree-grade-scale" className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Grade Scale</Label>
             <Select value={gradeScaleId} onValueChange={setGradeScaleId}>
-              <SelectTrigger className="bg-background border-border text-foreground rounded-sm">
+              <SelectTrigger id="degree-grade-scale" className="bg-background border-border text-foreground rounded-sm">
                 <SelectValue placeholder="Select a scale" />
               </SelectTrigger>
               <SelectContent className="bg-background border-border text-foreground">
@@ -140,7 +143,8 @@ export function CreateDegreeDialog({
               disabled={isSaving}
               className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-sm font-mono text-xs uppercase tracking-widest"
             >
-              {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Degree'}
+              {isSaving && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
+              {isSaving ? 'Saving degree…' : 'Save Degree'}
             </Button>
           </div>
         </div>

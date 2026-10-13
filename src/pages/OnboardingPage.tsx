@@ -18,6 +18,11 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
+function primaryConfettiColor() {
+  const primary = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim()
+  return primary ? `hsl(${primary})` : 'hsl(160 84% 39%)'
+}
+
 export default function OnboardingPage() {
   const navigate = useNavigate()
   const { scales, isLoading: scalesLoading } = useGradeScales()
@@ -54,7 +59,7 @@ export default function OnboardingPage() {
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ['#34d399', '#6ee7b7', '#059669'] // Emerald shades
+        colors: [primaryConfettiColor()]
       })
     } catch (err: any) {
       toast.error(err.message)
@@ -69,8 +74,9 @@ export default function OnboardingPage() {
 
   if (scalesLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div role="status" className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <span className="sr-only">Loading</span>
       </div>
     )
   }
@@ -99,9 +105,9 @@ export default function OnboardingPage() {
             </p>
 
             <div className="space-y-4 mb-8">
-              <Label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Default Grade Scale</Label>
+              <Label htmlFor="onboarding-scale" className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Default Grade Scale</Label>
               <Select value={scaleId} onValueChange={setScaleId}>
-                <SelectTrigger className="bg-background border-border text-foreground rounded-xl h-12">
+                <SelectTrigger id="onboarding-scale" className="bg-background border-border text-foreground rounded-xl h-12">
                   <SelectValue placeholder="Select a scale" />
                 </SelectTrigger>
                 <SelectContent className="bg-background border-border text-foreground">
@@ -150,8 +156,9 @@ export default function OnboardingPage() {
 
             <div className="space-y-6 mb-8">
               <div className="space-y-2">
-                <Label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Degree Title <span className="text-destructive">*</span></Label>
+                <Label htmlFor="onboarding-title" className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Degree Title <span className="text-destructive">*</span></Label>
                 <Input
+                  id="onboarding-title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. BSc Computer Science"
@@ -160,8 +167,9 @@ export default function OnboardingPage() {
               </div>
 
               <div className="space-y-2">
-                <Label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Institution</Label>
+                <Label htmlFor="onboarding-institution" className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Institution</Label>
                 <Input
+                  id="onboarding-institution"
                   value={institution}
                   onChange={(e) => setInstitution(e.target.value)}
                   placeholder="e.g. University of London"
@@ -170,8 +178,9 @@ export default function OnboardingPage() {
               </div>
 
               <div className="space-y-2">
-                <Label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Start Year</Label>
+                <Label htmlFor="onboarding-year" className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Start Year</Label>
                 <Input
+                  id="onboarding-year"
                   type="number"
                   value={startYear}
                   onChange={(e) => setStartYear(e.target.value)}

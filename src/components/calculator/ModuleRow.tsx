@@ -46,19 +46,21 @@ export function ModuleRow({ module, gradeScale, priorModules = [], onChange, onR
   }
 
   return (
-    <div className="flex flex-col gap-2 w-full animate-in fade-in slide-in-from-bottom-2 duration-300 p-3 sm:p-0 border border-[#1e3a5f] sm:border-transparent rounded-md bg-[#1e293b]/50 sm:bg-transparent">
+    <div className="flex flex-col gap-2 w-full animate-in fade-in slide-in-from-bottom-2 duration-300 p-3 sm:p-0 border border-border sm:border-transparent rounded-md bg-muted/50 sm:bg-transparent">
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full">
         <div className="flex w-full sm:flex-1 gap-2 items-center">
           <Input
             value={module.name}
             onChange={(e) => onChange(module.id, 'name', e.target.value)}
             placeholder="Module Name"
+            aria-label="Module name"
             className="flex-1 min-w-[120px]"
           />
           <Button
             variant="ghost"
             size="icon"
             className="sm:hidden text-muted-foreground hover:text-destructive shrink-0"
+            aria-label={module.name.trim() ? `Delete ${module.name.trim()}` : 'Delete module'}
             onClick={() => onRemove(module.id)}
           >
             <Trash2 className="w-4 h-4" />
@@ -70,6 +72,7 @@ export function ModuleRow({ module, gradeScale, priorModules = [], onChange, onR
             value={module.credits || ''}
             onChange={(e) => onChange(module.id, 'credits', parseFloat(e.target.value) || 0)}
             placeholder="Cr"
+            aria-label="Credits"
             className="w-[80px]"
             min={0.5}
             step={0.5}
@@ -78,7 +81,7 @@ export function ModuleRow({ module, gradeScale, priorModules = [], onChange, onR
             value={!module.grade || isUngradedGrade(module.grade) ? UNGRADED_GRADE : module.grade}
             onValueChange={(val) => onChange(module.id, 'grade', val)}
           >
-            <SelectTrigger className="flex-1 sm:w-[120px]">
+            <SelectTrigger className="flex-1 sm:w-[120px]" aria-label="Grade">
               <SelectValue placeholder="Grade" />
             </SelectTrigger>
             <SelectContent>
@@ -94,6 +97,7 @@ export function ModuleRow({ module, gradeScale, priorModules = [], onChange, onR
             variant="ghost"
             size="icon"
             className="hidden sm:inline-flex text-muted-foreground hover:text-destructive shrink-0"
+            aria-label={module.name.trim() ? `Delete ${module.name.trim()}` : 'Delete module'}
             onClick={() => onRemove(module.id)}
           >
             <Trash2 className="w-4 h-4" />

@@ -1,4 +1,5 @@
 import React from 'react'
+import { formatGpa } from '@/lib/score'
 import type { PdfExportOptions } from './PdfTemplates'
 import type { DegreeWithScale } from '@/lib/queries/degrees'
 import type { SemesterWithModules } from '@/lib/queries/semesters'
@@ -131,7 +132,7 @@ export const PdfMiniPreview: React.FC<PdfMiniPreviewProps> = ({
                       : 'text-slate-900'
                   }`}
                 >
-                  {metrics.cgpa.toFixed(2)}
+                  {formatGpa(metrics.cgpa)}
                 </div>
               </div>
 
@@ -161,7 +162,7 @@ export const PdfMiniPreview: React.FC<PdfMiniPreviewProps> = ({
               >
                 <div className="text-[6px] uppercase text-slate-400">Best</div>
                 <div className="text-[9px] font-bold font-mono text-amber-500">
-                  {metrics.highestGpa.toFixed(2)}
+                  {formatGpa(metrics.highestGpa)}
                 </div>
               </div>
 

@@ -97,8 +97,9 @@ export function GradeScaleEditor({
 
         <div className="space-y-6 mt-4">
           <div className="space-y-2">
-            <Label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Scale Name</Label>
+            <Label htmlFor="scale-name" className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Scale Name</Label>
             <Input
+              id="scale-name"
               value={label}
               onChange={(e) => setLabel(e.target.value)}
               placeholder="e.g. My Custom Scale"
@@ -155,6 +156,7 @@ export function GradeScaleEditor({
                           <Button
                             variant="ghost"
                             size="icon"
+                            aria-label={`Remove grade ${row.grade}`}
                             onClick={() => removeRow(index)}
                             className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-sm"
                           >
@@ -190,7 +192,8 @@ export function GradeScaleEditor({
                 disabled={isSaving}
                 className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-sm font-mono text-xs uppercase tracking-widest"
               >
-                {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Scale'}
+                {isSaving && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
+                {isSaving ? 'Saving scale…' : 'Save Scale'}
               </Button>
             )}
           </div>

@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card'
 import confetti from 'canvas-confetti'
 import { ModuleRow, type ModuleData, type PriorModuleOption } from './ModuleRow'
 import type { GradeRow } from '@/lib/queries/gradeScales'
-import { computeScore, hasGradedWork, honorsApply, totalCredits } from '@/lib/score'
+import { computeScore, GPA_DECIMALS, hasGradedWork, honorsApply, totalCredits } from '@/lib/score'
 import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
 import { prefersReducedMotion } from '@/lib/motion'
 import { ClassificationBadge } from '@/components/ui/ClassificationBadge'
@@ -107,7 +107,7 @@ export function Calculator({
             GPA {honorsApply(gradeScale) && <ClassificationBadge score={score} graded={graded} />}
           </span>
           <span className="text-4xl font-mono font-bold tracking-tight text-primary">
-            <AnimatedNumber value={score} decimals={4} />
+            <AnimatedNumber value={score} decimals={GPA_DECIMALS} />
           </span>
         </div>
       </div>

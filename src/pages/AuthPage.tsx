@@ -119,6 +119,7 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <title>{`${mode === 'forgot' ? 'Reset password' : mode === 'recovery' ? 'New password' : 'Sign in'} · Semest`}</title>
       <div className="w-full max-w-md">
         {/* Logo / Brand */}
         <div className="flex flex-col items-center mb-8 gap-3">
@@ -153,11 +154,15 @@ export default function AuthPage() {
               {resetSent ? (
                 <p className="text-sm text-muted-foreground font-mono">If that email has an account, a reset link is on its way.</p>
               ) : (
-                <Input type="email" required value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} placeholder="you@university.edu" className="font-mono" />
+                <div className="space-y-2 text-left">
+                  <Label htmlFor="reset-email" className="text-xs tracking-widest uppercase text-muted-foreground font-mono">Email</Label>
+                  <Input id="reset-email" type="email" required value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} placeholder="you@university.edu" className="font-mono" />
+                </div>
               )}
               {!resetSent && (
                 <Button type="submit" disabled={busy} className="w-full font-mono uppercase tracking-widest text-xs">
-                  {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send reset link'}
+                  {busy && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
+                  {busy ? 'Sending reset link…' : 'Send reset link'}
                 </Button>
               )}
               <Button type="button" variant="ghost" className="w-full font-mono" onClick={() => setMode('auth')}>Back</Button>
@@ -167,9 +172,13 @@ export default function AuthPage() {
           {mode === 'recovery' && !confirmEmail && (
             <form onSubmit={saveNewPassword} className="space-y-5">
               <h2 className="font-mono text-sm uppercase tracking-widest text-foreground">Choose a new password</h2>
-              <Input type="password" required value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password" className="font-mono" />
+              <div className="space-y-2 text-left">
+                <Label htmlFor="new-password" className="text-xs tracking-widest uppercase text-muted-foreground font-mono">New password</Label>
+                <Input id="new-password" type="password" required value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password" className="font-mono" />
+              </div>
               <Button type="submit" disabled={busy} className="w-full font-mono uppercase tracking-widest text-xs">
-                {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Update password'}
+                {busy && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
+                {busy ? 'Updating password…' : 'Update password'}
               </Button>
             </form>
           )}
@@ -195,34 +204,41 @@ export default function AuthPage() {
             <TabsContent value="signin">
               <form onSubmit={handleSubmit(onSignIn)} className="space-y-5">
                 <div className="space-y-2">
-                  <Label className="text-xs tracking-widest uppercase text-muted-foreground font-mono">
+                  <Label htmlFor="signin-email" className="text-xs tracking-widest uppercase text-muted-foreground font-mono">
                     Email
                   </Label>
                   <Input
+                    id="signin-email"
                     {...register('email')}
                     type="email"
                     placeholder="you@university.edu"
                     autoComplete="email"
+                    aria-invalid={!!errors.email}
+                    aria-describedby={errors.email ? 'signin-email-error' : undefined}
                     className="bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl focus-visible:ring-primary focus-visible:border-primary"
                   />
                   {errors.email && (
-                    <p className="text-xs text-destructive font-mono">{errors.email.message}</p>
+                    <p id="signin-email-error" className="text-xs text-destructive font-mono">{errors.email.message}</p>
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs tracking-widest uppercase text-muted-foreground font-mono">
+                  <Label htmlFor="signin-password" className="text-xs tracking-widest uppercase text-muted-foreground font-mono">
                     Password
                   </Label>
                   <div className="relative">
                     <Input
+                      id="signin-password"
                       {...register('password')}
                       type={showPassword ? 'text' : 'password'}
                       placeholder="••••••••"
                       autoComplete="current-password"
+                      aria-invalid={!!errors.password}
+                      aria-describedby={errors.password ? 'signin-password-error' : undefined}
                       className="bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl focus-visible:ring-primary focus-visible:border-primary pr-10"
                     />
                     <button
                       type="button"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
                     >
@@ -230,7 +246,7 @@ export default function AuthPage() {
                     </button>
                   </div>
                   {errors.password && (
-                    <p className="text-xs text-destructive font-mono">{errors.password.message}</p>
+                    <p id="signin-password-error" className="text-xs text-destructive font-mono">{errors.password.message}</p>
                   )}
                 </div>
                 <button type="button" onClick={() => setMode('forgot')} className="text-xs font-mono text-muted-foreground hover:text-primary">
@@ -241,11 +257,8 @@ export default function AuthPage() {
                   disabled={isSubmitting}
                   className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs tracking-widest uppercase rounded-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/20"
                 >
-                  {isSubmitting ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    'Sign In'
-                  )}
+                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
+                  {isSubmitting ? 'Signing in…' : 'Sign In'}
                 </Button>
               </form>
             </TabsContent>
@@ -254,34 +267,41 @@ export default function AuthPage() {
             <TabsContent value="signup">
               <form onSubmit={handleSubmit(onSignUp)} className="space-y-5">
                 <div className="space-y-2">
-                  <Label className="text-xs tracking-widest uppercase text-muted-foreground font-mono">
+                  <Label htmlFor="signup-email" className="text-xs tracking-widest uppercase text-muted-foreground font-mono">
                     Email
                   </Label>
                   <Input
+                    id="signup-email"
                     {...register('email')}
                     type="email"
                     placeholder="you@university.edu"
                     autoComplete="email"
+                    aria-invalid={!!errors.email}
+                    aria-describedby={errors.email ? 'signup-email-error' : undefined}
                     className="bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl focus-visible:ring-primary focus-visible:border-primary"
                   />
                   {errors.email && (
-                    <p className="text-xs text-destructive font-mono">{errors.email.message}</p>
+                    <p id="signup-email-error" className="text-xs text-destructive font-mono">{errors.email.message}</p>
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs tracking-widest uppercase text-muted-foreground font-mono">
+                  <Label htmlFor="signup-password" className="text-xs tracking-widest uppercase text-muted-foreground font-mono">
                     Password
                   </Label>
                   <div className="relative">
                     <Input
+                      id="signup-password"
                       {...register('password')}
                       type={showPassword ? 'text' : 'password'}
                       placeholder="••••••••"
                       autoComplete="new-password"
+                      aria-invalid={!!errors.password}
+                      aria-describedby={errors.password ? 'signup-password-error' : undefined}
                       className="bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl focus-visible:ring-primary focus-visible:border-primary pr-10"
                     />
                     <button
                       type="button"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
                     >
@@ -289,7 +309,7 @@ export default function AuthPage() {
                     </button>
                   </div>
                   {errors.password && (
-                    <p className="text-xs text-destructive font-mono">{errors.password.message}</p>
+                    <p id="signup-password-error" className="text-xs text-destructive font-mono">{errors.password.message}</p>
                   )}
                 </div>
                 <Button
@@ -297,11 +317,8 @@ export default function AuthPage() {
                   disabled={isSubmitting}
                   className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs tracking-widest uppercase rounded-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/20"
                 >
-                  {isSubmitting ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    'Create Account'
-                  )}
+                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
+                  {isSubmitting ? 'Creating account…' : 'Create Account'}
                 </Button>
                 <p className="text-center text-xs text-muted-foreground font-mono">
                   Your data is private and secured by Supabase.

@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { Plus, Edit2, Trash2, GraduationCap } from 'lucide-react'
 import { toast } from 'sonner'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useDegrees } from '@/hooks/useDegrees'
 import { useSemesters } from '@/hooks/useSemesters'
 import { getCumulativeMetrics } from '@/lib/analytics'
-import { honorsApply } from '@/lib/score'
+import { formatGpa, honorsApply } from '@/lib/score'
 import type { DegreeWithScale } from '@/lib/queries/degrees'
 import { CreateDegreeDialog } from '@/components/degrees/CreateDegreeDialog'
 import { Button } from '@/components/ui/button'
@@ -15,10 +15,11 @@ function DegreeGpa({ degreeId, grades }: { degreeId: string; grades: { grade: st
   const { semesters, isLoading } = useSemesters(degreeId)
   if (isLoading) return <span className="text-xs font-mono text-muted-foreground">GPA …</span>
   const metrics = getCumulativeMetrics(semesters, grades)
-  const label = honorsApply(grades) && metrics.standing ? metrics.standing : ''
+  const graded = metrics.attemptedCredits > 0
+  const label = graded && honorsApply(grades) && metrics.standing ? metrics.standing : ''
   return (
     <div className="bg-primary/10 text-primary px-2 py-1 rounded-sm text-xs font-mono font-bold tracking-widest">
-      GPA: {metrics.cgpa.toFixed(2)}{label ? ` · ${label}` : ''}
+      GPA: {graded ? formatGpa(metrics.cgpa) : '—'}{label ? ` · ${label}` : ''}
     </div>
   )
 }
@@ -124,24 +125,26 @@ export default function DegreesPage() {
             {degrees.map((degree) => (
               <div 
                 key={degree.id} 
-                onClick={() => navigate(`/degrees/${degree.id}/semesters`)}
-                className="bg-card border border-border rounded-sm p-6 relative group transition-all hover:border-primary/50 hover:-translate-y-1 hover:shadow-2xl cursor-pointer flex flex-col h-full"
+                className="bg-card border border-border rounded-sm p-6 relative group transition-all hover:border-primary/50 hover:-translate-y-1 hover:shadow-2xl flex flex-col h-full"
               >
                 <div className="absolute top-0 left-0 w-1 h-full bg-primary/50 group-hover:bg-primary transition-colors"></div>
                 
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <h3 className="font-mono text-lg font-bold text-foreground group-hover:text-primary transition-colors">
-                      {degree.title}
+                      <Link to={`/degrees/${degree.id}/semesters`} className="after:absolute after:inset-0">
+                        {degree.title}
+                      </Link>
                     </h3>
                     <p className="text-sm font-mono text-muted-foreground mt-1">
                       {degree.institution || 'Unknown Institution'} {degree.started_year ? `• ${degree.started_year}` : ''}
                     </p>
                   </div>
-                  <div className="flex opacity-0 group-hover:opacity-100 transition-opacity gap-1">
+                  <div className="relative z-10 flex sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 transition-opacity gap-1">
                     <Button
                       variant="ghost"
                       size="icon"
+                      aria-label={`Edit ${degree.title}`}
                       onClick={(e) => handleEdit(degree, e)}
                       className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-sm"
                     >
@@ -150,6 +153,7 @@ export default function DegreesPage() {
                     <Button
                       variant="ghost"
                       size="icon"
+                      aria-label={`Delete ${degree.title}`}
                       onClick={(e) => handleDelete(degree.id, e)}
                       className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-sm"
                     >

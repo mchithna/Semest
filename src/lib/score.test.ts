@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { attemptedCredits, computeScore, totalCredits, earnedCredits, ungradedCredits, classify, toCredits, type ModuleWithGrade } from './score'
+import { attemptedCredits, computeScore, totalCredits, earnedCredits, ungradedCredits, classify, toCredits, formatGpa, type ModuleWithGrade } from './score'
 import type { GradeRow } from './queries/gradeScales'
 
 describe('Score Logic', () => {
@@ -103,5 +103,11 @@ describe('Score Logic', () => {
     expect(classify(1.5)).toBe('Fail')
     expect(classify(0)).toBe('Unknown')
     expect(classify(0, true)).toBe('Fail')
+  })
+
+  it('formats GPA to two decimals', () => {
+    expect(formatGpa(3.7385)).toBe('3.74')
+    expect(formatGpa(0)).toBe('0.00')
+    expect(formatGpa(Number.NaN)).toBe('—')
   })
 })

@@ -6,7 +6,7 @@ import { queryClient } from './lib/queryClient'
 import { AuthProvider } from './context/AuthContext'
 import { Toaster } from 'sonner'
 import { ProtectedRoute } from './components/ProtectedRoute'
-import { ThemeProvider } from './components/theme-provider'
+import { ThemeProvider, useTheme } from './components/theme-provider'
 import './index.css'
 
 import LandingPage from './pages/LandingPage'
@@ -24,32 +24,37 @@ import MyPresetsPage from './pages/MyPresetsPage'
 import PresetDetailPage from './pages/PresetDetailPage'
 import { AppShell } from './components/layout/AppShell'
 
+function AppToaster() {
+  const { theme } = useTheme()
+  return <Toaster position="top-right" richColors theme={theme} />
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark" storageKey="semest-theme">
         <AuthProvider>
-          <Toaster position="top-right" richColors theme="dark" />
+          <AppToaster />
           <BrowserRouter>
             <AppShell>
             <Routes>
-              <Route path="/" element={<LandingPage />} />
+              <Route path="/" element={<><title>Semest</title><LandingPage /></>} />
               <Route path="/auth" element={<AuthPage />} />
               
               {/* Protected Routes */}
-              <Route path="/onboarding" element={<ProtectedRoute allowIncomplete><OnboardingPage /></ProtectedRoute>} />
-              <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-              <Route path="/degrees" element={<ProtectedRoute><DegreesPage /></ProtectedRoute>} />
+              <Route path="/onboarding" element={<ProtectedRoute allowIncomplete><><title>Set up · Semest</title><OnboardingPage /></></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute><><title>Dashboard · Semest</title><DashboardPage /></></ProtectedRoute>} />
+              <Route path="/degrees" element={<ProtectedRoute><><title>Degrees · Semest</title><DegreesPage /></></ProtectedRoute>} />
               <Route path="/degrees/:degreeId/semesters" element={<ProtectedRoute><SemestersPage /></ProtectedRoute>} />
-              <Route path="/degrees/:degreeId/semesters/new" element={<ProtectedRoute><NewSemesterPage /></ProtectedRoute>} />
-              <Route path="/degrees/:degreeId/semesters/:id/edit" element={<ProtectedRoute><EditSemesterPage /></ProtectedRoute>} />
-              <Route path="/settings" element={<ProtectedRoute><ScalesPage /></ProtectedRoute>} />
-              <Route path="/settings/scales" element={<ProtectedRoute><ScalesPage /></ProtectedRoute>} />
-              <Route path="/presets/new" element={<ProtectedRoute><NewPresetPage /></ProtectedRoute>} />
-              <Route path="/presets/mine" element={<ProtectedRoute><MyPresetsPage /></ProtectedRoute>} />
+              <Route path="/degrees/:degreeId/semesters/new" element={<ProtectedRoute><><title>New semester · Semest</title><NewSemesterPage /></></ProtectedRoute>} />
+              <Route path="/degrees/:degreeId/semesters/:id/edit" element={<ProtectedRoute><><title>Edit semester · Semest</title><EditSemesterPage /></></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><><title>Settings · Semest</title><ScalesPage /></></ProtectedRoute>} />
+              <Route path="/settings/scales" element={<ProtectedRoute><><title>Settings · Semest</title><ScalesPage /></></ProtectedRoute>} />
+              <Route path="/presets/new" element={<ProtectedRoute><><title>New preset · Semest</title><NewPresetPage /></></ProtectedRoute>} />
+              <Route path="/presets/mine" element={<ProtectedRoute><><title>My presets · Semest</title><MyPresetsPage /></></ProtectedRoute>} />
               
               {/* Public Preset Routes */}
-              <Route path="/presets" element={<PresetsPage />} />
+              <Route path="/presets" element={<><title>Presets · Semest</title><PresetsPage /></>} />
               <Route path="/presets/:code" element={<PresetDetailPage />} />
             </Routes>
           </AppShell>

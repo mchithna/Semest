@@ -1,7 +1,7 @@
 import React from 'react'
 import type { DegreeWithScale } from '@/lib/queries/degrees'
 import type { SemesterWithModules } from '@/lib/queries/semesters'
-import { computeScore, totalCredits } from '@/lib/score'
+import { computeScore, formatGpa, totalCredits } from '@/lib/score'
 import { compareSemesters } from '@/lib/semesterOrder'
 
 export type PdfExportOptions = {
@@ -159,7 +159,7 @@ export const PdfTemplates: React.FC<PdfTemplatesProps> = ({
                   isModern ? 'text-emerald-400' : 'text-slate-900'
                 }`}
               >
-                {metrics.cgpa.toFixed(3)}
+                {formatGpa(metrics.cgpa)}
               </div>
             </div>
 
@@ -189,7 +189,7 @@ export const PdfTemplates: React.FC<PdfTemplatesProps> = ({
                 Best Sem GPA
               </div>
               <div className="text-xl font-bold font-mono mt-1 text-amber-500">
-                {metrics.highestGpa.toFixed(3)}
+                {formatGpa(metrics.highestGpa)}
               </div>
             </div>
 
@@ -226,7 +226,7 @@ export const PdfTemplates: React.FC<PdfTemplatesProps> = ({
                 return (
                   <div key={sem.id || i} className="flex-1 flex flex-col items-center gap-1">
                     <span className="text-[10px] font-mono font-semibold text-slate-700">
-                      {sgpa.toFixed(2)}
+                      {formatGpa(sgpa)}
                     </span>
                     <div
                       className={`w-full rounded-t ${
@@ -296,7 +296,7 @@ export const PdfTemplates: React.FC<PdfTemplatesProps> = ({
                       </span>
                       <div className="flex gap-4 font-mono text-[11px]">
                         <span>Credits: {semCredits.toFixed(1)}</span>
-                        <span>GPA: {semGpa.toFixed(2)}</span>
+                        <span>GPA: {formatGpa(semGpa)}</span>
                       </div>
                     </div>
 

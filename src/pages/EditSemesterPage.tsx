@@ -32,8 +32,9 @@ export default function EditSemesterPage() {
 
   if (isDegreesLoading || isSemestersLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div role="status" className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <span className="sr-only">Loading</span>
       </div>
     )
   }
@@ -88,8 +89,9 @@ export default function EditSemesterPage() {
 
         <div className="grid gap-6 md:grid-cols-2 max-w-2xl mx-auto bg-card p-6 border border-border rounded-xl mb-8">
           <div className="space-y-2">
-            <Label className="text-muted-foreground font-mono uppercase tracking-widest text-xs">Title</Label>
+            <Label htmlFor="semester-title" className="text-muted-foreground font-mono uppercase tracking-widest text-xs">Title</Label>
             <Input 
+              id="semester-title"
               value={title} 
               onChange={(e) => setTitle(e.target.value)} 
               placeholder="e.g. Year 1, Semester 1"
@@ -97,8 +99,9 @@ export default function EditSemesterPage() {
             />
           </div>
           <div className="space-y-2">
-            <Label className="text-muted-foreground font-mono uppercase tracking-widest text-xs">Term (Optional)</Label>
+            <Label htmlFor="semester-term" className="text-muted-foreground font-mono uppercase tracking-widest text-xs">Term (Optional)</Label>
             <Input 
+              id="semester-term"
               value={term} 
               onChange={(e) => setTerm(e.target.value)} 
               placeholder="e.g. Fall 2026"

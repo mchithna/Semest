@@ -3,7 +3,7 @@ import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/rendere
 import type { DegreeWithScale } from '@/lib/queries/degrees'
 import type { SemesterWithModules } from '@/lib/queries/semesters'
 import type { PdfExportOptions } from './PdfTemplates'
-import { computeScore, totalCredits } from '@/lib/score'
+import { computeScore, formatGpa, totalCredits } from '@/lib/score'
 import { compareSemesters } from '@/lib/semesterOrder'
 
 // Register standard fonts
@@ -310,7 +310,7 @@ export const ReactPdfDocument: React.FC<ReactPdfDocumentProps> = ({
           <View style={styles.statsRow}>
             <View style={styles.statCard}>
               <Text style={styles.statLabel}>Cumulative GPA</Text>
-              <Text style={styles.statValueCgpa}>{metrics.cgpa.toFixed(3)}</Text>
+              <Text style={styles.statValueCgpa}>{formatGpa(metrics.cgpa)}</Text>
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statLabel}>Earned Credits</Text>
@@ -318,7 +318,7 @@ export const ReactPdfDocument: React.FC<ReactPdfDocumentProps> = ({
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statLabel}>Best Sem GPA</Text>
-              <Text style={styles.statValueBest}>{metrics.highestGpa.toFixed(3)}</Text>
+              <Text style={styles.statValueBest}>{formatGpa(metrics.highestGpa)}</Text>
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statLabel}>Semesters</Text>
@@ -337,7 +337,7 @@ export const ReactPdfDocument: React.FC<ReactPdfDocumentProps> = ({
                 const barHeight = Math.max(6, Math.min(30, (sgpa / 4.0) * 30))
                 return (
                   <View key={sem.id || i} style={styles.chartCol}>
-                    <Text style={styles.chartVal}>{sgpa.toFixed(2)}</Text>
+                    <Text style={styles.chartVal}>{formatGpa(sgpa)}</Text>
                     <View style={[styles.chartBar, { height: barHeight }]} />
                     <Text style={styles.chartTerm}>{sem.term || `S${i + 1}`}</Text>
                   </View>
@@ -372,7 +372,7 @@ export const ReactPdfDocument: React.FC<ReactPdfDocumentProps> = ({
                     {sem.title} {sem.term ? `(${sem.term})` : ''}
                   </Text>
                   <Text style={styles.semesterMeta}>
-                    Credits: {semCredits.toFixed(1)}   |   GPA: {semGpa.toFixed(2)}
+                    Credits: {semCredits.toFixed(1)}   |   GPA: {formatGpa(semGpa)}
                   </Text>
                 </View>
 

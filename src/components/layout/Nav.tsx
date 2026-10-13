@@ -1,4 +1,4 @@
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { GraduationCap, LogOut, Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from '@/components/ui/sheet'
@@ -8,7 +8,6 @@ import { ModeToggle } from '@/components/mode-toggle'
 export function Nav() {
   const { session, signOut } = useAuth()
   const navigate = useNavigate()
-  const location = useLocation()
 
   const handleSignOut = async () => {
     await signOut()
@@ -30,7 +29,7 @@ export function Nav() {
         
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <Link to="/" className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors">
+          <Link to="/" aria-label="Semest home" className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors">
             <GraduationCap className="h-6 w-6" />
             <span className="font-mono text-xl font-bold tracking-widest uppercase hidden sm:inline-block">
               UniScore Track
@@ -42,17 +41,17 @@ export function Nav() {
         <div className="hidden md:flex items-center gap-6">
           <div className="flex items-center gap-4">
             {navLinks.map(link => (
-              <Link 
-                key={link.path} 
+              <NavLink
+                key={link.path}
                 to={link.path}
-                className={`text-sm font-mono tracking-wider uppercase transition-colors ${
-                  location.pathname.startsWith(link.path) 
-                    ? 'text-primary font-bold' 
+                className={({ isActive }) => `text-sm font-mono tracking-wider uppercase transition-colors ${
+                  isActive
+                    ? 'text-primary font-bold'
                     : 'text-muted-foreground hover:text-primary'
                 }`}
               >
                 {link.label}
-              </Link>
+              </NavLink>
             ))}
           </div>
 
@@ -99,29 +98,29 @@ export function Nav() {
           <ModeToggle />
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
+              <Button variant="ghost" size="icon" aria-label="Open menu" className="text-muted-foreground hover:text-primary">
                 <Menu className="h-6 w-6" />
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="bg-background border-border p-6 w-[300px]">
-              <SheetHeader className="text-left mb-8 hidden">
-                <SheetTitle className="text-emerald-400 font-mono tracking-widest uppercase">Navigation</SheetTitle>
+              <SheetHeader className="sr-only">
+                <SheetTitle>Navigation</SheetTitle>
               </SheetHeader>
               
               <div className="flex flex-col gap-6">
                 <div className="flex flex-col gap-4">
                   {navLinks.map(link => (
-                    <Link 
-                      key={link.path} 
+                    <NavLink
+                      key={link.path}
                       to={link.path}
-                      className={`text-lg font-mono tracking-wider uppercase transition-colors ${
-                        location.pathname.startsWith(link.path) 
-                          ? 'text-primary font-bold' 
+                      className={({ isActive }) => `text-lg font-mono tracking-wider uppercase transition-colors ${
+                        isActive
+                          ? 'text-primary font-bold'
                           : 'text-muted-foreground hover:text-primary'
                       }`}
                     >
                       {link.label}
-                    </Link>
+                    </NavLink>
                   ))}
                 </div>
 

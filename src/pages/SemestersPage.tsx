@@ -1,9 +1,9 @@
-import { useParams, useNavigate } from 'react-router-dom'
+import { Link, useParams, useNavigate } from 'react-router-dom'
 import { Plus, Trash2, Edit2, Calendar } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useDegrees } from '@/hooks/useDegrees'
 import { useSemesters } from '@/hooks/useSemesters'
-import { attemptedCredits, computeScore, earnedCredits, hasGradedWork, honorsApply } from '@/lib/score'
+import { attemptedCredits, computeScore, earnedCredits, formatGpa, hasGradedWork, honorsApply } from '@/lib/score'
 import { ClassificationBadge } from '@/components/ui/ClassificationBadge'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -19,7 +19,9 @@ export default function SemestersPage() {
 
   if (isDegreesLoading || isSemestersLoading) {
     return (
-      <div className="min-h-screen bg-background text-foreground p-8">
+      <div role="status" className="min-h-screen bg-background text-foreground p-8">
+        <title>Semesters · Semest</title>
+        <span className="sr-only">Loading</span>
         <div className="max-w-6xl mx-auto space-y-8">
           <div className="flex justify-between items-end border-b pb-6">
             <div className="flex flex-col gap-2">
@@ -42,6 +44,7 @@ export default function SemestersPage() {
   if (!degree) {
     return (
       <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center">
+        <title>Semesters · Semest</title>
         <p>Degree not found.</p>
         <Button onClick={() => navigate('/degrees')} className="mt-4" variant="outline">
           Back to Degrees
@@ -62,6 +65,7 @@ export default function SemestersPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground p-8">
+      <title>{`${degree.title} · Semest`}</title>
       <div className="max-w-6xl mx-auto space-y-8 animate-slideUp">
         
         {/* Header */}
@@ -109,15 +113,19 @@ export default function SemestersPage() {
               return (
                 <div 
                   key={sem.id} 
-                  onClick={() => navigate(`/degrees/${degreeId}/semesters/${sem.id}/edit`)}
-                  className="bg-card border border-border rounded-xl p-6 relative group transition-all hover:border-primary/50 cursor-pointer flex flex-col h-full min-w-0 overflow-hidden hover:shadow-lg hover:-translate-y-1"
+                  className="bg-card border border-border rounded-xl p-6 relative group transition-all hover:border-primary/50 flex flex-col h-full min-w-0 overflow-hidden hover:shadow-lg hover:-translate-y-1"
                 >
                   <div className="absolute top-0 left-0 w-1 h-full bg-primary/50 rounded-l-xl"></div>
                   
                   <div className="flex justify-between items-start gap-3 mb-4 min-w-0">
                     <div className="min-w-0">
                       <h3 className="font-mono text-lg font-bold text-foreground group-hover:text-primary transition-colors truncate">
-                        {sem.title}
+                        <Link
+                          to={`/degrees/${degreeId}/semesters/${sem.id}/edit`}
+                          className="after:absolute after:inset-0"
+                        >
+                          {sem.title}
+                        </Link>
                       </h3>
                       {sem.term && (
                         <p className="text-sm font-mono text-muted-foreground mt-1">
@@ -125,14 +133,12 @@ export default function SemestersPage() {
                         </p>
                       )}
                     </div>
-                    <div className="flex opacity-0 group-hover:opacity-100 transition-opacity gap-1">
+                    <div className="relative z-10 flex sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 transition-opacity gap-1">
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          navigate(`/degrees/${degreeId}/semesters/${sem.id}/edit`)
-                        }}
+                        aria-label={`Edit ${sem.title}`}
+                        onClick={() => navigate(`/degrees/${degreeId}/semesters/${sem.id}/edit`)}
                         className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-sm"
                       >
                         <Edit2 className="w-4 h-4" />
@@ -140,6 +146,7 @@ export default function SemestersPage() {
                       <Button
                         variant="ghost"
                         size="icon"
+                        aria-label={`Delete ${sem.title}`}
                         onClick={(e) => handleDelete(sem.id, e)}
                         className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-sm"
                       >
@@ -160,7 +167,9 @@ export default function SemestersPage() {
                       </div>
                       <div className="min-w-0">
                         <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">GPA</p>
-                        <p className="font-mono text-sm font-semibold text-primary">{score.toFixed(2)}</p>
+                        <p className={`font-mono text-sm font-semibold ${attempted > 0 ? 'text-primary' : 'text-muted-foreground'}`}>
+                          {attempted > 0 ? formatGpa(score) : '—'}
+                        </p>
                       </div>
                     </div>
                     {honorsApply(scale) && (

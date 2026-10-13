@@ -50,18 +50,19 @@ export default function PresetsPage() {
           </div>
           
           <form onSubmit={handleCodeSearch} className="flex flex-col gap-2 w-full md:w-auto">
-            <label className="text-xs font-mono text-muted-foreground uppercase tracking-widest">
+            <label htmlFor="share-code" className="text-xs font-mono text-muted-foreground uppercase tracking-widest">
               Have a share code?
             </label>
             <div className="flex gap-2">
               <Input
+                id="share-code"
                 value={codeQuery}
                 onChange={e => setCodeQuery(e.target.value.toUpperCase())}
                 placeholder="e.g. X7K9M2"
                 maxLength={6}
                 className="bg-card border-border text-foreground font-mono w-full md:w-40"
               />
-              <Button type="submit" disabled={codeQuery.trim().length !== 6} className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold font-mono">
+              <Button type="submit" disabled={codeQuery.trim().length !== 6} aria-label="Look up share code" className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold font-mono">
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
@@ -76,6 +77,7 @@ export default function PresetsPage() {
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search by title, institution, or code..."
+              aria-label="Search presets"
               className="pl-10 bg-card border-border text-foreground font-mono h-12"
             />
           </div>
@@ -126,7 +128,7 @@ export default function PresetsPage() {
                     size="icon"
                     variant="ghost"
                     onClick={(e) => handleSharePreset(e, preset.code)}
-                    title="Copy Preset Link"
+                    aria-label={copiedCode === preset.code ? 'Share link copied' : 'Copy share link'}
                     className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-muted"
                   >
                     {copiedCode === preset.code ? (

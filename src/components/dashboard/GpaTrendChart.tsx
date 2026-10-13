@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import {
   AreaChart,
   Area,
@@ -10,15 +11,23 @@ import {
 } from 'recharts'
 import type { SemesterWithModules } from '@/lib/queries/semesters'
 import type { GradeRow } from '@/lib/queries/gradeScales'
-import { computeScore, hasGradedWork } from '@/lib/score'
+import { computeScore, formatGpa, hasGradedWork } from '@/lib/score'
 import { compareSemesters } from '@/lib/semesterOrder'
+import { Button } from '@/components/ui/button'
+
+const chartPrimary = 'hsl(var(--primary))'
+const chartMuted = 'hsl(var(--muted-foreground))'
+const chartBorder = 'hsl(var(--border))'
+const chartCard = 'hsl(var(--card))'
+const chartForeground = 'hsl(var(--foreground))'
 
 type GpaTrendChartProps = {
   semesters: SemesterWithModules[]
   gradeScale: GradeRow[]
+  degreeId: string
 }
 
-export function GpaTrendChart({ semesters, gradeScale }: GpaTrendChartProps) {
+export function GpaTrendChart({ semesters, gradeScale, degreeId }: GpaTrendChartProps) {
   const data = useMemo(() => {
     // Sort semesters to ensure chronological order if not already
     const sorted = [...semesters].sort(compareSemesters)
@@ -28,7 +37,7 @@ export function GpaTrendChart({ semesters, gradeScale }: GpaTrendChartProps) {
       const gpa = computeScore(sem.modules, gradeScale)
       return {
         name: sem.term || sem.title || `Sem ${i + 1}`,
-        gpa: Number(gpa.toFixed(2)),
+        gpa: Number(formatGpa(gpa)),
       }
     })
   }, [semesters, gradeScale])
@@ -38,10 +47,17 @@ export function GpaTrendChart({ semesters, gradeScale }: GpaTrendChartProps) {
     return Math.max(...gradeScale.map(g => g.points), 4.0)
   }, [gradeScale])
 
-  if (data.length === 0) {
+  if (data.length < 2) {
     return (
-      <div className="w-full h-[300px] flex items-center justify-center text-muted-foreground font-mono text-sm">
-        No data to display
+      <div className="flex flex-col items-center justify-center gap-4 py-10 text-center">
+        <p className="max-w-sm text-sm text-muted-foreground">
+          Your GPA trend appears after two graded semesters.
+        </p>
+        {degreeId && (
+          <Button asChild>
+            <Link to={`/degrees/${degreeId}/semesters/new`}>Add semester</Link>
+          </Button>
+        )}
       </div>
     )
   }
@@ -55,21 +71,21 @@ export function GpaTrendChart({ semesters, gradeScale }: GpaTrendChartProps) {
         >
           <defs>
             <linearGradient id="colorGpa" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#34d399" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="#34d399" stopOpacity={0} />
+              <stop offset="5%" stopColor={chartPrimary} stopOpacity={0.3} />
+              <stop offset="95%" stopColor={chartPrimary} stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#1e3a5f" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke={chartBorder} vertical={false} />
           <XAxis 
             dataKey="name" 
-            stroke="#64748b" 
+            stroke={chartMuted} 
             fontSize={12} 
             tickLine={false} 
             axisLine={false} 
             dy={10} 
           />
           <YAxis 
-            stroke="#64748b" 
+            stroke={chartMuted} 
             fontSize={12} 
             tickLine={false} 
             axisLine={false} 
@@ -78,22 +94,22 @@ export function GpaTrendChart({ semesters, gradeScale }: GpaTrendChartProps) {
           />
           <Tooltip 
             contentStyle={{ 
-              backgroundColor: '#1e293b', 
-              border: '1px solid #1e3a5f',
+              backgroundColor: chartCard, 
+              border: `1px solid ${chartBorder}`,
               borderRadius: '8px',
-              color: '#f8fafc',
+              color: chartForeground,
               fontFamily: 'monospace'
             }}
-            itemStyle={{ color: '#34d399' }}
+            itemStyle={{ color: chartPrimary }}
           />
           <Area
             type="monotone"
             dataKey="gpa"
-            stroke="#34d399"
+            stroke={chartPrimary}
             strokeWidth={3}
             fillOpacity={1}
             fill="url(#colorGpa)"
-            activeDot={{ r: 6, fill: '#34d399', stroke: '#1e293b', strokeWidth: 2 }}
+            activeDot={{ r: 6, fill: chartPrimary, stroke: chartCard, strokeWidth: 2 }}
           />
         </AreaChart>
       </ResponsiveContainer>

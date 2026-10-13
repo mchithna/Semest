@@ -126,6 +126,7 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
           <Button
             variant="ghost"
             size="icon"
+            aria-label="Close"
             onClick={onClose}
             className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-full"
           >

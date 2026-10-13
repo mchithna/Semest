@@ -27,6 +27,14 @@ export const CLASSIFICATION_META: Record<string, { label: string; badgeVariant: 
 /** Honors cuts assume a 4-point scale. Wider scales keep the numeric GPA only. */
 export const HONORS_MAX_POINTS = 4.5
 
+/** Display precision for GPA. The calculation itself keeps four decimals. */
+export const GPA_DECIMALS = 2
+
+export function formatGpa(value: number): string {
+  if (!Number.isFinite(value)) return '—'
+  return value.toFixed(GPA_DECIMALS)
+}
+
 export const UNGRADED_GRADE = 'Not graded'
 
 export function honorsApply(scale: GradeRow[]): boolean {

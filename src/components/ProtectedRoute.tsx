@@ -35,8 +35,9 @@ export function ProtectedRoute({
 
   if (loading || (session && checkingProfile)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div role="status" className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <span className="sr-only">Loading</span>
       </div>
     )
   }

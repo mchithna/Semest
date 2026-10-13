@@ -70,7 +70,9 @@ export default function PresetDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background text-foreground p-8 pb-32">
+      <div role="status" className="min-h-screen bg-background text-foreground p-8 pb-32">
+        <title>Preset · Semest</title>
+        <span className="sr-only">Loading</span>
         <div className="max-w-4xl mx-auto space-y-8">
           <Skeleton className="h-10 w-40 bg-muted" />
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b pb-8">
@@ -93,6 +95,7 @@ export default function PresetDetailPage() {
   if (isError || !preset) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-8 text-center text-foreground">
+        <title>Preset not found · Semest</title>
         <FileText className="w-16 h-16 text-destructive mb-6 opacity-50" />
         <h2 className="text-2xl font-mono font-bold tracking-widest uppercase mb-2">Preset Not Found</h2>
         <p className="text-muted-foreground font-mono text-sm mb-8 max-w-md">
@@ -112,6 +115,7 @@ export default function PresetDetailPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground p-8 pb-32">
+      <title>{`${preset.title} · Semest`}</title>
       <div className="max-w-4xl mx-auto space-y-8 animate-slideUp">
         
         <div className="flex items-center gap-4 text-primary mb-6">

@@ -140,11 +140,8 @@ export default function NewPresetPage() {
               disabled={createPreset.isPending || !selectedDegreeId || !title.trim()}
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold font-mono text-sm uppercase tracking-widest mt-4"
             >
-              {createPreset.isPending ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                'Generate Preset Code'
-              )}
+              {createPreset.isPending && <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />}
+              {createPreset.isPending ? 'Generating preset…' : 'Generate Preset Code'}
             </Button>
           </form>
         </Card>

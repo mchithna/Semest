@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
 import type { GradeRow } from '@/lib/queries/gradeScales'
+import { formatGpa, GPA_DECIMALS } from '@/lib/score'
 
 type TargetPredictorProps = {
   currentCgpa: number
@@ -71,22 +72,24 @@ export function TargetPredictor({ currentCgpa, earnedCredits, gradeScale, initia
 
       <div className="space-y-4 mb-6">
         <div className="space-y-2">
-          <Label className="text-xs font-mono text-muted-foreground uppercase tracking-widest">Desired CGPA</Label>
+          <Label htmlFor="desired-cgpa" className="text-xs font-mono text-muted-foreground uppercase tracking-widest">Desired CGPA</Label>
           <Input 
+            id="desired-cgpa"
             type="number" 
             step="0.01" 
             min="0" 
             max={maxPoints}
             value={targetCgpa} 
             onChange={(e) => setTargetCgpa(e.target.value)} 
-            placeholder={`e.g. ${maxPoints.toFixed(2)}`}
+            placeholder={`e.g. ${formatGpa(maxPoints)}`}
             className="bg-background border-border text-foreground font-mono"
           />
         </div>
         <div className="space-y-2">
-          <Label className="text-xs font-mono text-muted-foreground uppercase tracking-widest">Remaining Credits</Label>
+          <Label htmlFor="remaining-credits" className="text-xs font-mono text-muted-foreground uppercase tracking-widest">Remaining Credits</Label>
           <p className="text-[11px] font-mono text-muted-foreground">Uses graded credits, including fails, as the current base.</p>
           <Input 
+            id="remaining-credits"
             type="number" 
             step="1" 
             min="1"
@@ -113,7 +116,7 @@ export function TargetPredictor({ currentCgpa, earnedCredits, gradeScale, initia
               ) : requiredGpa <= 0 ? (
                 'Secured'
               ) : (
-                <AnimatedNumber value={requiredGpa} decimals={3} />
+                <AnimatedNumber value={requiredGpa} decimals={GPA_DECIMALS} />
               )}
             </div>
             <div className={`flex items-start justify-center gap-2 mt-2 text-xs font-mono ${statusColor}`}>
