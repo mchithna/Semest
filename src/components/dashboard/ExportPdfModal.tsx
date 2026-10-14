@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react'
 import { FileDown, Loader2, X, FileText, Sparkles, Layout } from 'lucide-react'
 import { pdf } from '@react-pdf/renderer'
 import { toast } from 'sonner'
+import { friendlyError } from '@/lib/errors'
 import type { DegreeWithScale } from '@/lib/queries/degrees'
 import type { SemesterWithModules } from '@/lib/queries/semesters'
 import { PdfTemplates, type PdfExportOptions } from './PdfTemplates'
@@ -91,11 +92,11 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
 
-      toast.success('Vector PDF report downloaded successfully!')
+      toast.success('PDF downloaded')
       onClose()
     } catch (err: any) {
       console.error('PDF export error:', err)
-      toast.error(err?.message || 'Failed to generate PDF document.')
+      toast.error(friendlyError(err, "Couldn't create the PDF. Try again."))
     } finally {
       setIsExporting(false)
     }
@@ -119,8 +120,8 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
         <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/40">
           <div className="flex items-center gap-2">
             <FileDown className="w-5 h-5 text-primary" />
-            <h2 className="text-lg font-bold tracking-widest uppercase text-foreground">
-              Customize PDF Academic Report
+            <h2 className="text-lg font-sans font-semibold text-foreground">
+              PDF report
             </h2>
           </div>
           <Button
@@ -169,7 +170,7 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
                   }`}
                 >
                   <Sparkles className="w-5 h-5" />
-                  <span className="text-xs">UniScore Modern</span>
+                  <span className="text-xs">Semest Modern</span>
                 </button>
 
                 <button
@@ -203,7 +204,7 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
               {options.includeName && (
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">
+                    <Label className="text-xs text-muted-foreground uppercase tracking-wider">
                       Student Name
                     </Label>
                     <Input
@@ -214,7 +215,7 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">
+                    <Label className="text-xs text-muted-foreground uppercase tracking-wider">
                       Email / ID
                     </Label>
                     <Input
@@ -317,7 +318,7 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
             variant="outline"
             onClick={onClose}
             disabled={isExporting}
-            className="font-mono text-xs uppercase tracking-wider rounded-sm border-border"
+            className="text-xs rounded-sm border-border"
           >
             Cancel
           </Button>
@@ -325,7 +326,7 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
           <Button
             onClick={handleExportPdf}
             disabled={isExporting}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold font-mono text-xs uppercase tracking-widest rounded-sm"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs rounded-sm"
           >
             {isExporting ? (
               <>

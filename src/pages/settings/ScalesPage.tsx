@@ -5,6 +5,7 @@ import {
   ChevronDown, ChevronUp
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { friendlyError } from '@/lib/errors'
 import { useGradeScales } from '@/hooks/useGradeScales'
 import type { GradeScale } from '@/lib/queries/gradeScales'
 import { GradeScaleEditor } from '@/components/settings/GradeScaleEditor'
@@ -28,7 +29,7 @@ function ThemeChoiceButton({ value, label }: { value: "light" | "dark" | "system
   return (
     <button
       onClick={() => setTheme(value)}
-      className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-mono font-bold uppercase tracking-widest transition-all ${
+      className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-medium transition-all ${
         isActive 
           ? 'bg-background text-foreground shadow-xs border border-border' 
           : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
@@ -96,9 +97,9 @@ export default function ScalesPage() {
     if (!confirm('Are you sure you want to delete this scale? Any degrees using it will lose their scale association.')) return
     try {
       await deleteScale(id)
-      toast.success('Scale deleted successfully')
+      toast.success('Scale deleted')
     } catch (err: any) {
-      toast.error(err.message)
+      toast.error(friendlyError(err, "Couldn't delete the scale. Try again."))
     }
   }
 
@@ -143,9 +144,9 @@ export default function ScalesPage() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-      toast.success('Degree data exported successfully!')
+      toast.success('Degree data exported')
     } catch (err: any) {
-      toast.error(err.message || 'Failed to export backup data')
+      toast.error(friendlyError(err, "Couldn't export your degrees. Try again."))
     } finally {
       setIsExporting(false)
     }
@@ -191,7 +192,7 @@ export default function ScalesPage() {
       await queryClient.invalidateQueries()
       toast.success('Backup imported as new degrees')
     } catch (err: any) {
-      toast.error(err.message || 'Could not import that file')
+      toast.error(friendlyError(err, "Couldn't import that file. Try again."))
     } finally {
       setIsImporting(false)
     }
@@ -212,16 +213,16 @@ export default function ScalesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-6 sm:p-8 pb-32">
+    <div className="min-h-screen bg-background text-foreground p-4 sm:p-8 pb-32">
       <div className="max-w-4xl mx-auto space-y-8 animate-slideUp">
         
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b pb-6">
           <div>
-            <h1 className="text-3xl font-mono font-bold tracking-widest uppercase text-primary flex items-center gap-3">
+            <h1 className="text-3xl font-sans font-bold tracking-tight text-primary flex items-center gap-3">
               <Sliders className="w-7 h-7" /> Settings
             </h1>
-            <p className="text-muted-foreground font-mono text-sm mt-2">
+            <p className="text-muted-foreground text-sm mt-2">
               Manage your grading systems, theme, and account preferences.
             </p>
           </div>
@@ -231,10 +232,10 @@ export default function ScalesPage() {
         <Card className="p-5 bg-card border-border">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h3 className="font-mono text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
+              <h2 className="font-sans text-base font-semibold text-foreground flex items-center gap-2">
                 Appearance
-              </h3>
-              <p className="text-xs font-mono text-muted-foreground mt-0.5">Select your preferred color theme.</p>
+              </h2>
+              <p className="text-xs text-muted-foreground mt-0.5">Select your preferred color theme.</p>
             </div>
             <div className="flex items-center bg-muted rounded p-1">
               <ThemeChoiceButton value="light" label="Light" />
@@ -248,27 +249,27 @@ export default function ScalesPage() {
         <div className="space-y-4">
           <div className="flex justify-between items-end border-b pb-3">
             <div>
-              <h2 className="text-base font-mono font-bold tracking-widest uppercase text-primary flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-primary" /> Your Custom Scales
+              <h2 className="text-base font-sans font-semibold text-foreground flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-primary" /> Your custom scales
               </h2>
-              <p className="text-xs font-mono text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 Custom grading systems for your university or special programs.
               </p>
             </div>
             <Button
               onClick={handleCreate}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded font-mono text-xs uppercase tracking-widest"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded text-xs"
             >
               <Plus className="w-4 h-4 mr-2" />
-              New Scale
+              New scale
             </Button>
           </div>
 
           {userScales.length === 0 ? (
             <div className="bg-card border border-border border-dashed rounded-lg p-8 text-center space-y-3">
               <Sliders className="w-8 h-8 text-muted-foreground mx-auto opacity-40" />
-              <h3 className="text-sm font-mono font-bold text-foreground">No custom scales created yet</h3>
-              <p className="text-muted-foreground font-mono text-xs max-w-md mx-auto">
+              <h3 className="text-sm font-sans font-semibold text-foreground">No custom scales yet</h3>
+              <p className="text-muted-foreground text-xs max-w-md mx-auto">
                 System grade scales (Standard 4.0, Sri Lankan UGC) are used by default. Create a custom scale if your university uses unique point values.
               </p>
             </div>
@@ -282,7 +283,7 @@ export default function ScalesPage() {
                         <h3 className="font-mono text-sm font-bold text-foreground group-hover:text-primary transition-colors">{scale.label}</h3>
                         <p className="text-xs font-mono text-muted-foreground mt-0.5">{scale.grades.length} grades defined</p>
                       </div>
-                      <div className="bg-primary/10 text-primary px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase">
+                      <div className="bg-primary/10 text-primary px-2 py-0.5 rounded text-xs font-mono font-bold uppercase">
                         Custom
                       </div>
                     </div>
@@ -290,8 +291,8 @@ export default function ScalesPage() {
                     {/* Grade Preview Chips */}
                     <div className="flex flex-wrap gap-1.5 my-3">
                       {scale.grades.slice(0, 6).map((g, idx) => (
-                        <span key={idx} className="bg-muted/80 text-foreground border border-border px-2 py-0.5 rounded text-[10px] font-mono font-bold">
-                          {g.grade} <span className="text-muted-foreground text-[9px]">({g.points})</span>
+                        <span key={idx} className="bg-muted/80 text-foreground border border-border px-2 py-0.5 rounded text-xs font-mono font-bold">
+                          {g.grade} <span className="text-muted-foreground">({g.points})</span>
                         </span>
                       ))}
                       {scale.grades.length > 6 && (
@@ -305,7 +306,7 @@ export default function ScalesPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleEdit(scale)}
-                      className="font-mono text-xs text-foreground hover:text-primary h-8"
+                      className="text-xs text-foreground hover:text-primary h-8"
                     >
                       <Edit2 className="w-3.5 h-3.5 mr-1" /> Edit
                     </Button>
@@ -313,7 +314,7 @@ export default function ScalesPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleDelete(scale.id)}
-                      className="font-mono text-xs text-destructive hover:bg-destructive/10 h-8"
+                      className="text-xs text-destructive hover:bg-destructive/10 h-8"
                     >
                       <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete
                     </Button>
@@ -335,10 +336,10 @@ export default function ScalesPage() {
                 <Shield className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-mono text-sm font-bold text-foreground uppercase tracking-wider">
-                  Built-In System Scales ({systemScales.length})
-                </h3>
-                <p className="text-xs font-mono text-muted-foreground mt-0.5">
+                <h2 className="font-sans text-base font-semibold text-foreground">
+                  Built-in scales ({systemScales.length})
+                </h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Standard grading systems provided by default (Standard 4.0, Sri Lankan UGC...)
                 </p>
               </div>
@@ -357,15 +358,15 @@ export default function ScalesPage() {
                           <h4 className="font-mono text-sm font-bold text-foreground">{scale.label}</h4>
                           <p className="text-xs font-mono text-muted-foreground mt-0.5">{scale.grades.length} letter grades</p>
                         </div>
-                        <span className="bg-muted text-muted-foreground px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-widest">
+                        <span className="bg-muted text-muted-foreground px-2 py-0.5 rounded text-xs font-mono uppercase tracking-widest">
                           System
                         </span>
                       </div>
 
                       <div className="flex flex-wrap gap-1.5 my-3">
                         {scale.grades.slice(0, 6).map((g, idx) => (
-                          <span key={idx} className="bg-muted/80 text-foreground border border-border px-1.5 py-0.5 rounded text-[10px] font-mono font-bold">
-                            {g.grade} <span className="text-muted-foreground text-[9px]">({g.points})</span>
+                          <span key={idx} className="bg-muted/80 text-foreground border border-border px-1.5 py-0.5 rounded text-xs font-mono font-bold">
+                            {g.grade} <span className="text-muted-foreground">({g.points})</span>
                           </span>
                         ))}
                       </div>
@@ -376,7 +377,7 @@ export default function ScalesPage() {
                         variant="outline" 
                         size="sm"
                         onClick={() => handleView(scale)}
-                        className="flex-1 font-mono text-xs text-foreground hover:text-primary h-8"
+                        className="flex-1 text-xs text-foreground hover:text-primary h-8"
                       >
                         View
                       </Button>
@@ -384,9 +385,9 @@ export default function ScalesPage() {
                         variant="outline" 
                         size="sm"
                         onClick={() => handleCloneScale(scale)}
-                        className="font-mono text-xs text-foreground hover:text-primary h-8"
+                        className="text-xs text-foreground hover:text-primary h-8"
                       >
-                        <Copy className="w-3.5 h-3.5 mr-1" /> Clone & Edit
+                        <Copy className="w-3.5 h-3.5 mr-1" /> Clone and edit
                       </Button>
                     </div>
                   </Card>
@@ -413,10 +414,10 @@ export default function ScalesPage() {
                 <User className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-mono text-sm font-bold text-foreground uppercase tracking-wider">
-                  Account & Profile
-                </h3>
-                <p className="text-xs font-mono text-muted-foreground mt-0.5">
+                <h2 className="font-sans text-base font-semibold text-foreground">
+                  Account
+                </h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Signed in as <span className="text-foreground font-bold">{session?.user?.email}</span>
                 </p>
               </div>
@@ -428,12 +429,12 @@ export default function ScalesPage() {
             <div className="p-5 border-t border-border bg-muted/10 space-y-4 animate-fadeIn max-w-xl">
               <div className="space-y-2 font-mono text-xs">
                 <div className="flex justify-between py-2 border-b border-border">
-                  <span className="text-muted-foreground">User Email</span>
+                  <span className="text-muted-foreground">Email</span>
                   <span className="text-foreground font-bold">{session?.user?.email}</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-border">
-                  <span className="text-muted-foreground">Active Degrees</span>
-                  <span className="text-primary font-bold">{degrees.length} Managed Degrees</span>
+                  <span className="text-muted-foreground">Degrees</span>
+                  <span className="text-primary font-bold tabular-nums">{degrees.length}</span>
                 </div>
                 <div className="flex justify-between py-2">
                   <span className="text-muted-foreground">Status</span>
@@ -459,12 +460,12 @@ export default function ScalesPage() {
                         await updateDisplayName(displayName)
                         toast.success('Display name saved')
                       } catch (err: any) {
-                        toast.error(err.message)
+                        toast.error(friendlyError(err, "Couldn't save your name. Try again."))
                       } finally {
                         setSavingName(false)
                       }
                     }}
-                    className="font-mono text-xs uppercase tracking-widest"
+                    className="text-xs"
                   >
                     Save
                   </Button>
@@ -475,9 +476,9 @@ export default function ScalesPage() {
                 <Button 
                   variant="outline" 
                   onClick={() => signOut()}
-                  className="w-full border-destructive/50 text-destructive hover:bg-destructive/10 font-mono text-xs uppercase tracking-widest h-10"
+                  className="w-full border-destructive/50 text-destructive hover:bg-destructive/10 h-10"
                 >
-                  <LogOut className="w-4 h-4 mr-2" /> Sign Out
+                  <LogOut className="w-4 h-4 mr-2" /> Sign out
                 </Button>
               </div>
             </div>
@@ -495,10 +496,10 @@ export default function ScalesPage() {
                 <Database className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-mono text-sm font-bold text-foreground uppercase tracking-wider">
-                  Data Backup & Maintenance
-                </h3>
-                <p className="text-xs font-mono text-muted-foreground mt-0.5">
+                <h2 className="font-sans text-base font-semibold text-foreground">
+                  Backup
+                </h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Export JSON degree backups and manage local guest session memory.
                 </p>
               </div>
@@ -510,18 +511,18 @@ export default function ScalesPage() {
             <div className="p-5 border-t border-border bg-muted/10 grid gap-4 sm:grid-cols-2 animate-fadeIn">
               <div className="p-4 bg-card border border-border rounded space-y-3 flex flex-col justify-between">
                 <div>
-                  <h4 className="font-mono text-sm font-bold text-foreground">Export Degree Data</h4>
-                  <p className="font-mono text-xs text-muted-foreground mt-1">
+                  <h3 className="font-sans text-sm font-semibold text-foreground">Export your degrees</h3>
+                  <p className="text-xs text-muted-foreground mt-1">
                     Download a JSON backup of all your degrees, semesters, and custom scales.
                   </p>
                 </div>
                 <Button 
                   onClick={handleExportData}
                   disabled={isExporting}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-mono font-bold text-xs uppercase tracking-widest h-9 w-full"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs h-9 w-full"
                 >
                   {isExporting ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" /> : <Download className="w-3.5 h-3.5 mr-1.5" />}
-                  Download Backup
+                  Download backup
                 </Button>
                 <label className="block">
                   <input
@@ -535,7 +536,7 @@ export default function ScalesPage() {
                       if (file) handleImportData(file)
                     }}
                   />
-                  <span className="inline-flex w-full h-9 items-center justify-center rounded-md border border-border font-mono text-xs uppercase tracking-widest cursor-pointer">
+                  <span className="inline-flex w-full h-9 items-center justify-center rounded-md border border-border text-xs cursor-pointer">
                     {isImporting ? 'Importing…' : 'Import backup'}
                   </span>
                 </label>
@@ -543,17 +544,17 @@ export default function ScalesPage() {
 
               <div className="p-4 bg-card border border-border rounded space-y-3 flex flex-col justify-between">
                 <div>
-                  <h4 className="font-mono text-sm font-bold text-foreground">Reset Guest Cache</h4>
-                  <p className="font-mono text-xs text-muted-foreground mt-1">
+                  <h3 className="font-sans text-sm font-semibold text-foreground">Guest draft</h3>
+                  <p className="text-xs text-muted-foreground mt-1">
                     Clear temporary guest calculator drafts stored in browser memory.
                   </p>
                 </div>
                 <Button 
                   onClick={handleClearGuestDraft}
                   variant="outline"
-                  className="border-amber-500/50 text-amber-400 hover:bg-amber-500/10 font-mono font-bold text-xs uppercase tracking-widest h-9 w-full"
+                  className="border-amber-500/50 text-amber-400 hover:bg-amber-500/10 font-bold text-xs h-9 w-full"
                 >
-                  Clear Draft Cache
+                  Clear draft
                 </Button>
               </div>
             </div>

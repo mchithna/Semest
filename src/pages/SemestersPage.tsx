@@ -19,7 +19,7 @@ export default function SemestersPage() {
 
   if (isDegreesLoading || isSemestersLoading) {
     return (
-      <div role="status" className="min-h-screen bg-background text-foreground p-8">
+      <div role="status" className="min-h-screen bg-background text-foreground p-4 sm:p-8">
         <title>Semesters · Semest</title>
         <span className="sr-only">Loading</span>
         <div className="max-w-6xl mx-auto space-y-8">
@@ -53,9 +53,9 @@ export default function SemestersPage() {
     )
   }
 
-  const handleDelete = async (id: string, e: React.MouseEvent) => {
+  const handleDelete = async (id: string, title: string, e: React.MouseEvent) => {
     e.stopPropagation()
-    if (!confirm('Are you sure you want to delete this semester?')) return
+    if (!confirm(`Delete ${title}? Its modules and grades will be removed.`)) return
     try {
       await deleteSemester(id)
     } catch (err: any) {
@@ -64,7 +64,7 @@ export default function SemestersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-8">
+    <div className="min-h-screen bg-background text-foreground p-4 sm:p-8">
       <title>{`${degree.title} · Semest`}</title>
       <div className="max-w-6xl mx-auto space-y-8 animate-slideUp">
         
@@ -72,19 +72,19 @@ export default function SemestersPage() {
         <div className="flex justify-between items-end border-b pb-6">
           <div className="flex flex-col gap-2">
             <Breadcrumb items={[{ label: degree.title }]} />
-            <h1 className="text-2xl font-mono font-bold tracking-widest uppercase text-foreground">
+            <h1 className="text-2xl font-sans font-bold tracking-tight text-foreground">
               {degree.title}
             </h1>
-            <p className="text-muted-foreground font-mono text-sm">
+            <p className="text-muted-foreground text-sm">
               Manage semesters for this degree.
             </p>
           </div>
           <Button
             onClick={() => navigate(`/degrees/${degreeId}/semesters/new`)}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl font-mono text-xs uppercase tracking-widest"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl text-xs"
           >
             <Plus className="w-4 h-4 mr-2" />
-            New Semester
+            New semester
           </Button>
         </div>
 
@@ -92,14 +92,14 @@ export default function SemestersPage() {
         {semesters.length === 0 ? (
           <div className="bg-card border border-border border-dashed rounded-xl p-12 text-center">
             <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-            <h3 className="text-foreground font-mono text-lg mb-2">No semesters found</h3>
-            <p className="text-muted-foreground font-mono text-sm mb-6">Create your first semester to start calculating your GPA.</p>
+            <h3 className="text-foreground font-sans text-lg font-semibold mb-2">No semesters found</h3>
+            <p className="text-muted-foreground text-sm mb-6">Create your first semester to start calculating your GPA.</p>
             <Button
               onClick={() => navigate(`/degrees/${degreeId}/semesters/new`)}
               variant="outline"
-              className="border-border text-primary hover:bg-muted hover:text-primary rounded-xl font-mono text-xs uppercase tracking-widest"
+              className="border-border text-primary hover:bg-muted hover:text-primary rounded-xl text-xs"
             >
-              Add Semester
+              Add semester
             </Button>
           </div>
         ) : (
@@ -147,7 +147,7 @@ export default function SemestersPage() {
                         variant="ghost"
                         size="icon"
                         aria-label={`Delete ${sem.title}`}
-                        onClick={(e) => handleDelete(sem.id, e)}
+                        onClick={(e) => handleDelete(sem.id, sem.title, e)}
                         className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-sm"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -158,16 +158,16 @@ export default function SemestersPage() {
                   <div className="mt-auto pt-4 border-t flex flex-col gap-3 min-w-0">
                     <div className="grid grid-cols-3 gap-3">
                       <div className="min-w-0">
-                        <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Passed</p>
-                        <p className="font-mono text-sm font-semibold text-foreground">{earned.toFixed(1)}</p>
+                        <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Passed</p>
+                        <p className="font-mono text-sm font-semibold tabular-nums text-foreground">{earned.toFixed(1)}</p>
                       </div>
                       <div className="min-w-0">
-                        <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Graded</p>
-                        <p className="font-mono text-sm font-semibold text-foreground">{attempted.toFixed(1)}</p>
+                        <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Graded</p>
+                        <p className="font-mono text-sm font-semibold tabular-nums text-foreground">{attempted.toFixed(1)}</p>
                       </div>
                       <div className="min-w-0">
-                        <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">GPA</p>
-                        <p className={`font-mono text-sm font-semibold ${attempted > 0 ? 'text-primary' : 'text-muted-foreground'}`}>
+                        <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground">GPA</p>
+                        <p className={`font-mono text-sm font-semibold tabular-nums ${attempted > 0 ? 'text-primary' : 'text-muted-foreground'}`}>
                           {attempted > 0 ? formatGpa(score) : '—'}
                         </p>
                       </div>

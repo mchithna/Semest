@@ -396,7 +396,7 @@ export const ReactPdfDocument: React.FC<ReactPdfDocumentProps> = ({
           })}
 
         <Text style={styles.footer}>
-          Generated via UniScore Track • Academic Progression Report
+          Generated via Semest • Academic Progression Report
         </Text>
       </Page>
     </Document>

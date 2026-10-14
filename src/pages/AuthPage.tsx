@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabase'
+import { friendlyError } from '@/lib/errors'
 
 const schema = z.object({
   email: z.string().email('Enter a valid email'),
@@ -59,7 +60,7 @@ export default function AuthPage() {
   const onSignIn = async (data: FormData) => {
     const { error } = await signIn(data.email, data.password)
     if (error) {
-      toast.error(error.message)
+      toast.error(friendlyError(error, "Couldn't sign in. Try again."))
       return
     }
     await redirectAfterSignIn()
@@ -75,7 +76,7 @@ export default function AuthPage() {
   const onSignUp = async (data: FormData) => {
     const { error, needsConfirmation } = await signUp(data.email, data.password)
     if (error) {
-      toast.error(error.message)
+      toast.error(friendlyError(error, "Couldn't create the account. Try again."))
       return
     }
     if (needsConfirmation) {
@@ -93,7 +94,7 @@ export default function AuthPage() {
     })
     setBusy(false)
     if (error) {
-      toast.error(error.message)
+      toast.error(friendlyError(error, "Couldn't send the reset email. Try again."))
       return
     }
     setResetSent(true)
@@ -109,7 +110,7 @@ export default function AuthPage() {
     const { error } = await supabase.auth.updateUser({ password: newPassword })
     setBusy(false)
     if (error) {
-      toast.error(error.message)
+      toast.error(friendlyError(error, "Couldn't update the password. Try again."))
       return
     }
     toast.success('Password updated')
@@ -128,10 +129,10 @@ export default function AuthPage() {
           </div>
           <div className="text-center">
             <h1 className="text-xl font-mono font-bold tracking-widest uppercase text-foreground">
-              UniScore Track
+              Semest
             </h1>
-            <p className="text-xs tracking-widest uppercase text-muted-foreground mt-1">
-              Academic Performance System
+            <p className="text-xs text-muted-foreground mt-1">
+              Academic performance system
             </p>
           </div>
         </div>
@@ -140,19 +141,19 @@ export default function AuthPage() {
         <div className="bg-card border border-border rounded-xl p-8 shadow-2xl">
           {confirmEmail && (
             <div className="space-y-4 text-center">
-              <h2 className="font-mono text-sm uppercase tracking-widest text-foreground">Check your email</h2>
-              <p className="text-sm text-muted-foreground font-mono">
+              <h2 className="font-sans text-base font-semibold text-foreground">Check your email</h2>
+              <p className="text-sm text-muted-foreground">
                 We sent a confirmation link to {confirmEmail}. Open it, then sign in.
               </p>
-              <Button variant="outline" className="font-mono" onClick={() => setConfirmEmail(null)}>Back to sign in</Button>
+              <Button variant="outline" className="" onClick={() => setConfirmEmail(null)}>Back to sign in</Button>
             </div>
           )}
 
           {mode === 'forgot' && !confirmEmail && (
             <form onSubmit={sendReset} className="space-y-5">
-              <h2 className="font-mono text-sm uppercase tracking-widest text-foreground">Reset password</h2>
+              <h2 className="font-sans text-base font-semibold text-foreground">Reset password</h2>
               {resetSent ? (
-                <p className="text-sm text-muted-foreground font-mono">If that email has an account, a reset link is on its way.</p>
+                <p className="text-sm text-muted-foreground">If that email has an account, a reset link is on its way.</p>
               ) : (
                 <div className="space-y-2 text-left">
                   <Label htmlFor="reset-email" className="text-xs tracking-widest uppercase text-muted-foreground font-mono">Email</Label>
@@ -160,23 +161,23 @@ export default function AuthPage() {
                 </div>
               )}
               {!resetSent && (
-                <Button type="submit" disabled={busy} className="w-full font-mono uppercase tracking-widest text-xs">
+                <Button type="submit" disabled={busy} className="w-full text-xs">
                   {busy && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
                   {busy ? 'Sending reset link…' : 'Send reset link'}
                 </Button>
               )}
-              <Button type="button" variant="ghost" className="w-full font-mono" onClick={() => setMode('auth')}>Back</Button>
+              <Button type="button" variant="ghost" className="w-full" onClick={() => setMode('auth')}>Back</Button>
             </form>
           )}
 
           {mode === 'recovery' && !confirmEmail && (
             <form onSubmit={saveNewPassword} className="space-y-5">
-              <h2 className="font-mono text-sm uppercase tracking-widest text-foreground">Choose a new password</h2>
+              <h2 className="font-sans text-base font-semibold text-foreground">Choose a new password</h2>
               <div className="space-y-2 text-left">
                 <Label htmlFor="new-password" className="text-xs tracking-widest uppercase text-muted-foreground font-mono">New password</Label>
                 <Input id="new-password" type="password" required value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password" className="font-mono" />
               </div>
-              <Button type="submit" disabled={busy} className="w-full font-mono uppercase tracking-widest text-xs">
+              <Button type="submit" disabled={busy} className="w-full text-xs">
                 {busy && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
                 {busy ? 'Updating password…' : 'Update password'}
               </Button>
@@ -188,15 +189,15 @@ export default function AuthPage() {
             <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted rounded-lg h-10">
               <TabsTrigger
                 value="signin"
-                className="rounded-md text-xs tracking-widest uppercase font-mono data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold text-muted-foreground"
+                className="rounded-md text-xs font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold text-muted-foreground"
               >
-                Sign In
+                Sign in
               </TabsTrigger>
               <TabsTrigger
                 value="signup"
-                className="rounded-md text-xs tracking-widest uppercase font-mono data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold text-muted-foreground"
+                className="rounded-md text-xs font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold text-muted-foreground"
               >
-                Sign Up
+                Sign up
               </TabsTrigger>
             </TabsList>
 
@@ -255,10 +256,10 @@ export default function AuthPage() {
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs tracking-widest uppercase rounded-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/20"
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs rounded-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/20"
                 >
                   {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
-                  {isSubmitting ? 'Signing in…' : 'Sign In'}
+                  {isSubmitting ? 'Signing in…' : 'Sign in'}
                 </Button>
               </form>
             </TabsContent>
@@ -315,12 +316,12 @@ export default function AuthPage() {
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs tracking-widest uppercase rounded-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/20"
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs rounded-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/20"
                 >
                   {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
-                  {isSubmitting ? 'Creating account…' : 'Create Account'}
+                  {isSubmitting ? 'Creating account…' : 'Create account'}
                 </Button>
-                <p className="text-center text-xs text-muted-foreground font-mono">
+                <p className="text-center text-xs text-muted-foreground">
                   Your data is private and secured by Supabase.
                 </p>
               </form>
@@ -330,8 +331,8 @@ export default function AuthPage() {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-xs text-muted-foreground font-mono mt-6 tracking-widest uppercase">
-          Calculate · Persist · Visualize
+        <p className="text-center text-xs text-muted-foreground mt-6">
+          Calculate · persist · visualize
         </p>
       </div>
     </div>

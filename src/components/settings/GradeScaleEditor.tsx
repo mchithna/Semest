@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Plus, Trash2, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { friendlyError } from '@/lib/errors'
 import {
   Dialog,
   DialogContent,
@@ -80,7 +81,7 @@ export function GradeScaleEditor({
       onOpenChange(false)
       toast.success(initialData ? 'Scale updated' : 'Scale created')
     } catch (err: any) {
-      toast.error(err.message)
+      toast.error(friendlyError(err, "Couldn't save the scale. Try again."))
     } finally {
       setIsSaving(false)
     }
@@ -90,8 +91,8 @@ export function GradeScaleEditor({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px] bg-background border-border text-foreground">
         <DialogHeader>
-          <DialogTitle className="font-mono text-primary uppercase tracking-widest text-sm">
-            {isReadOnly ? 'View Grade Scale' : initialData ? 'Edit Grade Scale' : 'New Grade Scale'}
+          <DialogTitle className="font-sans font-semibold text-primary">
+            {isReadOnly ? 'View grade scale' : initialData ? 'Edit grade scale' : 'New grade scale'}
           </DialogTitle>
         </DialogHeader>
 
@@ -182,7 +183,7 @@ export function GradeScaleEditor({
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="border-border text-muted-foreground hover:bg-muted hover:text-foreground rounded-sm font-mono text-xs uppercase tracking-widest"
+              className="border-border text-muted-foreground hover:bg-muted hover:text-foreground rounded-sm text-xs"
             >
               {isReadOnly ? 'Close' : 'Cancel'}
             </Button>
@@ -190,10 +191,10 @@ export function GradeScaleEditor({
               <Button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-sm font-mono text-xs uppercase tracking-widest"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-sm text-xs"
               >
                 {isSaving && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
-                {isSaving ? 'Saving scale…' : 'Save Scale'}
+                {isSaving ? 'Saving scale…' : 'Save scale'}
               </Button>
             )}
           </div>

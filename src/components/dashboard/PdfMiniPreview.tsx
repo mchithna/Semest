@@ -284,7 +284,7 @@ export const PdfMiniPreview: React.FC<PdfMiniPreviewProps> = ({
 
         {/* Mini Watermark Footer */}
         <div className="text-[6px] text-center text-slate-400 border-t border-slate-300/20 pt-1">
-          A4 Document • UniScore Export Engine
+          A4 Document • Semest
         </div>
       </div>
     </div>

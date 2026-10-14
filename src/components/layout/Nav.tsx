@@ -20,7 +20,7 @@ export function Nav() {
     { label: 'Presets', path: '/presets' },
     { label: 'Settings', path: '/settings' },
   ] : [
-    { label: 'Browse Presets', path: '/presets' },
+    { label: 'Browse presets', path: '/presets' },
   ]
 
   return (
@@ -29,10 +29,10 @@ export function Nav() {
         
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <Link to="/" aria-label="Semest home" className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors">
+          <Link to="/" aria-label="Semest home" className="flex items-center gap-2 shrink-0 whitespace-nowrap text-primary hover:text-primary/80 transition-colors">
             <GraduationCap className="h-6 w-6" />
             <span className="font-mono text-xl font-bold tracking-widest uppercase hidden sm:inline-block">
-              UniScore Track
+              Semest
             </span>
           </Link>
         </div>
@@ -44,9 +44,9 @@ export function Nav() {
               <NavLink
                 key={link.path}
                 to={link.path}
-                className={({ isActive }) => `text-sm font-mono tracking-wider uppercase transition-colors ${
+                className={({ isActive }) => `text-sm font-sans font-medium transition-colors ${
                   isActive
-                    ? 'text-primary font-bold'
+                    ? 'text-primary font-semibold'
                     : 'text-muted-foreground hover:text-primary'
                 }`}
               >
@@ -68,10 +68,10 @@ export function Nav() {
                 variant="ghost" 
                 size="sm" 
                 onClick={handleSignOut}
-                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 font-mono text-xs uppercase tracking-widest"
+                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 text-xs"
               >
                 <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
+                Sign out
               </Button>
             </div>
           ) : (
@@ -79,15 +79,15 @@ export function Nav() {
               <Button 
                 variant="ghost" 
                 onClick={() => navigate('/auth')}
-                className="text-muted-foreground hover:text-primary hover:bg-transparent font-mono text-sm uppercase tracking-widest"
+                className="text-muted-foreground hover:text-primary hover:bg-transparent"
               >
                 Log in
               </Button>
               <Button 
                 onClick={() => navigate('/auth')}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold font-mono text-sm uppercase tracking-widest"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold"
               >
-                Get Started
+                Get started
               </Button>
             </div>
           )}
@@ -113,9 +113,9 @@ export function Nav() {
                     <NavLink
                       key={link.path}
                       to={link.path}
-                      className={({ isActive }) => `text-lg font-mono tracking-wider uppercase transition-colors ${
+                      className={({ isActive }) => `text-base font-sans font-medium transition-colors ${
                         isActive
-                          ? 'text-primary font-bold'
+                          ? 'text-primary font-semibold'
                           : 'text-muted-foreground hover:text-primary'
                       }`}
                     >
@@ -134,10 +134,10 @@ export function Nav() {
                     <Button 
                       variant="outline" 
                       onClick={handleSignOut}
-                      className="w-full justify-start border-border text-muted-foreground hover:text-destructive hover:bg-destructive/10 font-mono uppercase tracking-widest"
+                      className="w-full justify-start border-border text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                     >
                       <LogOut className="h-4 w-4 mr-2" />
-                      Sign Out
+                      Sign out
                     </Button>
                   </div>
                 ) : (
@@ -145,15 +145,15 @@ export function Nav() {
                     <Button 
                       variant="outline" 
                       onClick={() => navigate('/auth')}
-                      className="w-full justify-center border-border text-muted-foreground hover:text-primary font-mono uppercase tracking-widest"
+                      className="w-full justify-center border-border text-muted-foreground hover:text-primary"
                     >
                       Log in
                     </Button>
                     <Button 
                       onClick={() => navigate('/auth')}
-                      className="w-full justify-center bg-primary hover:bg-primary/90 text-primary-foreground font-bold font-mono uppercase tracking-widest"
+                      className="w-full justify-center bg-primary hover:bg-primary/90 text-primary-foreground font-bold"
                     >
-                      Get Started
+                      Get started
                     </Button>
                   </div>
                 )}

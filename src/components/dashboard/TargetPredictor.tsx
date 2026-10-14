@@ -65,8 +65,8 @@ export function TargetPredictor({ currentCgpa, earnedCredits, gradeScale, initia
     <Card className="bg-card border-border p-6 flex flex-col h-full">
       <div className="flex items-center gap-2 mb-6">
         <Target className="w-5 h-5 text-primary" />
-        <h2 className="text-lg font-mono font-bold tracking-widest text-foreground uppercase">
-          Target Predictor
+        <h2 className="text-lg font-sans font-semibold text-foreground">
+          Target predictor
         </h2>
       </div>
 
@@ -87,7 +87,7 @@ export function TargetPredictor({ currentCgpa, earnedCredits, gradeScale, initia
         </div>
         <div className="space-y-2">
           <Label htmlFor="remaining-credits" className="text-xs font-mono text-muted-foreground uppercase tracking-widest">Remaining Credits</Label>
-          <p className="text-[11px] font-mono text-muted-foreground">Uses graded credits, including fails, as the current base.</p>
+          <p className="text-xs text-muted-foreground">Uses graded credits, including fails, as the current base.</p>
           <Input 
             id="remaining-credits"
             type="number" 
@@ -102,7 +102,7 @@ export function TargetPredictor({ currentCgpa, earnedCredits, gradeScale, initia
 
       <div className="mt-auto bg-muted rounded-lg border border-border p-4 text-center">
         {requiredGpa === null ? (
-          <p className="text-sm font-mono text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Enter a target CGPA to see what you need.
           </p>
         ) : (
@@ -110,7 +110,7 @@ export function TargetPredictor({ currentCgpa, earnedCredits, gradeScale, initia
             <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest">
               Required Average GPA
             </p>
-            <div className={`text-4xl font-mono font-bold ${requiredGpa > maxPoints ? 'text-destructive' : 'text-primary'}`}>
+            <div className={`text-4xl font-mono font-bold tabular-nums ${requiredGpa > maxPoints ? 'text-destructive' : 'text-primary'}`}>
               {requiredGpa > maxPoints ? (
                 'Impossible'
               ) : requiredGpa <= 0 ? (

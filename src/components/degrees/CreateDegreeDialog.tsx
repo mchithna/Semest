@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { friendlyError } from '@/lib/errors'
 import {
   Dialog,
   DialogContent,
@@ -63,7 +64,7 @@ export function CreateDegreeDialog({
       })
       onOpenChange(false)
     } catch (err: any) {
-      toast.error(err.message)
+      toast.error(friendlyError(err, "Couldn't save the degree. Try again."))
     } finally {
       setIsSaving(false)
     }
@@ -73,8 +74,8 @@ export function CreateDegreeDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px] bg-card border-border text-foreground">
         <DialogHeader>
-          <DialogTitle className="font-mono text-primary uppercase tracking-widest text-sm">
-            {initialData ? 'Edit Degree' : 'New Degree'}
+          <DialogTitle className="font-sans font-semibold text-primary">
+            {initialData ? 'Edit degree' : 'New degree'}
           </DialogTitle>
         </DialogHeader>
 
@@ -134,17 +135,17 @@ export function CreateDegreeDialog({
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="border-border text-muted-foreground hover:bg-muted hover:text-foreground rounded-sm font-mono text-xs uppercase tracking-widest"
+              className="border-border text-muted-foreground hover:bg-muted hover:text-foreground rounded-sm text-xs"
             >
               Cancel
             </Button>
             <Button
               onClick={handleSave}
               disabled={isSaving}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-sm font-mono text-xs uppercase tracking-widest"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-sm text-xs"
             >
               {isSaving && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
-              {isSaving ? 'Saving degree…' : 'Save Degree'}
+              {isSaving ? 'Saving degree…' : 'Save degree'}
             </Button>
           </div>
         </div>

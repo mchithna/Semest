@@ -52,7 +52,7 @@ export function ModuleRow({ module, gradeScale, priorModules = [], onChange, onR
           <Input
             value={module.name}
             onChange={(e) => onChange(module.id, 'name', e.target.value)}
-            placeholder="Module Name"
+            placeholder="Module name"
             aria-label="Module name"
             className="flex-1 min-w-[120px]"
           />

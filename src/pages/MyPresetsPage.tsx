@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useDeletePreset, useMyPresets, useSyncPreset, useUpdatePreset } from '@/hooks/usePresets'
 import { useDegrees } from '@/hooks/useDegrees'
 import { toast } from 'sonner'
+import { friendlyError } from '@/lib/errors'
 
 export default function MyPresetsPage() {
   const navigate = useNavigate()
@@ -32,35 +33,35 @@ export default function MyPresetsPage() {
     navigator.clipboard.writeText(url)
     setCopiedCode(code)
     setTimeout(() => setCopiedCode(null), 2000)
-    toast.success(`Share link for preset ${code} copied to clipboard!`)
+    toast.success('Share link copied')
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-8">
+    <div className="min-h-screen bg-background text-foreground p-4 sm:p-8">
       <div className="max-w-4xl mx-auto space-y-8 animate-slideUp">
         
         <div className="flex items-center gap-4 text-primary mb-6">
           <Button variant="ghost" className="p-0 hover:bg-transparent text-primary hover:text-primary/80" onClick={() => navigate('/presets')}>
             <ArrowLeft className="w-5 h-5 mr-2" />
-            Back to Presets
+            Back to presets
           </Button>
         </div>
 
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b pb-6">
           <div>
-            <h1 className="text-2xl font-mono font-bold tracking-widest uppercase text-primary">
-              My Published Presets
+            <h1 className="text-2xl font-sans font-bold tracking-tight text-primary">
+              My presets
             </h1>
-            <p className="text-muted-foreground font-mono text-sm mt-2">
+            <p className="text-muted-foreground text-sm mt-2">
               Manage the degree presets you have shared with the community.
             </p>
           </div>
           <Button 
             onClick={() => navigate('/presets/new')}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold font-mono text-xs uppercase tracking-widest"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs"
           >
             <Plus className="w-4 h-4 mr-2" />
-            Publish New Preset
+            Publish preset
           </Button>
         </div>
 
@@ -73,8 +74,8 @@ export default function MyPresetsPage() {
         ) : !presets || presets.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 text-center border border-dashed rounded-lg bg-card/30">
             <BookTemplate className="w-12 h-12 text-muted-foreground mb-4 opacity-50" />
-            <h3 className="text-lg font-mono font-bold text-foreground mb-2">No presets published</h3>
-            <p className="text-muted-foreground font-mono text-sm max-w-md">
+            <h3 className="text-lg font-sans font-semibold text-foreground mb-2">No presets published</h3>
+            <p className="text-muted-foreground text-sm max-w-md">
               You haven't published any of your degrees as presets yet. Share your degree structure with others!
             </p>
           </div>
@@ -120,7 +121,7 @@ export default function MyPresetsPage() {
                         e.stopPropagation()
                         setSyncPresetId(preset.id)
                       }}
-                      className="flex-1 border-border text-foreground hover:text-primary hover:border-primary transition-colors text-xs font-mono"
+                      className="flex-1 border-border text-foreground hover:text-primary hover:border-primary transition-colors text-xs"
                     >
                       <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
                       Sync
@@ -137,7 +138,7 @@ export default function MyPresetsPage() {
                         setEditInstitution(preset.institution || '')
                         setEditPublic(preset.is_public)
                       }}
-                      className="border-border text-foreground hover:text-primary hover:border-primary transition-colors text-xs font-mono px-3"
+                      className="border-border text-foreground hover:text-primary hover:border-primary transition-colors text-xs px-3"
                     >
                       <Pencil className="w-3.5 h-3.5 mr-1" />
                       Edit
@@ -148,7 +149,7 @@ export default function MyPresetsPage() {
                         variant="outline"
                         size="sm"
                         onClick={(e) => handleShareLink(e, preset.code)}
-                        className="border-border text-foreground hover:text-primary hover:border-primary transition-colors text-xs font-mono px-3"
+                        className="border-border text-foreground hover:text-primary hover:border-primary transition-colors text-xs px-3"
                         title="Share Preset Link"
                       >
                         {copiedCode === preset.code ? (
@@ -167,7 +168,7 @@ export default function MyPresetsPage() {
                         e.stopPropagation()
                         navigate(`/presets/${preset.code}`)
                       }}
-                      className="text-muted-foreground hover:text-primary transition-colors text-xs font-mono px-2"
+                      className="text-muted-foreground hover:text-primary transition-colors text-xs px-2"
                       title="View Details"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
@@ -185,10 +186,10 @@ export default function MyPresetsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-xs">
           <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md shadow-2xl space-y-6 animate-fadeIn">
             <div>
-              <h2 className="text-xl font-mono font-bold text-foreground mb-2 flex items-center gap-2">
-                <RefreshCw className="w-5 h-5 text-primary" /> Sync Preset
+              <h2 className="text-xl font-sans font-semibold text-foreground mb-2 flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-primary" /> Sync preset
               </h2>
-              <p className="text-sm font-mono text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Which of your current degrees should update this preset's structure?
               </p>
             </div>
@@ -205,7 +206,7 @@ export default function MyPresetsPage() {
             </select>
 
             <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-md">
-              <p className="text-xs font-mono text-amber-400/90 leading-relaxed">
+              <p className="text-xs text-amber-400/90 leading-relaxed">
                 ⚠ This will replace the current semester & module structure in the preset with your latest degree updates. Your share code and clone count will be preserved.
               </p>
             </div>
@@ -217,7 +218,7 @@ export default function MyPresetsPage() {
                   setSyncPresetId(null)
                   setSyncDegreeId('')
                 }}
-                className="text-muted-foreground hover:text-foreground font-mono"
+                className="text-muted-foreground hover:text-foreground"
               >
                 Cancel
               </Button>
@@ -229,20 +230,20 @@ export default function MyPresetsPage() {
                     { presetId: syncPresetId, degreeId: syncDegreeId },
                     {
                       onSuccess: () => {
-                        toast.success('Preset updated and synced successfully!')
+                        toast.success('Preset updated')
                         setSyncPresetId(null)
                         setSyncDegreeId('')
                       },
                       onError: (err: any) => {
-                        toast.error(err.message || 'Failed to sync preset')
+                        toast.error(friendlyError(err, "Couldn't update the preset. Try again."))
                       }
                     }
                   )
                 }}
-                className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold font-mono"
+                className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold"
               >
                 {syncPreset.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                Sync Preset
+                Sync preset
               </Button>
             </div>
           </div>
@@ -252,7 +253,7 @@ export default function MyPresetsPage() {
       {editPresetId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-xs">
           <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md shadow-2xl space-y-4">
-            <h2 className="text-xl font-mono font-bold text-foreground">Edit preset</h2>
+            <h2 className="text-xl font-sans font-semibold text-foreground">Edit preset</h2>
             <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} placeholder="Title" className="font-mono" />
             <Input value={editInstitution} onChange={(e) => setEditInstitution(e.target.value)} placeholder="Institution" className="font-mono" />
             <textarea
@@ -268,7 +269,7 @@ export default function MyPresetsPage() {
             <div className="flex justify-between gap-3 pt-2">
               <Button
                 variant="ghost"
-                className="text-destructive font-mono"
+                className="text-destructive"
                 disabled={deletePreset.isPending}
                 onClick={() => {
                   if (!confirm('Delete this preset? The share code will stop working.')) return
@@ -277,7 +278,7 @@ export default function MyPresetsPage() {
                       toast.success('Preset deleted')
                       setEditPresetId(null)
                     },
-                    onError: (err: any) => toast.error(err.message || 'Failed to delete preset'),
+                    onError: (err: unknown) => toast.error(friendlyError(err, "Couldn't delete the preset. Try again.")),
                   })
                 }}
               >
@@ -285,9 +286,9 @@ export default function MyPresetsPage() {
                 Delete
               </Button>
               <div className="flex gap-2">
-                <Button variant="ghost" className="font-mono" onClick={() => setEditPresetId(null)}>Cancel</Button>
+                <Button variant="ghost" className="" onClick={() => setEditPresetId(null)}>Cancel</Button>
                 <Button
-                  className="font-mono"
+                  className=""
                   disabled={!editTitle.trim() || updatePreset.isPending}
                   onClick={() => {
                     updatePreset.mutate(
@@ -303,7 +304,7 @@ export default function MyPresetsPage() {
                           toast.success('Preset updated')
                           setEditPresetId(null)
                         },
-                        onError: (err: any) => toast.error(err.message || 'Failed to update preset'),
+                        onError: (err: unknown) => toast.error(friendlyError(err, "Couldn't update the preset. Try again.")),
                       }
                     )
                   }}

@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card'
 import { usePreset, useApplyPreset } from '@/hooks/usePresets'
 import { useDegrees } from '@/hooks/useDegrees'
 import { toast } from 'sonner'
+import { friendlyError } from '@/lib/errors'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -27,7 +28,7 @@ export default function PresetDetailPage() {
     navigator.clipboard.writeText(preset.code)
     setIsCopied(true)
     setTimeout(() => setIsCopied(false), 2000)
-    toast.success("Share code copied to clipboard!")
+    toast.success('Share code copied')
   }
 
   const handleCopyLink = () => {
@@ -36,14 +37,14 @@ export default function PresetDetailPage() {
     navigator.clipboard.writeText(url)
     setIsLinkCopied(true)
     setTimeout(() => setIsLinkCopied(false), 2000)
-    toast.success("Preset share link copied to clipboard!")
+    toast.success('Share link copied')
   }
 
   const handleClone = () => {
     if (!preset) return
 
     if (cloneMode === 'existing' && !targetDegreeId) {
-      toast.error('Please select a degree to append to.')
+      toast.error('Choose a degree to add this preset to.')
       return
     }
 
@@ -55,14 +56,14 @@ export default function PresetDetailPage() {
       },
       {
         onSuccess: (newDegreeId) => {
-          toast.success("Preset successfully cloned!")
+          toast.success('Preset added')
           if (preset.scale_snapshot && (!preset.grade_scale_id || (preset.grade_scale && !preset.grade_scale.is_system))) {
-             toast.success(`Grade scale copied to your account!`)
+             toast.success('Grade scale copied')
           }
           navigate(`/degrees/${newDegreeId}/semesters`)
         },
         onError: (err: any) => {
-          toast.error(err.message || "Failed to clone preset.")
+          toast.error(friendlyError(err, "Couldn't add the preset. Try again."))
         }
       }
     )
@@ -70,7 +71,7 @@ export default function PresetDetailPage() {
 
   if (isLoading) {
     return (
-      <div role="status" className="min-h-screen bg-background text-foreground p-8 pb-32">
+      <div role="status" className="min-h-screen bg-background text-foreground p-4 sm:p-8 pb-32">
         <title>Preset · Semest</title>
         <span className="sr-only">Loading</span>
         <div className="max-w-4xl mx-auto space-y-8">
@@ -94,16 +95,16 @@ export default function PresetDetailPage() {
 
   if (isError || !preset) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-8 text-center text-foreground">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 text-center text-foreground sm:p-8">
         <title>Preset not found · Semest</title>
         <FileText className="w-16 h-16 text-destructive mb-6 opacity-50" />
-        <h2 className="text-2xl font-mono font-bold tracking-widest uppercase mb-2">Preset Not Found</h2>
-        <p className="text-muted-foreground font-mono text-sm mb-8 max-w-md">
+        <h2 className="text-2xl font-sans font-bold tracking-tight mb-2">Preset not found</h2>
+        <p className="text-muted-foreground text-sm mb-8 max-w-md">
           The share code you entered might be invalid or the preset was deleted by its creator.
         </p>
-        <Button onClick={() => navigate('/presets')} className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold font-mono">
+        <Button onClick={() => navigate('/presets')} className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold">
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Browse Public Presets
+          Browse presets
         </Button>
       </div>
     )
@@ -114,14 +115,14 @@ export default function PresetDetailPage() {
   }, 0)
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-8 pb-32">
+    <div className="min-h-screen bg-background text-foreground p-4 sm:p-8 pb-32">
       <title>{`${preset.title} · Semest`}</title>
       <div className="max-w-4xl mx-auto space-y-8 animate-slideUp">
         
         <div className="flex items-center gap-4 text-primary mb-6">
           <Button variant="ghost" className="p-0 hover:bg-transparent text-primary hover:text-primary/80" onClick={() => navigate('/presets')}>
             <ArrowLeft className="w-5 h-5 mr-2" />
-            Back to Presets
+            Back to presets
           </Button>
         </div>
 
@@ -141,22 +142,22 @@ export default function PresetDetailPage() {
               <>
                 <Button 
                   onClick={handleCopyLink}
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-mono font-bold h-12 transition-colors"
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-12 transition-colors"
                 >
                   {isLinkCopied ? <Check className="w-4 h-4 mr-2" /> : <Share2 className="w-4 h-4 mr-2" />}
-                  {isLinkCopied ? 'Link Copied!' : 'Share Link'}
+                  {isLinkCopied ? 'Link copied' : 'Share link'}
                 </Button>
                 <Button 
                   onClick={handleCopyCode}
                   variant="outline"
-                  className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground font-mono font-bold h-12 transition-colors"
+                  className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground font-bold h-12 transition-colors"
                 >
                   {isCopied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
-                  {isCopied ? 'Code Copied!' : `Code: ${preset.code}`}
+                  {isCopied ? 'Code copied' : `Code: ${preset.code}`}
                 </Button>
               </>
             ) : (
-              <p className="font-mono text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Private preset. Code {preset.code} is not shared publicly.
               </p>
             )}
@@ -166,12 +167,12 @@ export default function PresetDetailPage() {
         {/* Structure Preview */}
         <div>
           <div className="flex justify-between items-end mb-6">
-            <h2 className="text-xl font-mono font-bold tracking-widest uppercase text-primary">
-              Preset Structure
+            <h2 className="text-xl font-sans font-semibold text-primary">
+              Preset structure
             </h2>
-            <div className="text-right font-mono text-sm">
-              <p className="text-muted-foreground">Total Credits</p>
-              <p className="text-2xl font-bold text-foreground">{totalCredits}</p>
+            <div className="text-right text-sm">
+              <p className="text-muted-foreground">Total credits</p>
+              <p className="text-2xl font-bold tabular-nums text-foreground">{totalCredits}</p>
             </div>
           </div>
 
@@ -264,14 +265,14 @@ export default function PresetDetailPage() {
           <Button 
             onClick={handleClone}
             disabled={applyPreset.isPending}
-            className="w-full md:w-auto h-12 px-8 bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold font-mono text-sm uppercase tracking-widest self-end"
+            className="w-full md:w-auto h-12 px-8 bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold text-sm self-end"
           >
             {applyPreset.isPending ? (
               <Loader2 className="w-5 h-5 animate-spin mr-2" />
             ) : (
               <GraduationCap className="w-5 h-5 mr-2" />
             )}
-            Clone to my Account
+            Clone to my account
           </Button>
         </div>
       </div>

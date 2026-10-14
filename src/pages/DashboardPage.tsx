@@ -80,18 +80,18 @@ export default function DashboardPage() {
   // If user has no degrees, prompt them to create one
   if (degrees.length === 0) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-8 text-center">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 text-center sm:p-8">
         <GraduationCap className="w-16 h-16 text-muted-foreground mb-6 opacity-50" />
-        <h2 className="text-2xl font-mono font-bold tracking-widest text-foreground uppercase mb-2">No Degrees Found</h2>
-        <p className="text-muted-foreground font-mono text-sm mb-8 max-w-md">
+        <h2 className="text-2xl font-sans font-bold tracking-tight text-foreground mb-2">No degrees found</h2>
+        <p className="text-muted-foreground text-sm mb-8 max-w-md">
           You need to set up a degree profile before you can access the dashboard analytics.
         </p>
         <Button 
           onClick={() => navigate('/degrees')}
-          className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-sm font-mono text-xs uppercase tracking-widest"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-sm text-xs"
         >
           <Plus className="w-4 h-4 mr-2" />
-          Setup Degree
+          Set up a degree
         </Button>
       </div>
     )
@@ -100,7 +100,7 @@ export default function DashboardPage() {
   const metrics = getCumulativeMetrics(semesters, activeDegree?.grade_scale?.grades || [])
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-8">
+    <div className="min-h-screen bg-background text-foreground p-4 sm:p-8">
       {/* Export PDF Settings Modal */}
       <ExportPdfModal
         isOpen={isExportModalOpen}
@@ -117,10 +117,10 @@ export default function DashboardPage() {
         {/* Header & Degree Selector */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b pb-6">
           <div>
-            <h1 className="text-2xl font-mono font-bold tracking-widest uppercase text-primary">
-              Dashboard Analytics
+            <h1 className="text-2xl font-sans font-bold tracking-tight text-primary">
+              Dashboard
             </h1>
-            <p className="text-muted-foreground font-mono text-sm mt-2">
+            <p className="text-muted-foreground text-sm mt-2">
               Track your academic progression and goals.
             </p>
           </div>
@@ -130,7 +130,7 @@ export default function DashboardPage() {
               onClick={() => setIsExportModalOpen(true)}
               disabled={!activeDegree || isSemestersLoading}
               variant="outline"
-              className="bg-card border-border hover:bg-muted text-foreground font-mono text-sm h-10 px-4 rounded-sm"
+              className="bg-card border-border hover:bg-muted text-foreground text-sm h-10 px-4 rounded-sm"
             >
               <FileDown className="w-4 h-4 mr-2 text-primary" />
               Export PDF
@@ -177,12 +177,12 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <p className="text-sm font-mono text-muted-foreground uppercase tracking-widest">Cumulative GPA</p>
-                  <h3 className="text-3xl font-mono font-bold text-foreground mt-1">
+                  <h3 className="text-3xl font-mono font-bold tabular-nums text-foreground mt-1">
                     {metrics.attemptedCredits === 0 ? '—' : <AnimatedNumber value={metrics.cgpa} decimals={GPA_DECIMALS} />}
                   </h3>
                 </div>
               </div>
-              <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest">
+              <p className="text-xs text-muted-foreground">
                 Overall performance
               </p>
             </Card>
@@ -195,12 +195,12 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <p className="text-sm font-mono text-muted-foreground uppercase tracking-widest">Passing Credits</p>
-                  <h3 className="text-3xl font-mono font-bold text-foreground mt-1">
+                  <h3 className="text-3xl font-mono font-bold tabular-nums text-foreground mt-1">
                     <AnimatedNumber value={metrics.earnedCredits} decimals={1} />
                   </h3>
                 </div>
               </div>
-              <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest">
+              <p className="text-xs text-muted-foreground">
                 {metrics.attemptedCredits.toFixed(1)} graded, including fails
               </p>
             </Card>
@@ -213,12 +213,12 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <p className="text-sm font-mono text-muted-foreground uppercase tracking-widest">Highest Sem GPA</p>
-                  <h3 className="text-3xl font-mono font-bold text-foreground mt-1">
+                  <h3 className="text-3xl font-mono font-bold tabular-nums text-foreground mt-1">
                     {metrics.attemptedCredits === 0 ? '—' : <AnimatedNumber value={metrics.highestGpa} decimals={GPA_DECIMALS} />}
                   </h3>
                 </div>
               </div>
-              <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest">
+              <p className="text-xs text-muted-foreground">
                 Best performing semester
               </p>
             </Card>
@@ -231,12 +231,12 @@ export default function DashboardPage() {
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-mono text-muted-foreground uppercase tracking-widest">Standing</p>
-                  <h3 className="text-lg font-mono font-bold text-foreground mt-3 leading-tight">
+                  <h3 className="text-lg font-mono font-bold text-foreground mt-3 leading-tight tabular-nums">
                     {metrics.standing || '—'}
                   </h3>
                 </div>
               </div>
-              <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest">
+              <p className="text-xs text-muted-foreground">
                 {metrics.standing ? 'Current academic status' : 'This scale has no class band'}
               </p>
             </Card>
@@ -260,8 +260,8 @@ export default function DashboardPage() {
           <Card className="lg:col-span-2 bg-card border-border p-6 flex flex-col">
             <div className="flex items-center gap-2 mb-6">
               <Activity className="w-5 h-5 text-primary" />
-              <h2 className="text-lg font-mono font-bold tracking-widest text-foreground uppercase">
-                GPA Progression
+              <h2 className="text-lg font-sans font-semibold text-foreground">
+                GPA progression
               </h2>
             </div>
             <div className="flex-1 w-full">

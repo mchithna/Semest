@@ -7,6 +7,7 @@ import { useGradeScales } from '@/hooks/useGradeScales'
 import { useDegrees } from '@/hooks/useDegrees'
 import { completeOnboarding } from '@/lib/queries/profiles'
 import { prefersReducedMotion } from '@/lib/motion'
+import { friendlyError } from '@/lib/errors'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -62,7 +63,7 @@ export default function OnboardingPage() {
         colors: [primaryConfettiColor()]
       })
     } catch (err: any) {
-      toast.error(err.message)
+      toast.error(friendlyError(err, "Couldn't finish setup. Try again."))
     } finally {
       setIsSubmitting(false)
     }
@@ -99,8 +100,8 @@ export default function OnboardingPage() {
         {step === 1 && (
           <div className="bg-card border border-border p-8 rounded-xl animate-in fade-in slide-in-from-bottom-4 duration-500">
             <GraduationCap className="w-12 h-12 text-primary mb-6" />
-            <h1 className="text-3xl font-mono font-bold tracking-widest uppercase text-foreground mb-2">Welcome to Semest</h1>
-            <p className="text-muted-foreground font-mono text-sm mb-8 leading-relaxed">
+            <h1 className="text-3xl font-sans font-bold tracking-tight text-foreground mb-2">Welcome to Semest</h1>
+            <p className="text-muted-foreground text-sm mb-8 leading-relaxed">
               Let's set up your academic profile. First, how does your university grade you? You can pick a standard scale now or create a custom one later in settings.
             </p>
 
@@ -129,18 +130,18 @@ export default function OnboardingPage() {
                     await completeOnboarding()
                     navigate('/dashboard')
                   } catch (err: any) {
-                    toast.error(err.message)
+                    toast.error(friendlyError(err, "Couldn't skip setup. Try again."))
                   }
                 }}
-                className="text-muted-foreground font-mono text-xs uppercase tracking-widest"
+                className="text-muted-foreground text-xs"
               >
                 Skip for now
               </Button>
               <Button 
                 onClick={handleNextStep1}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl font-mono text-xs uppercase tracking-widest px-8"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl text-xs px-8"
               >
-                Next Step <ArrowRight className="w-4 h-4 ml-2" />
+                Next <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </div>
           </div>
@@ -149,8 +150,8 @@ export default function OnboardingPage() {
         {/* Step 2: First Degree */}
         {step === 2 && (
           <div className="bg-card border border-border p-8 rounded-xl animate-in fade-in slide-in-from-right-8 duration-500">
-            <h2 className="text-2xl font-mono font-bold tracking-widest uppercase text-primary mb-2">Your First Degree</h2>
-            <p className="text-muted-foreground font-mono text-sm mb-8 leading-relaxed">
+            <h2 className="text-2xl font-sans font-bold tracking-tight text-primary mb-2">Your first degree</h2>
+            <p className="text-muted-foreground text-sm mb-8 leading-relaxed">
               Create the main program you're currently studying. You can add more degrees or change these details later.
             </p>
 
@@ -194,17 +195,17 @@ export default function OnboardingPage() {
               <Button 
                 variant="ghost"
                 onClick={() => setStep(1)}
-                className="text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl font-mono text-xs uppercase tracking-widest"
+                className="text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl text-xs"
               >
                 Back
               </Button>
               <Button 
                 onClick={handleNextStep2}
                 disabled={isSubmitting}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl font-mono text-xs uppercase tracking-widest px-8"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl text-xs px-8"
               >
                 {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                Complete Setup
+                Complete setup
               </Button>
             </div>
           </div>
@@ -214,15 +215,15 @@ export default function OnboardingPage() {
         {step === 3 && (
           <div className="bg-card border border-border p-12 rounded-xl text-center animate-in zoom-in-95 duration-500">
             <CheckCircle className="w-16 h-16 text-primary mx-auto mb-6" />
-            <h2 className="text-3xl font-mono font-bold tracking-widest uppercase text-foreground mb-4">You're All Set!</h2>
-            <p className="text-muted-foreground font-mono text-sm mb-10 leading-relaxed max-w-xs mx-auto">
+            <h2 className="text-3xl font-sans font-bold tracking-tight text-foreground mb-4">You're all set</h2>
+            <p className="text-muted-foreground text-sm mb-10 leading-relaxed max-w-xs mx-auto">
               Your profile is ready. Let's head over to your dashboard to view your degree.
             </p>
             <Button 
               onClick={handleFinish}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl font-mono text-xs uppercase tracking-widest px-12 h-14"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl text-xs px-12 h-14"
             >
-              Go to Dashboard <ArrowRight className="w-4 h-4 ml-2" />
+              Go to dashboard <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>
         )}

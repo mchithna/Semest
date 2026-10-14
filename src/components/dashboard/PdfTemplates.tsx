@@ -353,7 +353,7 @@ export const PdfTemplates: React.FC<PdfTemplatesProps> = ({
 
         {/* Footer Statement */}
         <div className="mt-8 pt-4 border-t border-slate-200 text-center text-[10px] text-slate-400 break-inside-avoid" style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
-          Generated automatically via UniScore Track • Academic Progression Report
+          Generated automatically via Semest • Academic Progression Report
         </div>
       </div>
     </div>

@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useDegrees } from '@/hooks/useDegrees'
 import { useCreatePreset } from '@/hooks/usePresets'
 import { toast } from 'sonner'
+import { friendlyError } from '@/lib/errors'
 
 export default function NewPresetPage() {
   const navigate = useNavigate()
@@ -37,32 +38,32 @@ export default function NewPresetPage() {
       { degreeId: selectedDegreeId, title, description, institution, isPublic },
       {
         onSuccess: () => {
-          toast.success("Preset published successfully!")
+          toast.success('Preset published')
           navigate('/presets/mine')
         },
         onError: (err: any) => {
-          toast.error(err.message || "Failed to publish preset.")
+          toast.error(friendlyError(err, "Couldn't publish the preset. Try again."))
         }
       }
     )
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-8">
+    <div className="min-h-screen bg-background text-foreground p-4 sm:p-8">
       <div className="max-w-2xl mx-auto space-y-8 animate-slideUp">
         
         <div className="flex items-center gap-4 text-primary mb-6">
           <Button variant="ghost" className="p-0 hover:bg-transparent text-primary hover:text-primary/80" onClick={() => navigate('/presets/mine')}>
             <ArrowLeft className="w-5 h-5 mr-2" />
-            Back to My Presets
+            Back to my presets
           </Button>
         </div>
 
         <div>
-          <h1 className="text-2xl font-mono font-bold tracking-widest uppercase text-primary flex items-center gap-2">
-            <Sparkles className="w-6 h-6" /> Publish Preset
+          <h1 className="text-2xl font-sans font-bold tracking-tight text-primary flex items-center gap-2">
+            <Sparkles className="w-6 h-6" /> Publish a preset
           </h1>
-          <p className="text-muted-foreground font-mono text-sm mt-2">
+          <p className="text-muted-foreground text-sm mt-2">
             Turn your degree structure into a preset that others can clone.
           </p>
         </div>
@@ -119,8 +120,8 @@ export default function NewPresetPage() {
 
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-border pt-6">
               <div className="space-y-0.5 pr-4">
-                <Label className="text-foreground font-mono font-bold">Make Public</Label>
-                <p className="text-muted-foreground font-mono text-xs">
+                <Label className="text-foreground font-mono font-bold">Make public</Label>
+                <p className="text-muted-foreground text-xs">
                   Allow anyone to discover this preset in the community browser.
                 </p>
               </div>
@@ -138,10 +139,10 @@ export default function NewPresetPage() {
             <Button 
               type="submit"
               disabled={createPreset.isPending || !selectedDegreeId || !title.trim()}
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold font-mono text-sm uppercase tracking-widest mt-4"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-sm mt-4"
             >
               {createPreset.isPending && <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />}
-              {createPreset.isPending ? 'Generating preset…' : 'Generate Preset Code'}
+              {createPreset.isPending ? 'Generating preset…' : 'Generate preset code'}
             </Button>
           </form>
         </Card>

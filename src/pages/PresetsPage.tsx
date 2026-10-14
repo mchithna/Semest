@@ -31,20 +31,20 @@ export default function PresetsPage() {
     navigator.clipboard.writeText(url)
     setCopiedCode(code)
     setTimeout(() => setCopiedCode(null), 2000)
-    toast.success(`Share link copied for preset ${code}!`)
+    toast.success('Share link copied')
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-8">
+    <div className="min-h-screen bg-background text-foreground p-4 sm:p-8">
       <div className="max-w-6xl mx-auto space-y-8 animate-slideUp">
         
         {/* Header section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b pb-8">
           <div>
-            <h1 className="text-3xl font-mono font-bold tracking-widest uppercase text-primary flex items-center gap-3">
-              <Globe className="w-8 h-8" /> Community Presets
+            <h1 className="text-3xl font-sans font-bold tracking-tight text-primary flex items-center gap-3">
+              <Globe className="w-8 h-8" /> Community presets
             </h1>
-            <p className="text-muted-foreground font-mono text-sm mt-3 max-w-lg leading-relaxed">
+            <p className="text-muted-foreground text-sm mt-3 max-w-lg leading-relaxed">
               Discover degree structures published by the community. Find your major, clone the preset, and start tracking your GPA instantly.
             </p>
           </div>
@@ -62,7 +62,7 @@ export default function PresetsPage() {
                 maxLength={6}
                 className="bg-card border-border text-foreground font-mono w-full md:w-40"
               />
-              <Button type="submit" disabled={codeQuery.trim().length !== 6} aria-label="Look up share code" className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold font-mono">
+              <Button type="submit" disabled={codeQuery.trim().length !== 6} aria-label="Look up share code" className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold">
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
@@ -85,9 +85,9 @@ export default function PresetsPage() {
             <Button 
               onClick={() => navigate('/presets/mine')}
               variant="outline"
-              className="w-full sm:w-auto border-primary text-primary hover:bg-primary hover:text-primary-foreground font-bold font-mono uppercase tracking-widest h-12 transition-colors"
+              className="w-full sm:w-auto border-primary text-primary hover:bg-primary hover:text-primary-foreground font-bold h-12 transition-colors"
             >
-              My Presets
+              My presets
             </Button>
           )}
         </div>
@@ -102,8 +102,8 @@ export default function PresetsPage() {
         ) : filteredPresets.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-16 text-center border border-dashed rounded-lg bg-card/30">
             <FileText className="w-12 h-12 text-muted-foreground mb-4 opacity-50" />
-            <h3 className="text-lg font-mono font-bold text-foreground mb-2">No presets found</h3>
-            <p className="text-muted-foreground font-mono text-sm max-w-md">
+            <h3 className="text-lg font-sans font-semibold text-foreground mb-2">No presets found</h3>
+            <p className="text-muted-foreground text-sm max-w-md">
               We couldn't find any public presets matching your search criteria.
             </p>
           </div>
@@ -165,7 +165,6 @@ export default function PresetsPage() {
               variant="outline"
               onClick={() => fetchNextPage()}
               disabled={isFetchingNextPage}
-              className="font-mono uppercase tracking-widest"
             >
               {isFetchingNextPage ? 'Loading…' : 'Load more'}
             </Button>

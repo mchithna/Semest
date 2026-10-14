@@ -72,18 +72,18 @@ export default function EditSemesterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-8">
+    <div className="min-h-screen bg-background text-foreground p-4 sm:p-8">
       <div className="max-w-4xl mx-auto space-y-8 animate-slideUp">
         
         <div className="flex flex-col gap-2 border-b pb-6">
           <Breadcrumb 
             items={[
               { label: degree.title, path: `/degrees/${degreeId}/semesters` },
-              { label: 'Edit Semester' }
+              { label: 'Edit semester' }
             ]} 
           />
-          <h1 className="text-2xl font-mono font-bold tracking-widest uppercase text-foreground">
-            Edit Semester
+          <h1 className="text-2xl font-sans font-bold tracking-tight text-foreground">
+            Edit semester
           </h1>
         </div>
 

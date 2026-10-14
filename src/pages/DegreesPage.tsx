@@ -6,6 +6,7 @@ import { useDegrees } from '@/hooks/useDegrees'
 import { useSemesters } from '@/hooks/useSemesters'
 import { getCumulativeMetrics } from '@/lib/analytics'
 import { formatGpa, honorsApply } from '@/lib/score'
+import { friendlyError } from '@/lib/errors'
 import type { DegreeWithScale } from '@/lib/queries/degrees'
 import { CreateDegreeDialog } from '@/components/degrees/CreateDegreeDialog'
 import { Button } from '@/components/ui/button'
@@ -19,7 +20,7 @@ function DegreeGpa({ degreeId, grades }: { degreeId: string; grades: { grade: st
   const label = graded && honorsApply(grades) && metrics.standing ? metrics.standing : ''
   return (
     <div className="bg-primary/10 text-primary px-2 py-1 rounded-sm text-xs font-mono font-bold tracking-widest">
-      GPA: {graded ? formatGpa(metrics.cgpa) : '—'}{label ? ` · ${label}` : ''}
+      <span className="tabular-nums">GPA: {graded ? formatGpa(metrics.cgpa) : '—'}{label ? ` · ${label}` : ''}</span>
     </div>
   )
 }
@@ -48,7 +49,7 @@ export default function DegreesPage() {
       await deleteDegree(id)
       toast.success('Degree deleted')
     } catch (err: any) {
-      toast.error(err.message)
+      toast.error(friendlyError(err, "Couldn't delete the degree. Try again."))
     }
   }
 
@@ -64,7 +65,7 @@ export default function DegreesPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background text-foreground p-8">
+      <div className="min-h-screen bg-background text-foreground p-4 sm:p-8">
         <div className="max-w-6xl mx-auto space-y-8">
           <div className="flex justify-between items-end border-b pb-6">
             <div>
@@ -84,25 +85,25 @@ export default function DegreesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-8">
+    <div className="min-h-screen bg-background text-foreground p-4 sm:p-8">
       <div className="max-w-6xl mx-auto space-y-8 animate-slideUp">
         
         {/* Header */}
         <div className="flex justify-between items-end border-b pb-6">
           <div>
-            <h1 className="text-2xl font-mono font-bold tracking-widest uppercase text-primary">
-              My Degrees
+            <h1 className="text-2xl font-sans font-bold tracking-tight text-primary">
+              My degrees
             </h1>
-            <p className="text-muted-foreground font-mono text-sm mt-2">
+            <p className="text-muted-foreground text-sm mt-2">
               Manage your academic programs.
             </p>
           </div>
           <Button
             onClick={handleCreate}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-sm font-mono text-xs uppercase tracking-widest"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-sm text-xs"
           >
             <Plus className="w-4 h-4 mr-2" />
-            New Degree
+            New degree
           </Button>
         </div>
 
@@ -110,14 +111,14 @@ export default function DegreesPage() {
         {degrees.length === 0 ? (
           <div className="bg-card border border-border border-dashed rounded-sm p-12 text-center">
             <GraduationCap className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-            <h3 className="text-foreground font-mono text-lg mb-2">No degrees found</h3>
-            <p className="text-muted-foreground font-mono text-sm mb-6">Create your first degree to start tracking your progress.</p>
+            <h3 className="text-foreground font-sans text-lg font-semibold mb-2">No degrees found</h3>
+            <p className="text-muted-foreground text-sm mb-6">Create your first degree to start tracking your progress.</p>
             <Button
               onClick={handleCreate}
               variant="outline"
-              className="text-primary hover:text-primary/80 rounded-sm font-mono text-xs uppercase tracking-widest"
+              className="text-primary hover:text-primary/80 rounded-sm text-xs"
             >
-              Create Degree
+              Create degree
             </Button>
           </div>
         ) : (

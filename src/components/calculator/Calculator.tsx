@@ -89,15 +89,15 @@ export function Calculator({
         onClick={handleAddModule}
       >
         <Plus className="w-4 h-4 mr-2" />
-        Add Module
+        Add module
       </Button>
 
       <div className="h-px bg-border/50 w-full" />
 
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-1">
-          <span className="text-sm text-muted-foreground font-medium">Total Credits</span>
-          <span className="text-2xl font-mono text-foreground font-semibold">
+          <span className="text-sm text-muted-foreground font-medium">Total credits</span>
+          <span className="text-2xl font-mono tabular-nums text-foreground font-semibold">
             <AnimatedNumber value={credits} decimals={1} />
           </span>
         </div>
@@ -106,7 +106,7 @@ export function Calculator({
           <span className="text-sm text-muted-foreground font-medium flex items-center gap-2">
             GPA {honorsApply(gradeScale) && <ClassificationBadge score={score} graded={graded} />}
           </span>
-          <span className="text-4xl font-mono font-bold tracking-tight text-primary">
+          <span className="text-4xl font-mono font-bold tracking-tight tabular-nums text-primary">
             <AnimatedNumber value={score} decimals={GPA_DECIMALS} />
           </span>
         </div>
@@ -123,7 +123,7 @@ export function Calculator({
           ) : (
             <>
               <Save className="w-4 h-4 mr-2" />
-              Save Semester
+              Save semester
             </>
           )}
         </Button>
