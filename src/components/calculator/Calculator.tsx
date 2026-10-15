@@ -9,6 +9,7 @@ import { computeScore, GPA_DECIMALS, hasGradedWork, honorsApply, totalCredits } 
 import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
 import { prefersReducedMotion } from '@/lib/motion'
 import { ClassificationBadge } from '@/components/ui/ClassificationBadge'
+import { isUntouchedDraft, modulesMatch } from '@/lib/semesterDraft'
 
 type CalculatorProps = {
   initialModules?: ModuleData[]
@@ -16,6 +17,10 @@ type CalculatorProps = {
   priorModules?: PriorModuleOption[]
   onSave?: (modules: ModuleData[]) => void
   isSaving?: boolean
+  /** Saved modules for an existing semester. A new semester has no baseline. */
+  baselineModules?: ModuleData[]
+  /** Title or term differs from the values the page opened with. */
+  detailsChanged?: boolean
 }
 
 export function Calculator({
@@ -24,6 +29,8 @@ export function Calculator({
   priorModules = [],
   onSave,
   isSaving = false,
+  baselineModules,
+  detailsChanged = false,
 }: CalculatorProps) {
   const [modules, setModules] = useState<ModuleData[]>(
     initialModules.length > 0
@@ -31,6 +38,10 @@ export function Calculator({
       : [{ id: crypto.randomUUID(), name: '', credits: 3, grade: '' }]
   )
 
+  const modulesChanged = baselineModules
+    ? !modulesMatch(modules, baselineModules)
+    : !isUntouchedDraft(modules)
+  const canSave = (modulesChanged || detailsChanged) && modules.length > 0
   const score = computeScore(modules, gradeScale)
   const credits = totalCredits(modules)
   const graded = hasGradedWork(modules, gradeScale)
@@ -116,7 +127,7 @@ export function Calculator({
         <Button
           className="w-full mt-2"
           onClick={() => onSave(modules)}
-          disabled={isSaving || modules.length === 0}
+          disabled={isSaving || !canSave}
         >
           {isSaving ? (
             <span className="animate-pulse">Saving...</span>

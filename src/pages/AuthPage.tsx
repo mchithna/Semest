@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { friendlyError } from '@/lib/errors'
+import { hasFinishedOnboarding, rememberOnboarded } from '@/lib/queries/profiles'
 
 const schema = z.object({
   email: z.string().email('Enter a valid email'),
@@ -45,16 +46,24 @@ export default function AuthPage() {
   }
 
   const redirectAfterSignIn = async () => {
-    const { data } = await supabase
+    const { data: { session: current } } = await supabase.auth.getSession()
+    const userId = current?.user.id
+    const { data, error } = await supabase
       .from('profiles')
       .select('onboarded_at')
-      .single()
+      .maybeSingle()
 
-    if (data?.onboarded_at) {
+    const finished = !error && Boolean(data?.onboarded_at)
+    if (finished && userId) rememberOnboarded(userId)
+    if (finished || (error && userId && hasFinishedOnboarding(userId))) {
       navigate('/dashboard')
-    } else {
-      navigate('/onboarding')
+      return
     }
+    if (error) {
+      navigate('/dashboard')
+      return
+    }
+    navigate('/onboarding')
   }
 
   const onSignIn = async (data: FormData) => {

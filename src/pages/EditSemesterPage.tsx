@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { useDegrees } from '@/hooks/useDegrees'
@@ -20,15 +20,16 @@ export default function EditSemesterPage() {
   const degree = degrees.find(d => d.id === degreeId)
   const semester = semesters.find(s => s.id === semesterId)
 
-  const [title, setTitle] = useState('')
-  const [term, setTerm] = useState('')
-
-  useEffect(() => {
-    if (semester) {
-      setTitle(semester.title)
-      setTerm(semester.term || '')
-    }
-  }, [semester])
+  const [form, setForm] = useState<{ id: string; title: string; term: string } | null>(null)
+  if (semester && form?.id !== semester.id) {
+    setForm({ id: semester.id, title: semester.title, term: semester.term || '' })
+  }
+  const formReady = Boolean(form && semester && form.id === semester.id)
+  const title = formReady && form ? form.title : (semester?.title ?? '')
+  const term = formReady && form ? form.term : (semester?.term ?? '')
+  const detailsChanged = Boolean(
+    semester && (title !== semester.title || term !== (semester.term || ''))
+  )
 
   if (isDegreesLoading || isSemestersLoading) {
     return (
@@ -93,7 +94,7 @@ export default function EditSemesterPage() {
             <Input 
               id="semester-title"
               value={title} 
-              onChange={(e) => setTitle(e.target.value)} 
+              onChange={(e) => setForm({ id: semester.id, title: e.target.value, term })} 
               placeholder="e.g. Year 1, Semester 1"
               className="bg-background border-border text-foreground font-mono"
             />
@@ -103,17 +104,20 @@ export default function EditSemesterPage() {
             <Input 
               id="semester-term"
               value={term} 
-              onChange={(e) => setTerm(e.target.value)} 
+              onChange={(e) => setForm({ id: semester.id, title, term: e.target.value })} 
               placeholder="e.g. Fall 2026"
               className="bg-background border-border text-foreground font-mono"
             />
           </div>
         </div>
 
-        <Calculator 
+        <Calculator
+          key={semester.id}
           initialModules={initialModules}
           gradeScale={degree.grade_scale?.grades || []}
           priorModules={priorModules}
+          baselineModules={initialModules}
+          detailsChanged={detailsChanged}
           onSave={handleSave}
           isSaving={isSaving}
         />

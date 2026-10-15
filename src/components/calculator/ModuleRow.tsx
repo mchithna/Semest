@@ -4,16 +4,14 @@ import { Button } from "@/components/ui/button"
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
 import { Trash2 } from "lucide-react"
 import type { GradeRow } from "@/lib/queries/gradeScales"
 import { isUngradedGrade, UNGRADED_GRADE } from "@/lib/score"
-import { groupPriorModules, priorModuleLabel, type PriorModuleOption } from "@/lib/priorModules"
+import { priorSemesterKey, priorSemesters, type PriorModuleOption } from "@/lib/priorModules"
 
 export type { PriorModuleOption }
 
@@ -35,14 +33,27 @@ type ModuleRowProps = {
 
 export function ModuleRow({ module, gradeScale, priorModules = [], onChange, onRemove }: ModuleRowProps) {
   const [pickingRetake, setPickingRetake] = useState(false)
+  const [semesterChoice, setSemesterChoice] = useState<string | null>(null)
   const options = priorModules.filter((prior) => prior.id !== module.id)
   const selected = options.find((prior) => prior.id === module.retakesModuleId)
   const showRetake = Boolean(module.retakesModuleId) || pickingRetake
-  const groups = groupPriorModules(options, module.name)
+  const semesters = priorSemesters(options)
+  const activeSemester = semesterChoice ?? (selected ? priorSemesterKey(selected) : null)
+  const semesterModules = activeSemester
+    ? options.filter((prior) => priorSemesterKey(prior) === activeSemester)
+    : []
 
   const clearRetake = () => {
     setPickingRetake(false)
+    setSemesterChoice(null)
     onChange(module.id, 'retakesModuleId', null)
+  }
+
+  const chooseSemester = (key: string) => {
+    setSemesterChoice(key)
+    if (!selected || priorSemesterKey(selected) !== key) {
+      onChange(module.id, 'retakesModuleId', null)
+    }
   }
 
   return (
@@ -108,25 +119,40 @@ export function ModuleRow({ module, gradeScale, priorModules = [], onChange, onR
       {options.length > 0 && (
         showRetake ? (
           <div className="flex w-full flex-col gap-1">
-            <div className="flex w-full items-center gap-2">
+            <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
               <span className="shrink-0 text-xs text-muted-foreground">Replaces</span>
               <Select
-                value={selected ? module.retakesModuleId ?? undefined : undefined}
-                onValueChange={(val) => onChange(module.id, 'retakesModuleId', val)}
+                value={activeSemester ?? ''}
+                onValueChange={chooseSemester}
               >
-                <SelectTrigger className="min-w-0 flex-1" aria-label="Earlier module this replaces">
-                  <SelectValue placeholder="Choose the earlier module" />
+                <SelectTrigger className="min-w-0 w-full sm:flex-1" aria-label="Semester this replaces">
+                  <SelectValue placeholder="Semester" />
                 </SelectTrigger>
                 <SelectContent position="popper" className="max-h-72">
-                  {groups.map((group) => (
-                    <SelectGroup key={group.label}>
-                      <SelectLabel>{group.label}</SelectLabel>
-                      {group.modules.map((prior) => (
-                        <SelectItem key={prior.id} value={prior.id}>
-                          {priorModuleLabel(prior)}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
+                  {semesters.map((semester) => (
+                    <SelectItem key={semester.key} value={semester.key}>
+                      {semester.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={selected && activeSemester === priorSemesterKey(selected) ? selected.id : ''}
+                onValueChange={(val) => onChange(module.id, 'retakesModuleId', val)}
+                disabled={!activeSemester}
+              >
+                <SelectTrigger
+                  className="min-w-0 w-full sm:flex-1"
+                  aria-label="Module this replaces"
+                  title={activeSemester ? undefined : 'Choose a semester first'}
+                >
+                  <SelectValue placeholder="Module" />
+                </SelectTrigger>
+                <SelectContent position="popper" className="max-h-72">
+                  {semesterModules.map((prior) => (
+                    <SelectItem key={prior.id} value={prior.id}>
+                      {prior.name.trim() || 'Untitled'}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -134,7 +160,7 @@ export function ModuleRow({ module, gradeScale, priorModules = [], onChange, onR
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="shrink-0 text-muted-foreground"
+                className="shrink-0 self-end text-muted-foreground sm:self-auto"
                 onClick={clearRetake}
               >
                 Clear

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { useDegrees } from '@/hooks/useDegrees'
@@ -22,6 +22,8 @@ export default function NewSemesterPage() {
   const [title, setTitle] = useState('Year 1, Semester 1')
   const [term, setTerm] = useState('')
   const [initialModules, setInitialModules] = useState<ModuleData[]>([])
+  const openedAs = useRef({ title, term })
+  const detailsChanged = title !== openedAs.current.title || term !== openedAs.current.term
 
   useEffect(() => {
     if (isDegreesLoading) return
@@ -117,6 +119,7 @@ export default function NewSemesterPage() {
           initialModules={initialModules}
           gradeScale={degree.grade_scale?.grades || []}
           priorModules={earlierModuleOptions(semesters, null)}
+          detailsChanged={detailsChanged}
           onSave={handleSave}
           isSaving={isSaving}
         />

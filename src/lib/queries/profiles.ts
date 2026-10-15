@@ -1,4 +1,7 @@
 import { supabase } from '../supabase'
+import { rememberOnboarded } from '../onboardingMemory'
+
+export { forgetOnboarded, hasFinishedOnboarding, rememberOnboarded, resolveOnboarding } from '../onboardingMemory'
 
 export type Profile = {
   id: string
@@ -38,4 +41,5 @@ export async function completeOnboarding(): Promise<void> {
     .eq('id', userData.user.id)
 
   if (error) throw error
+  rememberOnboarded(userData.user.id)
 }

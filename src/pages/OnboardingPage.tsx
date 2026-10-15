@@ -1,11 +1,12 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { GraduationCap, ArrowRight, Loader2, CheckCircle } from 'lucide-react'
 import confetti from 'canvas-confetti'
 import { toast } from 'sonner'
 import { useGradeScales } from '@/hooks/useGradeScales'
 import { useDegrees } from '@/hooks/useDegrees'
-import { completeOnboarding } from '@/lib/queries/profiles'
+import { completeOnboarding, getProfile, hasFinishedOnboarding, rememberOnboarded } from '@/lib/queries/profiles'
+import { useAuth } from '@/context/AuthContext'
 import { prefersReducedMotion } from '@/lib/motion'
 import { friendlyError } from '@/lib/errors'
 import { Button } from '@/components/ui/button'
@@ -26,6 +27,7 @@ function primaryConfettiColor() {
 
 export default function OnboardingPage() {
   const navigate = useNavigate()
+  const { session } = useAuth()
   const { scales, isLoading: scalesLoading } = useGradeScales()
   const { createDegree } = useDegrees()
 
@@ -35,6 +37,25 @@ export default function OnboardingPage() {
   const [institution, setInstitution] = useState('')
   const [startYear, setStartYear] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const alreadyDone = Boolean(session && hasFinishedOnboarding(session.user.id))
+
+  useEffect(() => {
+    const userId = session?.user.id
+    if (!userId || hasFinishedOnboarding(userId)) return
+    let cancelled = false
+    getProfile()
+      .then((profile) => {
+        if (cancelled || !profile?.onboarded_at) return
+        rememberOnboarded(userId)
+        navigate('/dashboard', { replace: true })
+      })
+      .catch(() => {
+        // Offline, and this device has no record yet. Leave the setup screen.
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [navigate, session])
 
   const handleNextStep1 = () => {
     setStep(2)
@@ -71,6 +92,10 @@ export default function OnboardingPage() {
 
   const handleFinish = () => {
     navigate('/dashboard')
+  }
+
+  if (alreadyDone) {
+    return <Navigate to="/dashboard" replace />
   }
 
   if (scalesLoading) {
