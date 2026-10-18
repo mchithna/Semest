@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { Calculator } from '@/components/calculator/Calculator'
 import type { ModuleData } from '@/components/calculator/ModuleRow'
 import { Button } from '@/components/ui/button'
-import { GraduationCap, ArrowRight } from 'lucide-react'
+import { GraduationCap, ArrowRight, Loader2 } from 'lucide-react'
 import { GUEST_SCALE, loadGuestDraft, saveGuestDraft } from '@/lib/guestDraft'
+import { useAuth } from '@/context/AuthContext'
 
 export default function LandingPage() {
+  const { session, loading } = useAuth()
   const navigate = useNavigate()
   const [initialModules, setInitialModules] = useState<ModuleData[]>([])
 
@@ -25,6 +27,19 @@ export default function LandingPage() {
   const handleGuestSave = (modules: ModuleData[]) => {
     saveGuestDraft(modules)
     navigate('/auth')
+  }
+
+  if (loading) {
+    return (
+      <div role="status" className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <span className="sr-only">Loading</span>
+      </div>
+    )
+  }
+
+  if (session) {
+    return <Navigate to="/dashboard" replace />
   }
 
   return (

@@ -10,12 +10,13 @@ export const degreesKeys = {
   all: ['degrees'] as const,
 }
 
-export function useDegrees() {
+export function useDegrees(enabled = true) {
   const queryClient = useQueryClient()
 
   const query = useQuery({
     queryKey: degreesKeys.all,
     queryFn: getDegrees,
+    enabled,
   })
 
   const createMutation = useMutation({

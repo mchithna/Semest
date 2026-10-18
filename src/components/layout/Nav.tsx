@@ -29,7 +29,7 @@ export function Nav() {
         
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <Link to="/" aria-label="Semest home" className="flex items-center gap-2 shrink-0 whitespace-nowrap text-primary hover:text-primary/80 transition-colors">
+          <Link to={session ? '/dashboard' : '/'} aria-label="Semest home" className="flex items-center gap-2 shrink-0 whitespace-nowrap text-primary hover:text-primary/80 transition-colors">
             <GraduationCap className="h-6 w-6" />
             <span className="font-mono text-xl font-bold tracking-widest uppercase hidden sm:inline-block">
               Semest

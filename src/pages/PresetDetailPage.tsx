@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { usePreset, useApplyPreset } from '@/hooks/usePresets'
 import { useDegrees } from '@/hooks/useDegrees'
+import { useAuth } from '@/context/AuthContext'
 import { toast } from 'sonner'
 import { friendlyError } from '@/lib/errors'
 import { Input } from '@/components/ui/input'
@@ -13,9 +14,10 @@ import { Skeleton } from '@/components/ui/skeleton'
 export default function PresetDetailPage() {
   const { code } = useParams<{ code: string }>()
   const navigate = useNavigate()
+  const { session } = useAuth()
   const { data: preset, isLoading, isError } = usePreset(code || '')
   const applyPreset = useApplyPreset()
-  const { degrees } = useDegrees()
+  const { degrees } = useDegrees(Boolean(session))
 
   const [isCopied, setIsCopied] = useState(false)
   const [isLinkCopied, setIsLinkCopied] = useState(false)
@@ -213,67 +215,82 @@ export default function PresetDetailPage() {
         </div>
       </div>
 
-      {/* Floating Action Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-xs border-t p-4 shadow-2xl z-50">
         <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-4 justify-between">
-          <div className="flex-1 w-full flex flex-col gap-3">
-            <div className="flex items-center gap-6">
-              <label className="flex items-center gap-2 cursor-pointer text-sm font-mono text-muted-foreground">
-                <input 
-                  type="radio" 
-                  name="cloneMode" 
-                  value="new"
-                  checked={cloneMode === 'new'}
-                  onChange={() => setCloneMode('new')}
-                  className="accent-primary"
-                />
-                Create new degree
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer text-sm font-mono text-muted-foreground">
-                <input 
-                  type="radio" 
-                  name="cloneMode" 
-                  value="existing"
-                  checked={cloneMode === 'existing'}
-                  onChange={() => setCloneMode('existing')}
-                  className="accent-primary"
-                />
-                Add to existing
-              </label>
-            </div>
+          {session ? (
+            <>
+              <div className="flex-1 w-full flex flex-col gap-3">
+                <div className="flex items-center gap-6">
+                  <label className="flex items-center gap-2 cursor-pointer text-sm font-mono text-muted-foreground">
+                    <input 
+                      type="radio" 
+                      name="cloneMode" 
+                      value="new"
+                      checked={cloneMode === 'new'}
+                      onChange={() => setCloneMode('new')}
+                      className="accent-primary"
+                    />
+                    Create new degree
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer text-sm font-mono text-muted-foreground">
+                    <input 
+                      type="radio" 
+                      name="cloneMode" 
+                      value="existing"
+                      checked={cloneMode === 'existing'}
+                      onChange={() => setCloneMode('existing')}
+                      className="accent-primary"
+                    />
+                    Add to existing
+                  </label>
+                </div>
 
-            {cloneMode === 'new' ? (
-              <Input 
-                value={degreeTitle}
-                onChange={e => setDegreeTitle(e.target.value)}
-                placeholder={`Name your new degree (defaults to "${preset.title}")`}
-                className="bg-card border-border text-foreground font-mono h-10 w-full md:max-w-md"
-              />
-            ) : (
-              <select 
-                value={targetDegreeId}
-                onChange={e => setTargetDegreeId(e.target.value)}
-                className="bg-card border border-border rounded-md px-3 text-foreground font-mono h-10 w-full md:max-w-md focus:outline-hidden focus:ring-2 focus:ring-primary"
+                {cloneMode === 'new' ? (
+                  <Input 
+                    value={degreeTitle}
+                    onChange={e => setDegreeTitle(e.target.value)}
+                    placeholder={`Name your new degree (defaults to "${preset.title}")`}
+                    className="bg-card border-border text-foreground font-mono h-10 w-full md:max-w-md"
+                  />
+                ) : (
+                  <select 
+                    value={targetDegreeId}
+                    onChange={e => setTargetDegreeId(e.target.value)}
+                    className="bg-card border border-border rounded-md px-3 text-foreground font-mono h-10 w-full md:max-w-md focus:outline-hidden focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="">-- Select a degree --</option>
+                    {degrees.map(d => (
+                      <option key={d.id} value={d.id}>{d.title}</option>
+                    ))}
+                  </select>
+                )}
+              </div>
+              <Button 
+                onClick={handleClone}
+                disabled={applyPreset.isPending}
+                className="w-full md:w-auto h-12 px-8 bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold text-sm self-end"
               >
-                <option value="">-- Select a degree --</option>
-                {degrees.map(d => (
-                  <option key={d.id} value={d.id}>{d.title}</option>
-                ))}
-              </select>
-            )}
-          </div>
-          <Button 
-            onClick={handleClone}
-            disabled={applyPreset.isPending}
-            className="w-full md:w-auto h-12 px-8 bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold text-sm self-end"
-          >
-            {applyPreset.isPending ? (
-              <Loader2 className="w-5 h-5 animate-spin mr-2" />
-            ) : (
-              <GraduationCap className="w-5 h-5 mr-2" />
-            )}
-            Clone to my account
-          </Button>
+                {applyPreset.isPending ? (
+                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                ) : (
+                  <GraduationCap className="w-5 h-5 mr-2" />
+                )}
+                Clone to my account
+              </Button>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground text-pretty">
+                Sign in to clone this preset into your account.
+              </p>
+              <Button
+                onClick={() => navigate('/auth')}
+                className="w-full md:w-auto h-12 px-8 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-sm"
+              >
+                Get started for free
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </div>

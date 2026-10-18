@@ -249,7 +249,7 @@ export default function ScalesPage() {
         <div className="space-y-4">
           <div className="flex justify-between items-end border-b pb-3">
             <div>
-              <h2 className="text-base font-sans font-semibold text-foreground flex items-center gap-2">
+              <h2 className="font-sans text-base font-semibold text-foreground flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-primary" /> Your custom scales
               </h2>
               <p className="text-xs text-muted-foreground mt-1">
@@ -268,7 +268,7 @@ export default function ScalesPage() {
           {userScales.length === 0 ? (
             <div className="bg-card border border-border border-dashed rounded-lg p-8 text-center space-y-3">
               <Sliders className="w-8 h-8 text-muted-foreground mx-auto opacity-40" />
-              <h3 className="text-sm font-sans font-semibold text-foreground">No custom scales yet</h3>
+              <h3 className="font-sans text-sm font-semibold text-foreground">No custom scales yet</h3>
               <p className="text-muted-foreground text-xs max-w-md mx-auto">
                 System grade scales (Standard 4.0, Sri Lankan UGC) are used by default. Create a custom scale if your university uses unique point values.
               </p>

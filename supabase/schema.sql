@@ -104,9 +104,16 @@ create table if not exists preset_modules (
 -- Auto-create profile on sign-up
 create or replace function handle_new_user()
 returns trigger language plpgsql security definer set search_path = public as $$
+declare
+  chosen_name text;
 begin
+  chosen_name := nullif(trim(coalesce(new.raw_user_meta_data->>'display_name', '')), '');
+  if chosen_name is null then
+    chosen_name := split_part(new.email, '@', 1);
+  end if;
+
   insert into public.profiles (id, display_name)
-  values (new.id, split_part(new.email, '@', 1))
+  values (new.id, chosen_name)
   on conflict (id) do nothing;
   return new;
 end;
