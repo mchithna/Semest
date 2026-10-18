@@ -81,24 +81,24 @@ function SemesterMetrics({
   graded: boolean
   scale: GradeRow[]
 }) {
+  const stats = [
+    { label: 'Passed', value: earned.toFixed(1), tone: 'text-foreground' },
+    { label: 'Graded', value: attempted.toFixed(1), tone: 'text-foreground' },
+    {
+      label: 'GPA',
+      value: attempted > 0 ? formatGpa(score) : '—',
+      tone: attempted > 0 ? 'text-primary' : 'text-muted-foreground',
+    },
+  ]
+
   return (
-    <div className="flex flex-col gap-3 min-w-0">
-      <div className="grid grid-cols-3 gap-3">
-        <div className="min-w-0">
-          <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Passed</p>
-          <p className="font-mono text-sm font-semibold tabular-nums text-foreground">{earned.toFixed(1)}</p>
-        </div>
-        <div className="min-w-0">
-          <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Graded</p>
-          <p className="font-mono text-sm font-semibold tabular-nums text-foreground">{attempted.toFixed(1)}</p>
-        </div>
-        <div className="min-w-0">
-          <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground">GPA</p>
-          <p className={`font-mono text-sm font-semibold tabular-nums ${attempted > 0 ? 'text-primary' : 'text-muted-foreground'}`}>
-            {attempted > 0 ? formatGpa(score) : '—'}
-          </p>
-        </div>
-      </div>
+    <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1.5">
+      {stats.map((stat) => (
+        <p key={stat.label} className="flex items-baseline gap-1.5">
+          <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground">{stat.label}</span>
+          <span className={`font-mono text-sm font-semibold tabular-nums ${stat.tone}`}>{stat.value}</span>
+        </p>
+      ))}
       {honorsApply(scale) && (
         <ClassificationBadge
           score={score}
@@ -215,12 +215,12 @@ export default function SemestersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-4 sm:p-8">
+    <div className="flex h-[calc(100dvh-4rem-1px)] flex-col overflow-hidden bg-background p-4 text-foreground sm:p-8">
       <title>{`${degree.title} · Semest`}</title>
-      <div className="max-w-6xl mx-auto space-y-8 animate-slideUp">
+      <div className="mx-auto flex h-full min-h-0 w-full max-w-6xl flex-col animate-slideUp">
         
         {/* Header */}
-        <div className="flex flex-col gap-4 border-b pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex shrink-0 flex-col gap-4 border-b pb-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex flex-col gap-2 min-w-0">
             <Breadcrumb items={[{ label: degree.title }]} />
             <h1 className="text-2xl font-sans font-bold tracking-tight text-foreground">
@@ -246,7 +246,7 @@ export default function SemestersPage() {
 
         {/* Semesters Grid */}
         {semesters.length === 0 ? (
-          <div className="bg-card border border-border border-dashed rounded-xl p-12 text-center">
+          <div className="mt-6 bg-card border border-border border-dashed rounded-xl p-12 text-center">
             <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
             <h3 className="text-foreground font-sans text-lg font-semibold mb-2">No semesters found</h3>
             <p className="text-muted-foreground text-sm mb-6">Create your first semester to start calculating your GPA.</p>
@@ -258,97 +258,97 @@ export default function SemestersPage() {
               Add semester
             </Button>
           </div>
-        ) : layout === 'grid' ? (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {semesters.map((sem) => {
-              const scale = degree.grade_scale?.grades || []
-              const stats = semesterStats(sem, scale)
-
-              return (
-                <div
-                  key={sem.id}
-                  className="bg-card border border-border rounded-xl p-6 relative group transition-all hover:border-primary/50 flex flex-col h-full min-w-0 overflow-hidden hover:shadow-lg hover:-translate-y-1"
-                >
-                  <div className="absolute top-0 left-0 w-1 h-full bg-primary/50 rounded-l-xl"></div>
-
-                  <div className="flex justify-between items-start gap-3 mb-4 min-w-0">
-                    <div className="min-w-0">
-                      <h3 className="font-mono text-lg font-bold text-foreground group-hover:text-primary transition-colors truncate">
-                        <Link
-                          to={`/degrees/${degreeId}/semesters/${sem.id}/edit`}
-                          className="after:absolute after:inset-0"
-                        >
-                          {sem.title}
-                        </Link>
-                      </h3>
-                      {sem.term && (
-                        <p className="text-sm font-mono text-muted-foreground mt-1">
-                          {sem.term}
-                        </p>
-                      )}
-                    </div>
-                    <SemesterActions
-                      title={sem.title}
-                      onEdit={() => navigate(`/degrees/${degreeId}/semesters/${sem.id}/edit`)}
-                      onDelete={(event) => handleDelete(sem.id, sem.title, event)}
-                    />
-                  </div>
-
-                  <div className="mt-auto pt-4 border-t">
-                    <SemesterMetrics scale={scale} {...stats} />
-                  </div>
-                </div>
-              )
-            })}
-          </div>
         ) : (
-          <ol aria-label="Semesters in order" className="max-w-3xl">
-            {semesters.map((sem, index) => {
-              const scale = degree.grade_scale?.grades || []
-              const stats = semesterStats(sem, scale)
+          <div className="mt-4 min-h-0 flex-1 overflow-y-auto overscroll-contain">
+            {layout === 'grid' ? (
+              <div className="grid gap-3 pb-1 md:grid-cols-2 lg:grid-cols-3">
+                {semesters.map((sem) => {
+                  const scale = degree.grade_scale?.grades || []
+                  const stats = semesterStats(sem, scale)
 
-              return (
-                <li key={sem.id} className="relative pb-6 last:pb-0">
-                  {index < semesters.length - 1 && (
-                    <span
-                      aria-hidden="true"
-                      className="absolute left-4 top-12 bottom-0 w-px -translate-x-1/2 bg-border"
-                    />
-                  )}
-                  <span className="absolute left-0 top-6 z-10 flex size-8 items-center justify-center rounded-full border border-primary bg-background font-mono text-xs font-bold tabular-nums text-primary">
-                    {index + 1}
-                  </span>
-                  <div className="ml-12 bg-card border border-border rounded-xl p-5 relative group min-w-0 transition-colors hover:border-primary/50">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <h3 className="font-mono text-lg font-bold text-foreground group-hover:text-primary transition-colors">
-                          <Link
-                            to={`/degrees/${degreeId}/semesters/${sem.id}/edit`}
-                            className="after:absolute after:inset-0"
-                          >
-                            {sem.title}
-                          </Link>
-                        </h3>
-                        {sem.term && (
-                          <p className="text-sm font-mono text-muted-foreground mt-1">
-                            {sem.term}
-                          </p>
-                        )}
+                  return (
+                    <div
+                      key={sem.id}
+                      className="relative flex h-full min-w-0 flex-col gap-2 overflow-hidden rounded-xl border border-border bg-card p-3 group transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg"
+                    >
+                      <div className="absolute inset-y-0 start-0 w-1 rounded-s-xl bg-primary/50"></div>
+
+                      <div className="flex min-w-0 items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <h3 className="truncate font-mono text-base font-bold text-foreground transition-colors group-hover:text-primary">
+                            <Link
+                              to={`/degrees/${degreeId}/semesters/${sem.id}/edit`}
+                              className="after:absolute after:inset-0"
+                            >
+                              {sem.title}
+                            </Link>
+                          </h3>
+                          {sem.term && (
+                            <p className="mt-0.5 font-mono text-xs text-muted-foreground">
+                              {sem.term}
+                            </p>
+                          )}
+                        </div>
+                        <SemesterActions
+                          title={sem.title}
+                          onEdit={() => navigate(`/degrees/${degreeId}/semesters/${sem.id}/edit`)}
+                          onDelete={(event) => handleDelete(sem.id, sem.title, event)}
+                        />
                       </div>
-                      <SemesterActions
-                        title={sem.title}
-                        onEdit={() => navigate(`/degrees/${degreeId}/semesters/${sem.id}/edit`)}
-                        onDelete={(event) => handleDelete(sem.id, sem.title, event)}
-                      />
-                    </div>
-                    <div className="mt-4 pt-4 border-t">
+
                       <SemesterMetrics scale={scale} {...stats} />
                     </div>
-                  </div>
-                </li>
-              )
-            })}
-          </ol>
+                  )
+                })}
+              </div>
+            ) : (
+              <ol aria-label="Semesters in order" className="max-w-3xl pb-1">
+                {semesters.map((sem, index) => {
+                  const scale = degree.grade_scale?.grades || []
+                  const stats = semesterStats(sem, scale)
+
+                  return (
+                    <li key={sem.id} className="relative pb-3 last:pb-0">
+                      {index < semesters.length - 1 && (
+                        <span
+                          aria-hidden="true"
+                          className="absolute start-3 top-9 bottom-0 w-px bg-border"
+                        />
+                      )}
+                      <span className="absolute start-0 top-3 z-10 flex size-6 items-center justify-center rounded-full border border-primary bg-background font-mono text-xs font-bold tabular-nums text-primary">
+                        {index + 1}
+                      </span>
+                      <div className="relative ms-9 flex min-w-0 flex-col gap-2 rounded-xl border border-border bg-card p-3 group transition-colors hover:border-primary/50">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <h3 className="font-mono text-base font-bold text-foreground transition-colors group-hover:text-primary">
+                              <Link
+                                to={`/degrees/${degreeId}/semesters/${sem.id}/edit`}
+                                className="after:absolute after:inset-0"
+                              >
+                                {sem.title}
+                              </Link>
+                            </h3>
+                            {sem.term && (
+                              <p className="mt-0.5 font-mono text-xs text-muted-foreground">
+                                {sem.term}
+                              </p>
+                            )}
+                          </div>
+                          <SemesterActions
+                            title={sem.title}
+                            onEdit={() => navigate(`/degrees/${degreeId}/semesters/${sem.id}/edit`)}
+                            onDelete={(event) => handleDelete(sem.id, sem.title, event)}
+                          />
+                        </div>
+                        <SemesterMetrics scale={scale} {...stats} />
+                      </div>
+                    </li>
+                  )
+                })}
+              </ol>
+            )}
+          </div>
         )}
       </div>
     </div>
