@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { 
   Plus, Edit2, Trash2, Shield, Loader2,
-  User, Database, Download, Copy, LogOut, Check,
+  User, Database, Download, Copy, LogOut, Check, Sparkles,
   ChevronDown, ChevronUp
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -35,8 +35,9 @@ export default function ScalesPage() {
   const [isImporting, setIsImporting] = useState(false)
 
   // Abstracted / Collapsible Card States
-  const [showSystemScales, setShowSystemScales] = useState(false)
   const [showAccountDetails, setShowAccountDetails] = useState(false)
+  const [showSystemScales, setShowSystemScales] = useState(false)
+  const [showCustomScales, setShowCustomScales] = useState(false)
   const [showDataBackup, setShowDataBackup] = useState(false)
   const [displayName, setDisplayName] = useState('')
   const [savingName, setSavingName] = useState(false)
@@ -194,73 +195,98 @@ export default function ScalesPage() {
   return (
     <div className="min-h-screen bg-background pb-32 text-foreground">
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 className="font-display text-5xl font-semibold tracking-tight sm:text-6xl">Settings</h1>
-            <p className="mt-3 text-sm text-muted-foreground">
-              Manage your grading systems and account preferences.
-            </p>
-          </div>
-          <Button onClick={handleCreate}>
-            <Plus />
-            New scale
-          </Button>
+        <div>
+          <h1 className="font-display text-5xl font-semibold tracking-tight sm:text-6xl">Settings</h1>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Manage your grading systems and account preferences.
+          </p>
         </div>
 
-        <div className="mt-12">
-          <h2 className="text-lg font-semibold">Your custom scales</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Custom grading systems for your university or special programs.
-          </p>
-
-          {userScales.length === 0 ? (
-            <div className="mt-4 rounded-[22px] border border-dashed border-foreground/20 px-8 py-12 text-center">
-              <h3 className="font-display text-2xl font-semibold tracking-tight">No custom scales yet</h3>
-              <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-                Built-in scales are used by default. Create a custom scale if your university uses its own point values.
-              </p>
+        <section className="mt-10 overflow-hidden rounded-[22px] bg-card">
+          <div className={`h-[3px] ${cardAccentClass(0)}`} aria-hidden="true" />
+          <button
+            onClick={() => {
+              const next = !showAccountDetails
+              setShowAccountDetails(next)
+              if (next) {
+                getProfile().then((profile) => setDisplayName(profile?.display_name || '')).catch(() => {})
+              }
+            }}
+            className="flex w-full items-center justify-between p-5 text-left"
+          >
+            <div className="flex items-center gap-3">
+              <User className={`size-5 ${BAND_TEXT_CLASS.pass}`} />
+              <div>
+                <h2 className="font-semibold">Account</h2>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  Signed in as <span className="text-foreground">{session?.user?.email}</span>
+                </p>
+              </div>
             </div>
-          ) : (
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              {userScales.map((scale, index) => (
-                <article key={scale.id} className="flex h-full flex-col overflow-hidden rounded-[22px] bg-card">
-                  <div className={`h-[3px] shrink-0 ${cardAccentClass(index)}`} aria-hidden="true" />
-                  <div className="flex flex-1 flex-col p-5">
-                    <h3 className="text-lg font-semibold">{scale.label}</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">{scale.grades.length} grades</p>
-                    <div className="mt-4 flex flex-wrap gap-1.5">
-                      {scale.grades.slice(0, 6).map((grade, gradeIndex) => (
-                        <span key={gradeIndex} className="rounded-full bg-background px-2.5 py-1 text-xs">
-                          {grade.grade} <span className="text-muted-foreground">{grade.points}</span>
-                        </span>
-                      ))}
-                      {scale.grades.length > 6 && (
-                        <span className="self-center text-xs text-muted-foreground">+{scale.grades.length - 6} more</span>
-                      )}
-                    </div>
-                    <div className="mt-auto flex gap-2 pt-4">
-                      <Button variant="outline" size="sm" onClick={() => handleEdit(scale)}>
-                        <Edit2 /> Edit
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleDelete(scale.id)} className="text-destructive">
-                        <Trash2 /> Delete
-                      </Button>
-                    </div>
-                  </div>
-                </article>
-              ))}
+            {showAccountDetails ? <ChevronUp className="size-5 text-muted-foreground" /> : <ChevronDown className="size-5 text-muted-foreground" />}
+          </button>
+
+          {showAccountDetails && (
+            <div className="space-y-4 border-t border-border px-5 py-5">
+              <dl className="grid gap-3 sm:grid-cols-3">
+                <div className="rounded-[18px] bg-background px-4 py-3">
+                  <dt className="text-sm text-muted-foreground">Email</dt>
+                  <dd className="mt-1 break-all text-sm">{session?.user?.email}</dd>
+                </div>
+                <div className="rounded-[18px] bg-background px-4 py-3">
+                  <dt className="text-sm text-muted-foreground">Degrees</dt>
+                  <dd className="mt-1 text-sm tabular-nums">{degrees.length}</dd>
+                </div>
+                <div className="rounded-[18px] bg-background px-4 py-3">
+                  <dt className="text-sm text-muted-foreground">Status</dt>
+                  <dd className={`mt-1 flex items-center gap-1 text-sm ${BAND_TEXT_CLASS.pass}`}>
+                    <Check className="size-3.5" /> Signed in
+                  </dd>
+                </div>
+              </dl>
+
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                <div className="min-w-0 flex-1 space-y-2">
+                  <label htmlFor="display-name" className="text-sm text-muted-foreground">Display name</label>
+                  <Input
+                    id="display-name"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    className="rounded-xl"
+                  />
+                </div>
+                <Button
+                  disabled={savingName || !displayName.trim()}
+                  onClick={async () => {
+                    setSavingName(true)
+                    try {
+                      await updateDisplayName(displayName)
+                      toast.success('Display name saved')
+                    } catch (err: any) {
+                      toast.error(friendlyError(err, "Couldn't save your name. Try again."))
+                    } finally {
+                      setSavingName(false)
+                    }
+                  }}
+                >
+                  Save
+                </Button>
+                <Button variant="destructive" onClick={() => signOut()}>
+                  <LogOut /> Sign out
+                </Button>
+              </div>
             </div>
           )}
-        </div>
+        </section>
 
-        <section className="mt-6 overflow-hidden rounded-[22px] bg-card">
-          <div className={`h-[3px] ${cardAccentClass(0)}`} aria-hidden="true" />
+        <section className="mt-4 overflow-hidden rounded-[22px] bg-card">
+          <div className={`h-[3px] ${cardAccentClass(1)}`} aria-hidden="true" />
           <button
             onClick={() => setShowSystemScales(!showSystemScales)}
             className="flex w-full items-center justify-between p-5 text-left"
           >
             <div className="flex items-center gap-3">
-              <Shield className={`size-5 ${BAND_TEXT_CLASS.pass}`} />
+              <Shield className={`size-5 ${BAND_TEXT_CLASS['second-lower']}`} />
               <div>
                 <h2 className="font-semibold">Built-in scales ({systemScales.length})</h2>
                 <p className="mt-0.5 text-sm text-muted-foreground">
@@ -302,91 +328,90 @@ export default function ScalesPage() {
         </section>
 
         <section className="mt-4 overflow-hidden rounded-[22px] bg-card">
-          <div className={`h-[3px] ${cardAccentClass(1)}`} aria-hidden="true" />
-          <button
-            onClick={() => {
-              const next = !showAccountDetails
-              setShowAccountDetails(next)
-              if (next) {
-                getProfile().then((profile) => setDisplayName(profile?.display_name || '')).catch(() => {})
-              }
-            }}
-            className="flex w-full items-center justify-between p-5 text-left"
-          >
-            <div className="flex items-center gap-3">
-              <User className={`size-5 ${BAND_TEXT_CLASS['second-lower']}`} />
+          <div className={`h-[3px] ${cardAccentClass(2)}`} aria-hidden="true" />
+          <div className="flex items-center justify-between gap-3 p-5">
+            <button
+              type="button"
+              onClick={() => setShowCustomScales(!showCustomScales)}
+              className="flex min-w-0 flex-1 items-center gap-3 text-left"
+            >
+              <Sparkles className={`size-5 shrink-0 ${BAND_TEXT_CLASS['second-upper']}`} />
               <div>
-                <h2 className="font-semibold">Account</h2>
+                <h2 className="font-semibold">Custom scales ({userScales.length})</h2>
                 <p className="mt-0.5 text-sm text-muted-foreground">
-                  Signed in as <span className="text-foreground">{session?.user?.email}</span>
+                  Grading systems for your university or a special program.
                 </p>
               </div>
-            </div>
-            {showAccountDetails ? <ChevronUp className="size-5 text-muted-foreground" /> : <ChevronDown className="size-5 text-muted-foreground" />}
-          </button>
-
-          {showAccountDetails && (
-            <div className="max-w-xl space-y-5 border-t border-border px-5 py-5">
-              <dl className="space-y-3 text-sm">
-                <div className="flex justify-between gap-4">
-                  <dt className="text-muted-foreground">Email</dt>
-                  <dd>{session?.user?.email}</dd>
-                </div>
-                <div className="flex justify-between gap-4">
-                  <dt className="text-muted-foreground">Degrees</dt>
-                  <dd className="tabular-nums">{degrees.length}</dd>
-                </div>
-                <div className="flex justify-between gap-4">
-                  <dt className="text-muted-foreground">Status</dt>
-                  <dd className={`flex items-center gap-1 ${BAND_TEXT_CLASS.pass}`}>
-                    <Check className="size-3.5" /> Signed in
-                  </dd>
-                </div>
-              </dl>
-
-              <div className="space-y-2">
-                <label htmlFor="display-name" className="text-sm text-muted-foreground">Display name</label>
-                <div className="flex gap-2">
-                  <Input
-                    id="display-name"
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                    className="rounded-xl"
-                  />
-                  <Button
-                    disabled={savingName || !displayName.trim()}
-                    onClick={async () => {
-                      setSavingName(true)
-                      try {
-                        await updateDisplayName(displayName)
-                        toast.success('Display name saved')
-                      } catch (err: any) {
-                        toast.error(friendlyError(err, "Couldn't save your name. Try again."))
-                      } finally {
-                        setSavingName(false)
-                      }
-                    }}
-                  >
-                    Save
-                  </Button>
-                </div>
-              </div>
-
-              <Button variant="destructive" onClick={() => signOut()} className="w-full sm:w-auto">
-                <LogOut /> Sign out
+            </button>
+            <div className="flex shrink-0 items-center gap-2">
+              <Button onClick={handleCreate}>
+                <Plus />
+                New scale
               </Button>
+              <button
+                type="button"
+                onClick={() => setShowCustomScales(!showCustomScales)}
+                aria-expanded={showCustomScales}
+                aria-label={showCustomScales ? 'Hide custom scales' : 'Show custom scales'}
+                className="text-muted-foreground"
+              >
+                {showCustomScales ? <ChevronUp className="size-5" /> : <ChevronDown className="size-5" />}
+              </button>
+            </div>
+          </div>
+
+          {showCustomScales && (
+            <div className="border-t border-border px-5 py-5">
+              {userScales.length === 0 ? (
+                <div className="rounded-[22px] border border-dashed border-foreground/20 px-8 py-10 text-center">
+                  <h3 className="font-display text-2xl font-semibold tracking-tight">No custom scales yet</h3>
+                  <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+                    Built-in scales are used by default. Create a custom scale if your university uses its own point values.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {userScales.map((scale, index) => (
+                    <article key={scale.id} className="flex h-full flex-col overflow-hidden rounded-[22px] bg-background">
+                      <div className={`h-[3px] shrink-0 ${cardAccentClass(index)}`} aria-hidden="true" />
+                      <div className="flex flex-1 flex-col p-5">
+                        <h3 className="text-lg font-semibold">{scale.label}</h3>
+                        <p className="mt-1 text-sm text-muted-foreground">{scale.grades.length} grades</p>
+                        <div className="mt-4 flex flex-wrap gap-1.5">
+                          {scale.grades.slice(0, 6).map((grade, gradeIndex) => (
+                            <span key={gradeIndex} className="rounded-full bg-card px-2.5 py-1 text-xs">
+                              {grade.grade} <span className="text-muted-foreground">{grade.points}</span>
+                            </span>
+                          ))}
+                          {scale.grades.length > 6 && (
+                            <span className="self-center text-xs text-muted-foreground">+{scale.grades.length - 6} more</span>
+                          )}
+                        </div>
+                        <div className="mt-auto flex gap-2 pt-4">
+                          <Button variant="outline" size="sm" onClick={() => handleEdit(scale)}>
+                            <Edit2 /> Edit
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => handleDelete(scale.id)} className="text-destructive">
+                            <Trash2 /> Delete
+                          </Button>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </section>
 
         <section className="mt-4 overflow-hidden rounded-[22px] bg-card">
-          <div className={`h-[3px] ${cardAccentClass(2)}`} aria-hidden="true" />
+          <div className={`h-[3px] ${cardAccentClass(3)}`} aria-hidden="true" />
           <button
             onClick={() => setShowDataBackup(!showDataBackup)}
             className="flex w-full items-center justify-between p-5 text-left"
           >
             <div className="flex items-center gap-3">
-              <Database className={`size-5 ${BAND_TEXT_CLASS['second-upper']}`} />
+              <Database className={`size-5 ${BAND_TEXT_CLASS.first}`} />
               <div>
                 <h2 className="font-semibold">Backup</h2>
                 <p className="mt-0.5 text-sm text-muted-foreground">
