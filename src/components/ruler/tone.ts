@@ -23,3 +23,16 @@ export const BAND_BORDER_CLASS: Record<BandTone, string> = {
   first: 'border-band-first/80',
   plain: 'border-border',
 }
+
+const CARD_ACCENT_TONES: Exclude<BandTone, 'plain'>[] = [
+  'pass',
+  'second-lower',
+  'second-upper',
+  'first',
+]
+
+/** Band color for a card edge. Index cycles so neighbors do not share a color. */
+export function cardAccentClass(index: number): string {
+  const tone = CARD_ACCENT_TONES[((index % CARD_ACCENT_TONES.length) + CARD_ACCENT_TONES.length) % CARD_ACCENT_TONES.length]
+  return BAND_TONE_CLASS[tone]
+}

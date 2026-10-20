@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Loader2, Share2, Check, RefreshCw, Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { MiniRuler, ScalePreview } from '@/components/ruler/MiniRuler'
-import { bandsForScale } from '@/lib/bands'
+import { cardAccentClass } from '@/components/ruler/tone'
 import { useDeletePreset, useMyPresets, useSyncPreset, useUpdatePreset } from '@/hooks/usePresets'
 import { useDegrees } from '@/hooks/useDegrees'
 import { toast } from 'sonner'
@@ -61,7 +60,6 @@ export default function MyPresetsPage() {
           </div>
         ) : !presets || presets.length === 0 ? (
           <div className="mt-10 rounded-[22px] border border-dashed border-foreground/20 px-8 py-12 text-center">
-            <MiniRuler track={bandsForScale([])} value={null} className="mx-auto mb-8 max-w-sm" />
             <h2 className="font-display text-2xl font-semibold tracking-tight">No presets published</h2>
             <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
               Publish a degree when you want other people to clone its structure.
@@ -72,55 +70,57 @@ export default function MyPresetsPage() {
           </div>
         ) : (
           <div className="mt-10 grid gap-4 sm:grid-cols-2">
-            {presets.map((preset) => (
-              <article key={preset.id} className="flex h-full flex-col rounded-[22px] bg-card p-5">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <h2 className="text-lg font-semibold">{preset.title}</h2>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {preset.institution?.trim() || 'Unknown institution'}
-                    </p>
+            {presets.map((preset, index) => (
+              <article key={preset.id} className="flex h-full flex-col overflow-hidden rounded-[22px] bg-card">
+                <div className={`h-[3px] shrink-0 ${cardAccentClass(index)}`} aria-hidden="true" />
+                <div className="flex flex-1 flex-col p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <h2 className="text-lg font-semibold">{preset.title}</h2>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {preset.institution?.trim() || 'Unknown institution'}
+                      </p>
+                    </div>
+                    <span className="shrink-0 rounded-full bg-background px-2.5 py-1 text-xs tracking-wide">
+                      {preset.code}
+                    </span>
                   </div>
-                  <span className="shrink-0 rounded-full bg-background px-2.5 py-1 text-xs tracking-wide">
-                    {preset.code}
-                  </span>
-                </div>
-                <ScalePreview grades={preset.grade_scale?.grades} className="mt-5" />
-                <p className="mt-4 text-xs text-muted-foreground">
-                  {preset.is_public ? 'Public' : 'Private'} · {preset.use_count} {preset.use_count === 1 ? 'clone' : 'clones'}
-                </p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setSyncPresetId(preset.id)}
-                  >
-                    <RefreshCw />
-                    Sync
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setEditPresetId(preset.id)
-                      setEditTitle(preset.title)
-                      setEditDescription(preset.description || '')
-                      setEditInstitution(preset.institution || '')
-                      setEditPublic(preset.is_public)
-                    }}
-                  >
-                    <Pencil />
-                    Edit
-                  </Button>
-                  {preset.is_public && (
-                    <Button variant="outline" size="sm" onClick={(event) => handleShareLink(event, preset.code)}>
-                      {copiedCode === preset.code ? <Check /> : <Share2 />}
-                      Share
+                  <p className="mt-4 text-xs text-muted-foreground">
+                    {preset.is_public ? 'Public' : 'Private'} · {preset.use_count} {preset.use_count === 1 ? 'clone' : 'clones'}
+                  </p>
+                  <div className="mt-auto flex flex-wrap gap-2 pt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSyncPresetId(preset.id)}
+                    >
+                      <RefreshCw />
+                      Sync
                     </Button>
-                  )}
-                  <Button variant="ghost" size="sm" onClick={() => navigate(`/presets/${preset.code}`)}>
-                    Open
-                  </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setEditPresetId(preset.id)
+                        setEditTitle(preset.title)
+                        setEditDescription(preset.description || '')
+                        setEditInstitution(preset.institution || '')
+                        setEditPublic(preset.is_public)
+                      }}
+                    >
+                      <Pencil />
+                      Edit
+                    </Button>
+                    {preset.is_public && (
+                      <Button variant="outline" size="sm" onClick={(event) => handleShareLink(event, preset.code)}>
+                        {copiedCode === preset.code ? <Check /> : <Share2 />}
+                        Share
+                      </Button>
+                    )}
+                    <Button variant="ghost" size="sm" onClick={() => navigate(`/presets/${preset.code}`)}>
+                      Open
+                    </Button>
+                  </div>
                 </div>
               </article>
             ))}

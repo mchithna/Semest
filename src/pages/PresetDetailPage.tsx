@@ -8,8 +8,7 @@ import { useAuth } from '@/context/AuthContext'
 import { toast } from 'sonner'
 import { friendlyError } from '@/lib/errors'
 import { Input } from '@/components/ui/input'
-import { ScalePreview, MiniRuler } from '@/components/ruler/MiniRuler'
-import { bandsForScale } from '@/lib/bands'
+import { cardAccentClass } from '@/components/ruler/tone'
 
 export default function PresetDetailPage() {
   const { code } = useParams<{ code: string }>()
@@ -87,7 +86,6 @@ export default function PresetDetailPage() {
       <div className="mx-auto flex min-h-[70vh] max-w-lg items-center px-4">
         <title>Preset not found · Semest</title>
         <div className="w-full rounded-[22px] border border-dashed border-foreground/20 px-8 py-12 text-center">
-          <MiniRuler track={bandsForScale([])} value={null} className="mb-8" />
           <h1 className="font-display text-3xl font-semibold tracking-tight">Preset not found</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             That share code is not a public preset, or it was removed.
@@ -119,7 +117,6 @@ export default function PresetDetailPage() {
             {preset.description && (
               <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">{preset.description}</p>
             )}
-            <ScalePreview grades={preset.grade_scale?.grades} className="mt-6 max-w-md" />
           </div>
           <div className="flex flex-wrap gap-2">
             {preset.is_public ? (
@@ -151,30 +148,32 @@ export default function PresetDetailPage() {
           <div className="space-y-4">
             {preset.semesters.length === 0 ? (
               <div className="rounded-[22px] border border-dashed border-foreground/20 px-8 py-10 text-center">
-                <MiniRuler track={bandsForScale(preset.grade_scale?.grades)} value={null} className="mx-auto mb-6 max-w-sm" />
                 <p className="text-sm text-muted-foreground">This preset has no semesters.</p>
               </div>
             ) : (
               preset.semesters.map((sem, i) => (
-                <section key={sem.id} className="rounded-[22px] bg-card p-5">
-                  <div className="flex items-baseline justify-between gap-3">
-                    <h3 className="font-medium">{sem.title || `Semester ${i + 1}`}</h3>
-                    <span className="text-xs text-muted-foreground">
-                      {sem.modules.length} {sem.modules.length === 1 ? 'module' : 'modules'}
-                    </span>
+                <section key={sem.id} className="overflow-hidden rounded-[22px] bg-card">
+                  <div className={`h-[3px] ${cardAccentClass(i)}`} aria-hidden="true" />
+                  <div className="p-5">
+                    <div className="flex items-baseline justify-between gap-3">
+                      <h3 className="font-medium">{sem.title || `Semester ${i + 1}`}</h3>
+                      <span className="text-xs text-muted-foreground">
+                        {sem.modules.length} {sem.modules.length === 1 ? 'module' : 'modules'}
+                      </span>
+                    </div>
+                    {sem.modules.length === 0 ? (
+                      <p className="mt-4 text-sm text-muted-foreground">No modules added</p>
+                    ) : (
+                      <ul className="mt-4 divide-y divide-border/70">
+                        {sem.modules.map(mod => (
+                          <li key={mod.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
+                            <span>{mod.name}</span>
+                            <span className="tabular-nums text-muted-foreground">{mod.credits} credits</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
-                  {sem.modules.length === 0 ? (
-                    <p className="mt-4 text-sm text-muted-foreground">No modules added</p>
-                  ) : (
-                    <ul className="mt-4 divide-y divide-border/70">
-                      {sem.modules.map(mod => (
-                        <li key={mod.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
-                          <span>{mod.name}</span>
-                          <span className="tabular-nums text-muted-foreground">{mod.credits} credits</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
                 </section>
               ))
             )}

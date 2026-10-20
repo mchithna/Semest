@@ -1,4 +1,4 @@
-import { bandsForScale, markerPercent, type BandTrack } from '@/lib/bands'
+import { markerPercent, type BandTrack } from '@/lib/bands'
 import { cn } from '@/lib/utils'
 import { BAND_TONE_CLASS } from './tone'
 
@@ -51,17 +51,4 @@ export function MiniRuler({
       ) : null}
     </div>
   )
-}
-
-export function ScalePreview({
-  grades,
-  className,
-}: {
-  grades?: { points: number }[] | null
-  className?: string
-}) {
-  const rows = grades ?? []
-  const track = bandsForScale(rows)
-  const preview = rows.length > 0 && track.bands.some((band) => band.tone !== 'plain')
-  return <MiniRuler track={track} value={null} preview={preview} className={className} />
 }
