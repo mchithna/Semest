@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Loader2, Sparkles } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -49,35 +48,26 @@ export default function NewPresetPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-4 sm:p-8">
-      <div className="max-w-2xl mx-auto space-y-8 animate-slideUp">
-        
-        <div className="flex items-center gap-4 text-primary mb-6">
-          <Button variant="ghost" className="p-0 hover:bg-transparent text-primary hover:text-primary/80" onClick={() => navigate('/presets/mine')}>
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            Back to my presets
-          </Button>
-        </div>
+    <div className="min-h-screen bg-background text-foreground">
+      <title>Publish a preset · Semest</title>
+      <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 sm:py-10">
+        <Button variant="ghost" className="mb-4 px-0 text-muted-foreground hover:bg-transparent hover:text-foreground" onClick={() => navigate('/presets/mine')}>
+          Back to my presets
+        </Button>
+        <h1 className="font-display text-5xl font-semibold tracking-tight sm:text-6xl">Publish a preset</h1>
+        <p className="mt-3 text-sm text-muted-foreground">
+          Turn a degree into a structure other people can clone.
+        </p>
 
-        <div>
-          <h1 className="text-2xl font-display font-bold tracking-tight text-primary flex items-center gap-2">
-            <Sparkles className="w-6 h-6" /> Publish a preset
-          </h1>
-          <p className="text-muted-foreground text-sm mt-2">
-            Turn your degree structure into a preset that others can clone.
-          </p>
-        </div>
-
-        <Card className="bg-card border-border p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="mt-8 space-y-6 rounded-[22px] bg-card p-6 sm:p-8">
             
             <div className="space-y-2">
-              <Label className="text-muted-foreground font-mono text-sm uppercase tracking-widest">Select Degree to Clone</Label>
+              <Label>Degree to publish</Label>
               <Select value={selectedDegreeId} onValueChange={handleDegreeChange} disabled={isDegreesLoading}>
-                <SelectTrigger className="bg-background border-border text-foreground font-mono">
+                <SelectTrigger className="w-full rounded-xl">
                   <SelectValue placeholder="Select one of your degrees..." />
                 </SelectTrigger>
-                <SelectContent className="bg-background border-border text-foreground font-mono">
+                <SelectContent>
                   {degrees.map(deg => (
                     <SelectItem key={deg.id} value={deg.id} className="hover:bg-muted focus:bg-muted cursor-pointer">
                       {deg.title} {deg.institution ? `(${deg.institution})` : ''}
@@ -88,39 +78,39 @@ export default function NewPresetPage() {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-muted-foreground font-mono text-sm uppercase tracking-widest">Preset Title</Label>
+              <Label>Preset title</Label>
               <Input
                 required
                 value={title}
                 onChange={e => setTitle(e.target.value)}
                 placeholder="e.g. BSc Computer Science (2024)"
-                className="bg-background border-border text-foreground font-mono"
+                className="rounded-xl"
               />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-muted-foreground font-mono text-sm uppercase tracking-widest">Institution (Optional)</Label>
+              <Label>Institution (optional)</Label>
               <Input
                 value={institution}
                 onChange={e => setInstitution(e.target.value)}
                 placeholder="e.g. University of Oxford"
-                className="bg-background border-border text-foreground font-mono"
+                className="rounded-xl"
               />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-muted-foreground font-mono text-sm uppercase tracking-widest">Description (Optional)</Label>
+              <Label>Description (optional)</Label>
               <textarea
                 value={description}
                 onChange={e => setDescription(e.target.value)}
                 placeholder="Briefly describe the focus of this degree..."
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground font-mono min-h-[100px] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-transparent"
+                className="min-h-[100px] w-full rounded-xl border border-input bg-transparent px-3 py-2 text-sm focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-hidden"
               />
             </div>
 
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-border pt-6">
               <div className="space-y-0.5 pr-4">
-                <Label className="text-foreground font-mono font-bold">Make public</Label>
+                <Label>Make public</Label>
                 <p className="text-muted-foreground text-xs">
                   Allow anyone to discover this preset in the community browser.
                 </p>
@@ -132,21 +122,19 @@ export default function NewPresetPage() {
                   checked={isPublic} 
                   onChange={e => setIsPublic(e.target.checked)} 
                 />
-                <div className="w-11 h-6 bg-muted peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-background after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-foreground/50 after:border-foreground/20 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                <div className="h-6 w-11 rounded-full bg-muted peer-focus:outline-hidden after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-foreground/70 after:transition-all peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:bg-primary-foreground"></div>
               </label>
             </div>
 
             <Button 
               type="submit"
               disabled={createPreset.isPending || !selectedDegreeId || !title.trim()}
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-sm mt-4"
+              className="mt-2 w-full"
             >
-              {createPreset.isPending && <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />}
+              {createPreset.isPending && <Loader2 className="animate-spin" aria-hidden="true" />}
               {createPreset.isPending ? 'Generating preset…' : 'Generate preset code'}
             </Button>
           </form>
-        </Card>
-
       </div>
     </div>
   )

@@ -1,15 +1,15 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Loader2, Copy, FileText, Check, GraduationCap, Share2 } from 'lucide-react'
+import { Loader2, Copy, Check, Share2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { usePreset, useApplyPreset } from '@/hooks/usePresets'
 import { useDegrees } from '@/hooks/useDegrees'
 import { useAuth } from '@/context/AuthContext'
 import { toast } from 'sonner'
 import { friendlyError } from '@/lib/errors'
 import { Input } from '@/components/ui/input'
-import { Skeleton } from '@/components/ui/skeleton'
+import { ScalePreview, MiniRuler } from '@/components/ruler/MiniRuler'
+import { bandsForScale } from '@/lib/bands'
 
 export default function PresetDetailPage() {
   const { code } = useParams<{ code: string }>()
@@ -73,41 +73,29 @@ export default function PresetDetailPage() {
 
   if (isLoading) {
     return (
-      <div role="status" className="min-h-screen bg-background text-foreground p-4 sm:p-8 pb-32">
+      <div role="status" className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
         <title>Preset · Semest</title>
         <span className="sr-only">Loading</span>
-        <div className="max-w-4xl mx-auto space-y-8">
-          <Skeleton className="h-10 w-40 bg-muted" />
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b pb-8">
-            <div className="flex-1 space-y-4 w-full">
-              <Skeleton className="h-10 w-3/4 bg-muted" />
-              <Skeleton className="h-5 w-1/2 bg-muted" />
-              <Skeleton className="h-24 w-full bg-muted" />
-            </div>
-            <Skeleton className="h-12 w-48 bg-muted" />
-          </div>
-          <div className="space-y-6">
-            <Skeleton className="h-40 w-full bg-muted" />
-            <Skeleton className="h-40 w-full bg-muted" />
-          </div>
-        </div>
+        <div className="h-14 w-72 animate-pulse rounded-full bg-muted" />
+        <div className="mt-8 h-40 animate-pulse rounded-[22px] bg-muted" />
       </div>
     )
   }
 
   if (isError || !preset) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 text-center text-foreground sm:p-8">
+      <div className="mx-auto flex min-h-[70vh] max-w-lg items-center px-4">
         <title>Preset not found · Semest</title>
-        <FileText className="w-16 h-16 text-destructive mb-6 opacity-50" />
-        <h2 className="text-2xl font-display font-bold tracking-tight mb-2">Preset not found</h2>
-        <p className="text-muted-foreground text-sm mb-8 max-w-md">
-          The share code you entered might be invalid or the preset was deleted by its creator.
-        </p>
-        <Button onClick={() => navigate('/presets')} className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold">
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Browse presets
-        </Button>
+        <div className="w-full rounded-[22px] border border-dashed border-foreground/20 px-8 py-12 text-center">
+          <MiniRuler track={bandsForScale([])} value={null} className="mb-8" />
+          <h1 className="font-display text-3xl font-semibold tracking-tight">Preset not found</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            That share code is not a public preset, or it was removed.
+          </p>
+          <Button variant="outline" className="mt-6" onClick={() => navigate('/presets')}>
+            Browse presets
+          </Button>
+        </div>
       </div>
     )
   }
@@ -117,45 +105,32 @@ export default function PresetDetailPage() {
   }, 0)
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-4 sm:p-8 pb-32">
+    <div className="min-h-screen bg-background pb-40 text-foreground">
       <title>{`${preset.title} · Semest`}</title>
-      <div className="max-w-4xl mx-auto space-y-8 animate-slideUp">
-        
-        <div className="flex items-center gap-4 text-primary mb-6">
-          <Button variant="ghost" className="p-0 hover:bg-transparent text-primary hover:text-primary/80" onClick={() => navigate('/presets')}>
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            Back to presets
-          </Button>
-        </div>
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+        <Button variant="ghost" className="mb-4 px-0 text-muted-foreground hover:bg-transparent hover:text-foreground" onClick={() => navigate('/presets')}>
+          Back to presets
+        </Button>
 
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b pb-8">
-          <div className="flex-1">
-            <h1 className="text-3xl font-display font-bold tracking-tight text-foreground">{preset.title}</h1>
-            <p className="text-muted-foreground font-mono text-sm mt-2">{preset.institution || 'Unknown Institution'}</p>
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="min-w-0 flex-1">
+            <h1 className="font-display text-5xl font-semibold tracking-tight sm:text-6xl">{preset.title}</h1>
+            <p className="mt-3 text-sm text-muted-foreground">{preset.institution?.trim() || 'Unknown institution'}</p>
             {preset.description && (
-              <p className="text-muted-foreground font-mono text-sm mt-4 bg-card/50 p-4 rounded-lg border">
-                {preset.description}
-              </p>
+              <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">{preset.description}</p>
             )}
+            <ScalePreview grades={preset.grade_scale?.grades} className="mt-6 max-w-md" />
           </div>
-          <div className="flex flex-col sm:flex-row md:flex-col gap-3 min-w-[200px] w-full md:w-auto">
+          <div className="flex flex-wrap gap-2">
             {preset.is_public ? (
               <>
-                <Button 
-                  onClick={handleCopyLink}
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-12 transition-colors"
-                >
-                  {isLinkCopied ? <Check className="w-4 h-4 mr-2" /> : <Share2 className="w-4 h-4 mr-2" />}
+                <Button onClick={handleCopyLink}>
+                  {isLinkCopied ? <Check /> : <Share2 />}
                   {isLinkCopied ? 'Link copied' : 'Share link'}
                 </Button>
-                <Button 
-                  onClick={handleCopyCode}
-                  variant="outline"
-                  className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground font-bold h-12 transition-colors"
-                >
-                  {isCopied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
-                  {isCopied ? 'Code copied' : `Code: ${preset.code}`}
+                <Button onClick={handleCopyCode} variant="outline">
+                  {isCopied ? <Check /> : <Copy />}
+                  {isCopied ? 'Code copied' : preset.code}
                 </Button>
               </>
             ) : (
@@ -167,61 +142,53 @@ export default function PresetDetailPage() {
         </div>
 
         {/* Structure Preview */}
-        <div>
-          <div className="flex justify-between items-end mb-6">
-            <h2 className="text-xl font-sans font-semibold text-primary">
-              Preset structure
-            </h2>
-            <div className="text-right text-sm">
-              <p className="text-muted-foreground">Total credits</p>
-              <p className="text-2xl font-bold tabular-nums text-foreground">{totalCredits}</p>
-            </div>
+        <div className="mt-12">
+          <div className="mb-4 flex items-baseline justify-between gap-3">
+            <h2 className="text-lg font-semibold">Preset structure</h2>
+            <p className="text-sm text-muted-foreground">{totalCredits} credits</p>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-4">
             {preset.semesters.length === 0 ? (
-              <div className="text-center p-8 bg-card/30 border border-dashed rounded-lg">
-                <p className="text-muted-foreground font-mono text-sm">This preset contains no semesters.</p>
+              <div className="rounded-[22px] border border-dashed border-foreground/20 px-8 py-10 text-center">
+                <MiniRuler track={bandsForScale(preset.grade_scale?.grades)} value={null} className="mx-auto mb-6 max-w-sm" />
+                <p className="text-sm text-muted-foreground">This preset has no semesters.</p>
               </div>
             ) : (
               preset.semesters.map((sem, i) => (
-                <Card key={sem.id} className="bg-card border-border overflow-hidden">
-                  <div className="bg-muted px-4 py-3 flex justify-between items-center">
-                    <h3 className="font-mono font-bold text-foreground">{sem.title || `Semester ${i + 1}`}</h3>
-                    <span className="font-mono text-xs text-muted-foreground bg-background px-2 py-1 rounded">
-                      {sem.modules.length} Modules
+                <section key={sem.id} className="rounded-[22px] bg-card p-5">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <h3 className="font-medium">{sem.title || `Semester ${i + 1}`}</h3>
+                    <span className="text-xs text-muted-foreground">
+                      {sem.modules.length} {sem.modules.length === 1 ? 'module' : 'modules'}
                     </span>
                   </div>
-                  <div className="p-4">
-                    {sem.modules.length === 0 ? (
-                      <p className="text-muted-foreground font-mono text-sm text-center py-4">Empty semester</p>
-                    ) : (
-                      <div className="grid gap-2">
-                        {sem.modules.map(mod => (
-                          <div key={mod.id} className="flex justify-between items-center p-3 bg-background rounded border border-border">
-                            <span className="font-mono text-sm text-foreground">{mod.name}</span>
-                            <span className="font-mono text-xs text-muted-foreground font-bold bg-muted px-2 py-1 rounded">
-                              {mod.credits} Cr
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </Card>
+                  {sem.modules.length === 0 ? (
+                    <p className="mt-4 text-sm text-muted-foreground">No modules added</p>
+                  ) : (
+                    <ul className="mt-4 divide-y divide-border/70">
+                      {sem.modules.map(mod => (
+                        <li key={mod.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
+                          <span>{mod.name}</span>
+                          <span className="tabular-nums text-muted-foreground">{mod.credits} credits</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
               ))
             )}
           </div>
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-xs border-t p-4 shadow-2xl z-50">
-        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-4 justify-between">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/70 bg-background/95 p-4 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 md:flex-row">
           {session ? (
             <>
               <div className="flex-1 w-full flex flex-col gap-3">
                 <div className="flex items-center gap-6">
-                  <label className="flex items-center gap-2 cursor-pointer text-sm font-mono text-muted-foreground">
+                  <label className="flex items-center gap-2 cursor-pointer text-sm text-muted-foreground">
                     <input 
                       type="radio" 
                       name="cloneMode" 
@@ -232,7 +199,7 @@ export default function PresetDetailPage() {
                     />
                     Create new degree
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer text-sm font-mono text-muted-foreground">
+                  <label className="flex items-center gap-2 cursor-pointer text-sm text-muted-foreground">
                     <input 
                       type="radio" 
                       name="cloneMode" 
@@ -250,13 +217,13 @@ export default function PresetDetailPage() {
                     value={degreeTitle}
                     onChange={e => setDegreeTitle(e.target.value)}
                     placeholder={`Name your new degree (defaults to "${preset.title}")`}
-                    className="bg-card border-border text-foreground font-mono h-10 w-full md:max-w-md"
+                    className="h-10 w-full rounded-full md:max-w-md"
                   />
                 ) : (
                   <select 
                     value={targetDegreeId}
                     onChange={e => setTargetDegreeId(e.target.value)}
-                    className="bg-card border border-border rounded-md px-3 text-foreground font-mono h-10 w-full md:max-w-md focus:outline-hidden focus:ring-2 focus:ring-primary"
+                    className="h-10 w-full rounded-full border border-input bg-transparent px-3 text-sm md:max-w-md"
                   >
                     <option value="">-- Select a degree --</option>
                     {degrees.map(d => (
@@ -268,13 +235,9 @@ export default function PresetDetailPage() {
               <Button 
                 onClick={handleClone}
                 disabled={applyPreset.isPending}
-                className="w-full md:w-auto h-12 px-8 bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold text-sm self-end"
+                className="w-full self-end md:w-auto"
               >
-                {applyPreset.isPending ? (
-                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                ) : (
-                  <GraduationCap className="w-5 h-5 mr-2" />
-                )}
+                {applyPreset.isPending && <Loader2 className="animate-spin" />}
                 Clone to my account
               </Button>
             </>
@@ -285,7 +248,7 @@ export default function PresetDetailPage() {
               </p>
               <Button
                 onClick={() => navigate('/auth')}
-                className="w-full md:w-auto h-12 px-8 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-sm"
+                className="w-full md:w-auto"
               >
                 Get started for free
               </Button>

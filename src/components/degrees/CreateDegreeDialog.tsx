@@ -72,55 +72,55 @@ export function CreateDegreeDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] bg-card border-border text-foreground">
+      <DialogContent className="rounded-[22px] border-border bg-card text-foreground sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="font-sans font-semibold text-primary">
+          <DialogTitle className="font-display text-2xl font-semibold">
             {initialData ? 'Edit degree' : 'New degree'}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 mt-4">
+        <div className="mt-4 space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="degree-title" className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Title <span className="text-destructive">*</span></Label>
+            <Label htmlFor="degree-title">Title</Label>
             <Input
               id="degree-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. BSc Computer Science"
-              className="bg-background border-border text-foreground rounded-sm"
+              className="rounded-xl"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="degree-institution" className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Institution</Label>
+            <Label htmlFor="degree-institution">Institution</Label>
             <Input
               id="degree-institution"
               value={institution}
               onChange={(e) => setInstitution(e.target.value)}
               placeholder="e.g. University of London"
-              className="bg-background border-border text-foreground rounded-sm"
+              className="rounded-xl"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="degree-start-year" className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Start Year</Label>
+            <Label htmlFor="degree-start-year">Start year</Label>
             <Input
               id="degree-start-year"
               type="number"
               value={startYear}
               onChange={(e) => setStartYear(e.target.value)}
               placeholder="e.g. 2024"
-              className="bg-background border-border text-foreground rounded-sm"
+              className="rounded-xl"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="degree-grade-scale" className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Grade Scale</Label>
+            <Label htmlFor="degree-grade-scale">Grade scale</Label>
             <Select value={gradeScaleId} onValueChange={setGradeScaleId}>
-              <SelectTrigger id="degree-grade-scale" className="bg-background border-border text-foreground rounded-sm">
+              <SelectTrigger id="degree-grade-scale" className="w-full rounded-xl">
                 <SelectValue placeholder="Select a scale" />
               </SelectTrigger>
-              <SelectContent className="bg-background border-border text-foreground">
+              <SelectContent>
                 <SelectItem value="none">None</SelectItem>
                 {scales.map(scale => (
                   <SelectItem key={scale.id} value={scale.id}>
@@ -131,20 +131,12 @@ export function CreateDegreeDialog({
             </Select>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4">
-            <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="border-border text-muted-foreground hover:bg-muted hover:text-foreground rounded-sm text-xs"
-            >
+          <div className="flex justify-end gap-3 pt-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button
-              onClick={handleSave}
-              disabled={isSaving}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-sm text-xs"
-            >
-              {isSaving && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving && <Loader2 className="animate-spin" aria-hidden="true" />}
               {isSaving ? 'Saving degree…' : 'Save degree'}
             </Button>
           </div>

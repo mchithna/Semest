@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, Globe, Users, FileText, ArrowRight, Share2, Check } from 'lucide-react'
+import { Search, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Skeleton } from '@/components/ui/skeleton'
 import { usePublicPresets } from '@/hooks/usePresets'
 import { useAuth } from '@/context/AuthContext'
+import { MiniRuler, ScalePreview } from '@/components/ruler/MiniRuler'
+import { bandsForScale } from '@/lib/bands'
 import { toast } from 'sonner'
 
 export default function PresetsPage() {
@@ -35,137 +35,101 @@ export default function PresetsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-4 sm:p-8">
-      <div className="max-w-6xl mx-auto space-y-8 animate-slideUp">
-        
-        {/* Header section */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b pb-8">
+    <div className="min-h-screen bg-background text-foreground">
+      <title>Presets · Semest</title>
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h1 className="text-3xl font-display font-bold tracking-tight text-primary flex items-center gap-3">
-              <Globe className="w-8 h-8" /> Community presets
+            <h1 className="max-w-xl font-display text-5xl font-semibold tracking-tight sm:text-6xl">
+              Community presets
             </h1>
-            <p className="text-muted-foreground text-sm mt-3 max-w-lg leading-relaxed">
-              Discover degree structures published by the community. Find your major, clone the preset, and start tracking your GPA instantly.
+            <p className="mt-3 max-w-md text-sm text-muted-foreground">
+              Find your major, clone the preset, and start tracking your GPA straight away.
             </p>
           </div>
-          
-          <form onSubmit={handleCodeSearch} className="flex flex-col gap-2 w-full md:w-auto">
-            <label htmlFor="share-code" className="text-xs font-mono text-muted-foreground uppercase tracking-widest">
+          <form onSubmit={handleCodeSearch} className="flex flex-col gap-2">
+            <label htmlFor="share-code" className="text-sm text-muted-foreground">
               Have a share code?
             </label>
             <div className="flex gap-2">
               <Input
                 id="share-code"
                 value={codeQuery}
-                onChange={e => setCodeQuery(e.target.value.toUpperCase())}
-                placeholder="e.g. X7K9M2"
+                onChange={(event) => setCodeQuery(event.target.value.toUpperCase())}
+                placeholder="e.g. X7R9M2"
                 maxLength={6}
-                className="bg-card border-border text-foreground font-mono w-full md:w-40"
+                className="w-40 rounded-full"
               />
-              <Button type="submit" disabled={codeQuery.trim().length !== 6} aria-label="Look up share code" className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold">
-                <ArrowRight className="w-4 h-4" />
+              <Button type="submit" disabled={codeQuery.trim().length !== 6}>
+                Go
               </Button>
             </div>
           </form>
         </div>
 
-        {/* Search Bar & Actions */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative w-full max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search by title, institution, or code..."
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Search by title, institution or code"
               aria-label="Search presets"
-              className="pl-10 bg-card border-border text-foreground font-mono h-12"
+              className="h-10 rounded-full pl-9"
             />
           </div>
           {session && (
-            <Button 
-              onClick={() => navigate('/presets/mine')}
-              variant="outline"
-              className="w-full sm:w-auto border-primary text-primary hover:bg-primary hover:text-primary-foreground font-bold h-12 transition-colors"
-            >
+            <Button variant="outline" onClick={() => navigate('/presets/mine')}>
               My presets
             </Button>
           )}
         </div>
 
-        {/* Presets Grid */}
         {isLoading ? (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Skeleton key={i} className="h-48 bg-muted rounded-xl" />
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {[1, 2, 3].map((item) => (
+              <div key={item} className="h-44 animate-pulse rounded-[22px] bg-muted" />
             ))}
           </div>
         ) : filteredPresets.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-16 text-center border border-dashed rounded-lg bg-card/30">
-            <FileText className="w-12 h-12 text-muted-foreground mb-4 opacity-50" />
-            <h3 className="text-lg font-sans font-semibold text-foreground mb-2">No presets found</h3>
-            <p className="text-muted-foreground text-sm max-w-md">
-              We couldn't find any public presets matching your search criteria.
+          <div className="mt-10 rounded-[22px] border border-dashed border-foreground/20 px-8 py-12 text-center">
+            <MiniRuler track={bandsForScale([])} value={null} className="mx-auto mb-8 max-w-sm" />
+            <h2 className="font-display text-2xl font-semibold tracking-tight">No presets found</h2>
+            <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
+              Nothing public matches that search.
             </p>
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {filteredPresets.map((preset) => (
-              <Card 
-                key={preset.id} 
-                className="bg-card border-border p-6 hover:border-primary/50 transition-all cursor-pointer flex flex-col group hover:shadow-lg hover:-translate-y-1 relative"
-                onClick={() => navigate(`/presets/${preset.code}`)}
-              >
-                <div className="flex justify-between items-start mb-4 gap-2">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-mono font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2">
-                      {preset.title}
-                    </h3>
-                    <p className="text-sm font-mono text-muted-foreground mt-1 line-clamp-1">
-                      {preset.institution || 'Unknown Institution'}
-                    </p>
-                  </div>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={(e) => handleSharePreset(e, preset.code)}
-                    aria-label={copiedCode === preset.code ? 'Share link copied' : 'Copy share link'}
-                    className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-muted"
+              <article key={preset.id} className="flex h-full flex-col rounded-[22px] bg-card p-5">
+                <h2 className="text-lg font-semibold">{preset.title}</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {preset.institution?.trim() || 'Unknown institution'}
+                </p>
+                <ScalePreview grades={preset.grade_scale?.grades} className="mt-5" />
+                <div className="mt-5 flex items-center justify-between gap-3">
+                  <button
+                    type="button"
+                    onClick={(event) => handleSharePreset(event, preset.code)}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-background px-2.5 py-1 text-xs tracking-wide text-foreground"
+                    aria-label={copiedCode === preset.code ? 'Share link copied' : `Copy share link for ${preset.code}`}
                   >
-                    {copiedCode === preset.code ? (
-                      <Check className="w-4 h-4 text-emerald-400" />
-                    ) : (
-                      <Share2 className="w-4 h-4" />
-                    )}
+                    {copiedCode === preset.code && <Check className="size-3" />}
+                    {preset.code}
+                  </button>
+                  <Button variant="outline" size="sm" onClick={() => navigate(`/presets/${preset.code}`)}>
+                    Use preset
                   </Button>
                 </div>
-                
-                {preset.description && (
-                  <p className="text-sm font-mono text-muted-foreground mb-6 line-clamp-3 flex-1">
-                    {preset.description}
-                  </p>
-                )}
-
-                <div className="mt-auto flex justify-between items-center text-xs font-mono text-muted-foreground border-t pt-4">
-                  <div className="flex items-center gap-1.5">
-                    <Users className="w-4 h-4 text-primary/70" />
-                    <span>{preset.use_count} clones</span>
-                  </div>
-                  <div className="bg-muted px-2 py-1 rounded font-bold">
-                    {preset.code}
-                  </div>
-                </div>
-              </Card>
+              </article>
             ))}
           </div>
         )}
 
         {hasNextPage && (
-          <div className="flex justify-center">
-            <Button
-              variant="outline"
-              onClick={() => fetchNextPage()}
-              disabled={isFetchingNextPage}
-            >
+          <div className="mt-8 flex justify-center">
+            <Button variant="outline" onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
               {isFetchingNextPage ? 'Loading…' : 'Load more'}
             </Button>
           </div>
