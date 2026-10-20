@@ -11,7 +11,6 @@ import { MiniRuler } from '@/components/ruler/MiniRuler'
 import { Ruler } from '@/components/ruler/Ruler'
 import { TargetPredictor } from '@/components/dashboard/TargetPredictor'
 import { ExportPdfModal } from '@/components/dashboard/ExportPdfModal'
-import { NavActions } from '@/components/layout/NavActions'
 import {
   Select,
   SelectContent,
@@ -113,27 +112,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <NavActions>
-        <Select value={activeDegreeId} onValueChange={chooseDegree}>
-          <SelectTrigger
-            aria-label="Degree"
-            className="h-10 max-w-[9.5rem] rounded-full border-foreground/20 bg-transparent px-4 sm:max-w-[14rem]"
-          >
-            <SelectValue placeholder="Degree" />
-          </SelectTrigger>
-          <SelectContent>
-            {degrees.map((degree) => (
-              <SelectItem key={degree.id} value={degree.id}>
-                {degree.title}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Button onClick={() => setIsExportModalOpen(true)} disabled={!activeDegree || isSemestersLoading}>
-          Export PDF
-        </Button>
-      </NavActions>
-
       <ExportPdfModal
         isOpen={isExportModalOpen}
         onClose={() => setIsExportModalOpen(false)}
@@ -145,6 +123,26 @@ export default function DashboardPage() {
       />
 
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+        <div className="mb-8 flex flex-wrap items-center justify-end gap-2">
+          <Select value={activeDegreeId} onValueChange={chooseDegree}>
+            <SelectTrigger
+              aria-label="Degree"
+              className="h-10 w-full max-w-[14rem] rounded-full border-foreground/20 bg-transparent px-4 sm:w-auto"
+            >
+              <SelectValue placeholder="Degree" />
+            </SelectTrigger>
+            <SelectContent>
+              {degrees.map((degree) => (
+                <SelectItem key={degree.id} value={degree.id}>
+                  {degree.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button onClick={() => setIsExportModalOpen(true)} disabled={!activeDegree || isSemestersLoading}>
+            Export PDF
+          </Button>
+        </div>
         {isSemestersLoading ? (
           <div role="status" className="space-y-6">
             <div className="h-24 w-48 animate-pulse rounded-full bg-muted" />

@@ -5,7 +5,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from '@/co
 import { useAuth } from '@/context/AuthContext'
 import { cn } from '@/lib/utils'
 import { Logo } from './Logo'
-import { NavActionSlot, useHasNavActions } from './NavActions'
+import { NavActionSlot } from './NavActions'
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   cn(
@@ -16,7 +16,6 @@ const linkClass = ({ isActive }: { isActive: boolean }) =>
 export function Nav() {
   const { session, signOut } = useAuth()
   const navigate = useNavigate()
-  const hasCustomActions = useHasNavActions()
 
   const handleSignOut = async () => {
     await signOut()
@@ -63,7 +62,7 @@ export function Nav() {
 
         <div className="flex items-center gap-2">
           <NavActionSlot className="flex items-center gap-2 empty:hidden" />
-          {!hasCustomActions && <div className="hidden items-center gap-2 md:flex">{accountActions}</div>}
+          <div className="hidden items-center gap-2 md:flex">{accountActions}</div>
 
           <div className="md:hidden">
             <Sheet>
@@ -91,7 +90,7 @@ export function Nav() {
                       {link.label}
                     </NavLink>
                   ))}
-                  {!hasCustomActions && <div className="mt-6 flex flex-col gap-2">{accountActions}</div>}
+                  <div className="mt-6 flex flex-col gap-2">{accountActions}</div>
                 </div>
               </SheetContent>
             </Sheet>
