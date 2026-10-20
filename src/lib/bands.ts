@@ -107,6 +107,8 @@ export type RulerMarker = {
   id: string
   value: number
   label: string
+  /** Shown apart from the name, so a title ending in a digit does not run into the GPA. */
+  scoreLabel?: string
   kind: MarkerKind
 }
 
@@ -137,7 +139,7 @@ export function placeMarkers(
   if (!crowded) {
     for (const marker of [...labeled].sort((a, b) => a.value - b.value)) {
       const center = (markerPercent(marker.value, track) / 100) * trackWidth
-      const width = estimateLabelWidth(marker.label)
+      const width = estimateLabelWidth(markerCaption(marker)) + (marker.scoreLabel ? 14 : 0)
       const left = center - width / 2
       const right = center + width / 2
       const side = (['above', 'below'] as const).find((candidate) => !hits(candidate, left, right))
@@ -172,4 +174,8 @@ function trackFromBands(bands: Band[]): BandTrack {
 
 function formatGap(value: number): string {
   return (Math.round(value * 100) / 100).toFixed(2)
+}
+
+export function markerCaption(marker: RulerMarker): string {
+  return marker.scoreLabel ? `${marker.label} · ${marker.scoreLabel}` : marker.label
 }

@@ -403,7 +403,8 @@ function semesterPins(semesters: SemesterWithModules[], scale: GradeRow[]): Rule
     pins.push({
       id: semester.id,
       value: score,
-      label: `${semester.title} ${formatGpa(score)}`,
+      label: semester.title,
+      scoreLabel: formatGpa(score),
       kind: 'pin',
     })
   }

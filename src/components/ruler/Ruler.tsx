@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import {
   estimateLabelWidth,
+  markerCaption,
   markerPercent,
   placeMarkers,
   type BandTrack,
@@ -37,7 +38,7 @@ export function Ruler({
   const hasBelow = markers.some((marker) => placement.get(marker.id) === 'below')
   const legend = markers.filter((marker) => placement.get(marker.id) === 'legend' && marker.kind !== 'dot')
   const ticks = visibleTicks(track, measured)
-  const summary = markers.map((marker) => marker.label).filter(Boolean).join(', ')
+  const summary = markers.map((marker) => markerCaption(marker)).filter(Boolean).join(', ')
     || track.bands.map((band) => band.label).filter(Boolean).join(', ')
 
   return (
@@ -111,7 +112,7 @@ export function Ruler({
         )}
       </div>
       {legend.length > 0 && (
-        <p className="mt-2 text-xs text-muted-foreground">{legend.map((marker) => marker.label).join(' · ')}</p>
+        <p className="mt-2 text-xs text-muted-foreground">{legend.map((marker) => markerCaption(marker)).join(' · ')}</p>
       )}
     </figure>
   )
@@ -135,13 +136,19 @@ function MarkerPill({
       {side === 'below' && <Stem dashed={target} />}
       <span
         className={cn(
-          'whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium',
+          'inline-flex items-center gap-2 whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium',
           target
             ? 'border border-band-first bg-background text-band-first'
             : 'bg-primary text-primary-foreground',
         )}
       >
-        {marker.label}
+        <span>{marker.label}</span>
+        {marker.scoreLabel ? (
+          <>
+            <span aria-hidden="true" className="h-3 w-px bg-current opacity-30" />
+            <span className="tabular-nums">{marker.scoreLabel}</span>
+          </>
+        ) : null}
       </span>
       {side === 'above' && <Stem dashed={target} />}
     </div>
