@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { 
-  Plus, Edit2, Trash2, Shield, Loader2, Monitor, Sun, Moon, 
+  Plus, Edit2, Trash2, Shield, Loader2, 
   Sliders, User, Database, Download, Copy, LogOut, Check, Sparkles,
   ChevronDown, ChevronUp
 } from 'lucide-react'
@@ -11,7 +11,6 @@ import type { GradeScale } from '@/lib/queries/gradeScales'
 import { GradeScaleEditor } from '@/components/settings/GradeScaleEditor'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { useTheme } from '@/components/theme-provider'
 import { useAuth } from '@/context/AuthContext'
 import { useDegrees } from '@/hooks/useDegrees'
 import { supabase } from '@/lib/supabase'
@@ -21,27 +20,6 @@ import { createDegree } from '@/lib/queries/degrees'
 import { createGradeScale } from '@/lib/queries/gradeScales'
 import { saveSemester } from '@/lib/queries/semesters'
 import { queryClient } from '@/lib/queryClient'
-
-function ThemeChoiceButton({ value, label }: { value: "light" | "dark" | "system", label: string }) {
-  const { theme, setTheme } = useTheme()
-  const isActive = theme === value
-  
-  return (
-    <button
-      onClick={() => setTheme(value)}
-      className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-medium transition-all ${
-        isActive 
-          ? 'bg-background text-foreground shadow-xs border border-border' 
-          : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
-      }`}
-    >
-      {value === 'light' && <Sun className="w-3.5 h-3.5 text-amber-500" />}
-      {value === 'dark' && <Moon className="w-3.5 h-3.5 text-sky-400" />}
-      {value === 'system' && <Monitor className="w-3.5 h-3.5 text-emerald-400" />}
-      {label}
-    </button>
-  )
-}
 
 export default function ScalesPage() {
   const { scales, isLoading, createScale, updateScale, deleteScale } = useGradeScales()
@@ -219,33 +197,16 @@ export default function ScalesPage() {
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b pb-6">
           <div>
-            <h1 className="text-3xl font-sans font-bold tracking-tight text-primary flex items-center gap-3">
+            <h1 className="text-3xl font-display font-bold tracking-tight text-primary flex items-center gap-3">
               <Sliders className="w-7 h-7" /> Settings
             </h1>
             <p className="text-muted-foreground text-sm mt-2">
-              Manage your grading systems, theme, and account preferences.
+              Manage your grading systems and account preferences.
             </p>
           </div>
         </div>
 
-        {/* 1. APPEARANCE SETTINGS (Compact & Clean) */}
-        <Card className="p-5 bg-card border-border">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <h2 className="font-sans text-base font-semibold text-foreground flex items-center gap-2">
-                Appearance
-              </h2>
-              <p className="text-xs text-muted-foreground mt-0.5">Select your preferred color theme.</p>
-            </div>
-            <div className="flex items-center bg-muted rounded p-1">
-              <ThemeChoiceButton value="light" label="Light" />
-              <ThemeChoiceButton value="dark" label="Dark" />
-              <ThemeChoiceButton value="system" label="System" />
-            </div>
-          </div>
-        </Card>
-
-        {/* 2. CUSTOM GRADE SCALES (Primary Focus) */}
+        {/* Custom grade scales */}
         <div className="space-y-4">
           <div className="flex justify-between items-end border-b pb-3">
             <div>

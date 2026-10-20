@@ -86,7 +86,7 @@ export default function NewSemesterPage() {
               { label: 'New semester' }
             ]} 
           />
-          <h1 className="text-2xl font-sans font-bold tracking-tight text-foreground">
+          <h1 className="text-2xl font-display font-bold tracking-tight text-foreground">
             New semester
           </h1>
         </div>

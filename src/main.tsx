@@ -6,7 +6,7 @@ import { queryClient } from './lib/queryClient'
 import { AuthProvider } from './context/AuthContext'
 import { Toaster } from 'sonner'
 import { ProtectedRoute } from './components/ProtectedRoute'
-import { ThemeProvider, useTheme } from './components/theme-provider'
+import { ThemeProvider } from './components/theme-provider'
 import './index.css'
 
 import LandingPage from './pages/LandingPage'
@@ -25,8 +25,7 @@ import PresetDetailPage from './pages/PresetDetailPage'
 import { AppShell } from './components/layout/AppShell'
 
 function AppToaster() {
-  const { theme } = useTheme()
-  return <Toaster position="top-right" richColors theme={theme} />
+  return <Toaster position="top-right" richColors theme="dark" />
 }
 
 createRoot(document.getElementById('root')!).render(

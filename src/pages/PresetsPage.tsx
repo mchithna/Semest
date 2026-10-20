@@ -41,7 +41,7 @@ export default function PresetsPage() {
         {/* Header section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b pb-8">
           <div>
-            <h1 className="text-3xl font-sans font-bold tracking-tight text-primary flex items-center gap-3">
+            <h1 className="text-3xl font-display font-bold tracking-tight text-primary flex items-center gap-3">
               <Globe className="w-8 h-8" /> Community presets
             </h1>
             <p className="text-muted-foreground text-sm mt-3 max-w-lg leading-relaxed">

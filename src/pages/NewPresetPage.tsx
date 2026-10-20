@@ -60,7 +60,7 @@ export default function NewPresetPage() {
         </div>
 
         <div>
-          <h1 className="text-2xl font-sans font-bold tracking-tight text-primary flex items-center gap-2">
+          <h1 className="text-2xl font-display font-bold tracking-tight text-primary flex items-center gap-2">
             <Sparkles className="w-6 h-6" /> Publish a preset
           </h1>
           <p className="text-muted-foreground text-sm mt-2">

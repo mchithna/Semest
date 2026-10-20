@@ -100,7 +100,7 @@ export default function PresetDetailPage() {
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 text-center text-foreground sm:p-8">
         <title>Preset not found · Semest</title>
         <FileText className="w-16 h-16 text-destructive mb-6 opacity-50" />
-        <h2 className="text-2xl font-sans font-bold tracking-tight mb-2">Preset not found</h2>
+        <h2 className="text-2xl font-display font-bold tracking-tight mb-2">Preset not found</h2>
         <p className="text-muted-foreground text-sm mb-8 max-w-md">
           The share code you entered might be invalid or the preset was deleted by its creator.
         </p>
@@ -131,7 +131,7 @@ export default function PresetDetailPage() {
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b pb-8">
           <div className="flex-1">
-            <h1 className="text-3xl font-mono font-bold text-foreground">{preset.title}</h1>
+            <h1 className="text-3xl font-display font-bold tracking-tight text-foreground">{preset.title}</h1>
             <p className="text-muted-foreground font-mono text-sm mt-2">{preset.institution || 'Unknown Institution'}</p>
             {preset.description && (
               <p className="text-muted-foreground font-mono text-sm mt-4 bg-card/50 p-4 rounded-lg border">

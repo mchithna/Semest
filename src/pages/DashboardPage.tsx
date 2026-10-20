@@ -82,7 +82,7 @@ export default function DashboardPage() {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 text-center sm:p-8">
         <GraduationCap className="w-16 h-16 text-muted-foreground mb-6 opacity-50" />
-        <h2 className="text-2xl font-sans font-bold tracking-tight text-foreground mb-2">No degrees found</h2>
+        <h2 className="text-2xl font-display font-bold tracking-tight text-foreground mb-2">No degrees found</h2>
         <p className="text-muted-foreground text-sm mb-8 max-w-md">
           You need to set up a degree profile before you can access the dashboard analytics.
         </p>
@@ -117,7 +117,7 @@ export default function DashboardPage() {
         {/* Header & Degree Selector */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b pb-6">
           <div>
-            <h1 className="text-2xl font-sans font-bold tracking-tight text-primary">
+            <h1 className="text-2xl font-display font-bold tracking-tight text-primary">
               Dashboard
             </h1>
             <p className="text-muted-foreground text-sm mt-2">

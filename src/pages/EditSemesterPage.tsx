@@ -83,7 +83,7 @@ export default function EditSemesterPage() {
               { label: 'Edit semester' }
             ]} 
           />
-          <h1 className="text-2xl font-sans font-bold tracking-tight text-foreground">
+          <h1 className="text-2xl font-display font-bold tracking-tight text-foreground">
             Edit semester
           </h1>
         </div>

@@ -47,7 +47,7 @@ export default function LandingPage() {
       {/* Hero Section */}
       <main className="flex-1 flex flex-col items-center pt-16 pb-12 px-6 animate-slideUp">
         <div className="text-center max-w-3xl mb-16 space-y-6">
-          <h1 className="text-5xl md:text-6xl font-sans font-bold tracking-tight bg-linear-to-br from-primary to-primary/70 bg-clip-text text-transparent">
+          <h1 className="text-5xl md:text-6xl font-display font-bold tracking-tight text-foreground">
             Track your academic journey
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">

@@ -1,9 +1,8 @@
-@import '@fontsource/plus-jakarta-sans/400.css' layer(base);
-@import '@fontsource/plus-jakarta-sans/500.css' layer(base);
-@import '@fontsource/plus-jakarta-sans/600.css' layer(base);
-@import '@fontsource/plus-jakarta-sans/700.css' layer(base);
-@import '@fontsource/jetbrains-mono/400.css' layer(base);
-@import '@fontsource/jetbrains-mono/700.css' layer(base);
+@import '@fontsource/instrument-sans/400.css' layer(base);
+@import '@fontsource/instrument-sans/500.css' layer(base);
+@import '@fontsource/instrument-sans/600.css' layer(base);
+@import '@fontsource/bricolage-grotesque/600.css' layer(base);
+@import '@fontsource/bricolage-grotesque/700.css' layer(base);
 
 @import 'tailwindcss';
 @import 'tw-animate-css';
@@ -11,8 +10,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Bricolage Grotesque', 'Instrument Sans', ui-sans-serif, sans-serif;
+  --font-mono: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
 
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
@@ -50,6 +50,11 @@
   --color-sidebar-border: hsl(var(--sidebar-border));
   --color-sidebar-ring: hsl(var(--sidebar-ring));
 
+  --color-band-pass: #5b6cff;
+  --color-band-second-lower: #38b6c9;
+  --color-band-second-upper: #e6b84a;
+  --color-band-first: #f07a5a;
+
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
@@ -86,106 +91,63 @@
   }
 }
 
-/*
-  The default border color has changed to `currentcolor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
-*/
 @layer base {
   *,
   ::after,
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: var(--color-gray-200, currentcolor);
+    border-color: var(--color-border);
   }
 }
 
 @layer base {
-  .theme {
-    --font-heading: var(--font-sans);
-    --font-sans: 'Plus Jakarta Sans', sans-serif;
-  }
-  :root {
-    --background: 160 20% 96%;
-    --foreground: 160 40% 10%;
-    --card: 0 0% 100%;
-    --card-foreground: 160 40% 10%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 160 40% 10%;
-    --primary: 160 84% 26%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 160 20% 94%;
-    --secondary-foreground: 160 40% 10%;
-    --muted: 160 20% 92%;
-    --muted-foreground: 160 15% 35%;
-    --accent: 160 20% 92%;
-    --accent-foreground: 160 40% 10%;
-    --destructive: 0 72% 45%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 160 20% 86%;
-    --input: 160 20% 86%;
-    --ring: 160 84% 26%;
-    --radius: 0.5rem;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --sidebar: 0 0% 100%;
-    --sidebar-foreground: 222 47% 11%;
-    --sidebar-primary: 160 84% 26%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 40% 96.1%;
-    --sidebar-accent-foreground: 222 47% 11%;
-    --sidebar-border: 214.3 31.8% 91.4%;
-    --sidebar-ring: 160 84% 26%;
-  }
+  :root,
+  .light,
   .dark {
-    --background: 215 30% 10%;
-    --foreground: 210 40% 98%;
-    --card: 215 25% 15%;
-    --card-foreground: 210 40% 98%;
-    --popover: 215 25% 15%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 160 84% 39%;
-    --primary-foreground: 160 84% 8%;
-    --secondary: 215 25% 20%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 215 25% 20%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 215 25% 20%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 84% 70%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 215 25% 20%;
-    --input: 215 25% 20%;
-    --ring: 160 84% 39%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --sidebar: 215 30% 10%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 160 84% 39%;
-    --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 215 25% 20%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 215 25% 20%;
-    --sidebar-ring: 160 84% 39%;
+    --background: 233 45% 11%;
+    --foreground: 229 52% 94%;
+    --card: 233 38% 16%;
+    --card-foreground: 229 52% 94%;
+    --popover: 233 38% 16%;
+    --popover-foreground: 229 52% 94%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 233 45% 11%;
+    --secondary: 233 32% 20%;
+    --secondary-foreground: 229 52% 94%;
+    --muted: 233 32% 20%;
+    --muted-foreground: 227 23% 68%;
+    --accent: 233 32% 20%;
+    --accent-foreground: 229 52% 94%;
+    --destructive: 0 72% 62%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 233 31% 25%;
+    --input: 233 32% 18%;
+    --ring: 229 52% 94%;
+    --radius: 1.375rem;
+    --chart-1: 234 100% 68%;
+    --chart-2: 188 57% 50%;
+    --chart-3: 42 76% 60%;
+    --chart-4: 13 83% 65%;
+    --chart-5: 229 52% 94%;
+    --sidebar: 233 45% 11%;
+    --sidebar-foreground: 229 52% 94%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 233 45% 11%;
+    --sidebar-accent: 233 32% 20%;
+    --sidebar-accent-foreground: 229 52% 94%;
+    --sidebar-border: 233 31% 25%;
+    --sidebar-ring: 229 52% 94%;
   }
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    color-scheme: dark;
+    font-family: var(--font-sans);
+  }
   body {
     @apply bg-background text-foreground;
-  }
-  html {
-    font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
   }
 }
 

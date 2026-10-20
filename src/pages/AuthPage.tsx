@@ -4,7 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Loader2, GraduationCap, Eye, EyeOff } from 'lucide-react'
+import { Loader2, Eye, EyeOff } from 'lucide-react'
+import { Logo } from '@/components/layout/Logo'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -140,17 +141,13 @@ export default function AuthPage() {
       <div className="w-full max-w-md">
         {/* Logo / Brand */}
         <div className="flex flex-col items-center mb-8 gap-3">
-          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 border border-primary/30">
-            <GraduationCap className="w-6 h-6 text-primary" />
-          </div>
-          <div className="text-center">
-            <h1 className="text-xl font-mono font-bold tracking-widest uppercase text-foreground">
-              Semest
-            </h1>
-            <p className="text-xs text-muted-foreground mt-1">
-              Academic performance system
-            </p>
-          </div>
+          <h1 className="sr-only">
+            {mode === 'forgot' ? 'Reset password' : mode === 'recovery' ? 'New password' : 'Sign in'}
+          </h1>
+          <Logo />
+          <p className="text-xs text-muted-foreground">
+            Academic performance system
+          </p>
         </div>
 
         {/* Card */}

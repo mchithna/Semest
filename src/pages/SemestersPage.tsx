@@ -223,7 +223,7 @@ export default function SemestersPage() {
         <div className="flex shrink-0 flex-col gap-4 border-b pb-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex flex-col gap-2 min-w-0">
             <Breadcrumb items={[{ label: degree.title }]} />
-            <h1 className="text-2xl font-sans font-bold tracking-tight text-foreground">
+            <h1 className="text-2xl font-display font-bold tracking-tight text-foreground">
               {degree.title}
             </h1>
             <p className="text-muted-foreground text-sm">

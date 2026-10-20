@@ -1,167 +1,102 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { GraduationCap, LogOut, Menu } from 'lucide-react'
+import { Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from '@/components/ui/sheet'
 import { useAuth } from '@/context/AuthContext'
-import { ModeToggle } from '@/components/mode-toggle'
+import { cn } from '@/lib/utils'
+import { Logo } from './Logo'
+import { NavActionSlot, useHasNavActions } from './NavActions'
+
+const linkClass = ({ isActive }: { isActive: boolean }) =>
+  cn(
+    'relative flex h-16 items-center text-sm text-muted-foreground transition-colors hover:text-foreground',
+    isActive && 'text-foreground after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-foreground',
+  )
 
 export function Nav() {
   const { session, signOut } = useAuth()
   const navigate = useNavigate()
+  const hasCustomActions = useHasNavActions()
 
   const handleSignOut = async () => {
     await signOut()
     navigate('/auth')
   }
 
-  const navLinks = session ? [
-    { label: 'Dashboard', path: '/dashboard' },
-    { label: 'Degrees', path: '/degrees' },
-    { label: 'Presets', path: '/presets' },
-    { label: 'Settings', path: '/settings' },
-  ] : [
-    { label: 'Browse presets', path: '/presets' },
-  ]
+  const navLinks = session
+    ? [
+        { label: 'Dashboard', path: '/dashboard' },
+        { label: 'Degrees', path: '/degrees' },
+        { label: 'Presets', path: '/presets' },
+        { label: 'Settings', path: '/settings' },
+      ]
+    : [{ label: 'Browse presets', path: '/presets' }]
+
+  const accountActions = session ? (
+    <Button variant="outline" onClick={handleSignOut}>
+      Sign out
+    </Button>
+  ) : (
+    <>
+      <Button variant="outline" onClick={() => navigate('/auth')}>
+        Log in
+      </Button>
+      <Button onClick={() => navigate('/auth')}>Get started</Button>
+    </>
+  )
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/60">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        
-        {/* Logo */}
-        <div className="flex items-center gap-2">
-          <Link to={session ? '/dashboard' : '/'} aria-label="Semest home" className="flex items-center gap-2 shrink-0 whitespace-nowrap text-primary hover:text-primary/80 transition-colors">
-            <GraduationCap className="h-6 w-6" />
-            <span className="font-mono text-xl font-bold tracking-widest uppercase hidden sm:inline-block">
-              Semest
-            </span>
+    <nav className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/90 backdrop-blur-md">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 px-4 sm:px-6">
+        <div className="flex min-w-0 items-center gap-8">
+          <Link to={session ? '/dashboard' : '/'} aria-label="Semest home" className="shrink-0">
+            <Logo />
           </Link>
-        </div>
-
-        {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-6">
-          <div className="flex items-center gap-4">
-            {navLinks.map(link => (
-              <NavLink
-                key={link.path}
-                to={link.path}
-                className={({ isActive }) => `text-sm font-sans font-medium transition-colors ${
-                  isActive
-                    ? 'text-primary font-semibold'
-                    : 'text-muted-foreground hover:text-primary'
-                }`}
-              >
+          <div className="hidden items-center gap-6 md:flex">
+            {navLinks.map((link) => (
+              <NavLink key={link.path} to={link.path} className={linkClass}>
                 {link.label}
               </NavLink>
             ))}
           </div>
-
-          <div className="h-6 w-px bg-border"></div>
-          
-          <ModeToggle />
-
-          {session ? (
-            <div className="flex items-center gap-4">
-              <span className="text-xs font-mono text-muted-foreground hidden lg:inline-block">
-                {session.user.email}
-              </span>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleSignOut}
-                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 text-xs"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Sign out
-              </Button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                onClick={() => navigate('/auth')}
-                className="text-muted-foreground hover:text-primary hover:bg-transparent"
-              >
-                Log in
-              </Button>
-              <Button 
-                onClick={() => navigate('/auth')}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold"
-              >
-                Get started
-              </Button>
-            </div>
-          )}
         </div>
 
-        {/* Mobile Nav Toggle */}
-        <div className="md:hidden flex items-center gap-2">
-          <ModeToggle />
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" aria-label="Open menu" className="text-muted-foreground hover:text-primary">
-                <Menu className="h-6 w-6" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="bg-background border-border p-6 w-[300px]">
-              <SheetHeader className="sr-only">
-                <SheetTitle>Navigation</SheetTitle>
-              </SheetHeader>
-              
-              <div className="flex flex-col gap-6">
-                <div className="flex flex-col gap-4">
-                  {navLinks.map(link => (
+        <div className="flex items-center gap-2">
+          <NavActionSlot className="flex items-center gap-2 empty:hidden" />
+          {!hasCustomActions && <div className="hidden items-center gap-2 md:flex">{accountActions}</div>}
+
+          <div className="md:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="Open menu">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[280px] border-border bg-background p-6">
+                <SheetHeader className="sr-only">
+                  <SheetTitle>Navigation</SheetTitle>
+                </SheetHeader>
+                <div className="flex flex-col gap-1">
+                  {navLinks.map((link) => (
                     <NavLink
                       key={link.path}
                       to={link.path}
-                      className={({ isActive }) => `text-base font-sans font-medium transition-colors ${
-                        isActive
-                          ? 'text-primary font-semibold'
-                          : 'text-muted-foreground hover:text-primary'
-                      }`}
+                      className={({ isActive }) =>
+                        cn(
+                          'border-b border-transparent py-3 text-base text-muted-foreground',
+                          isActive && 'border-foreground text-foreground',
+                        )
+                      }
                     >
                       {link.label}
                     </NavLink>
                   ))}
+                  {!hasCustomActions && <div className="mt-6 flex flex-col gap-2">{accountActions}</div>}
                 </div>
-
-                <div className="h-px w-full bg-border"></div>
-
-                {session ? (
-                  <div className="flex flex-col gap-4">
-                    <span className="text-sm font-mono text-muted-foreground truncate">
-                      {session.user.email}
-                    </span>
-                    <Button 
-                      variant="outline" 
-                      onClick={handleSignOut}
-                      className="w-full justify-start border-border text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                    >
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Sign out
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-4">
-                    <Button 
-                      variant="outline" 
-                      onClick={() => navigate('/auth')}
-                      className="w-full justify-center border-border text-muted-foreground hover:text-primary"
-                    >
-                      Log in
-                    </Button>
-                    <Button 
-                      onClick={() => navigate('/auth')}
-                      className="w-full justify-center bg-primary hover:bg-primary/90 text-primary-foreground font-bold"
-                    >
-                      Get started
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </SheetContent>
-          </Sheet>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
-
       </div>
     </nav>
   )

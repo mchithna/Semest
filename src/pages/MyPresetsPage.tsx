@@ -49,7 +49,7 @@ export default function MyPresetsPage() {
 
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b pb-6">
           <div>
-            <h1 className="text-2xl font-sans font-bold tracking-tight text-primary">
+            <h1 className="text-2xl font-display font-bold tracking-tight text-primary">
               My presets
             </h1>
             <p className="text-muted-foreground text-sm mt-2">

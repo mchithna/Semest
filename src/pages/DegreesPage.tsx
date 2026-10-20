@@ -91,7 +91,7 @@ export default function DegreesPage() {
         {/* Header */}
         <div className="flex justify-between items-end border-b pb-6">
           <div>
-            <h1 className="text-2xl font-sans font-bold tracking-tight text-primary">
+            <h1 className="text-2xl font-display font-bold tracking-tight text-primary">
               My degrees
             </h1>
             <p className="text-muted-foreground text-sm mt-2">
