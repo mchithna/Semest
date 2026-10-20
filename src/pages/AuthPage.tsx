@@ -140,42 +140,41 @@ export default function AuthPage() {
       <title>{`${mode === 'forgot' ? 'Reset password' : mode === 'recovery' ? 'New password' : 'Sign in'} · Semest`}</title>
       <div className="w-full max-w-md">
         {/* Logo / Brand */}
-        <div className="flex flex-col items-center mb-8 gap-3">
+        <div className="mb-8 flex flex-col items-center gap-3">
           <h1 className="sr-only">
             {mode === 'forgot' ? 'Reset password' : mode === 'recovery' ? 'New password' : 'Sign in'}
           </h1>
           <Logo />
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Academic performance system
           </p>
         </div>
 
-        {/* Card */}
-        <div className="bg-card border border-border rounded-xl p-8 shadow-2xl">
+        <div className="rounded-[22px] bg-card p-6 sm:p-8">
           {confirmEmail && (
             <div className="space-y-4 text-center">
-              <h2 className="font-sans text-base font-semibold text-foreground">Check your email</h2>
+              <h2 className="font-display text-2xl font-semibold tracking-tight">Check your email</h2>
               <p className="text-sm text-muted-foreground">
                 We sent a confirmation link to {confirmEmail}. Open it, then sign in.
               </p>
-              <Button variant="outline" className="" onClick={() => setConfirmEmail(null)}>Back to sign in</Button>
+              <Button variant="outline" onClick={() => setConfirmEmail(null)}>Back to sign in</Button>
             </div>
           )}
 
           {mode === 'forgot' && !confirmEmail && (
             <form onSubmit={sendReset} className="space-y-5">
-              <h2 className="font-sans text-base font-semibold text-foreground">Reset password</h2>
+              <h2 className="font-display text-2xl font-semibold tracking-tight">Reset password</h2>
               {resetSent ? (
                 <p className="text-sm text-muted-foreground">If that email has an account, a reset link is on its way.</p>
               ) : (
                 <div className="space-y-2 text-left">
-                  <Label htmlFor="reset-email" className="text-xs tracking-widest uppercase text-muted-foreground font-mono">Email</Label>
-                  <Input id="reset-email" type="email" required value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} placeholder="you@university.edu" className="font-mono" />
+                  <Label htmlFor="reset-email" className="text-sm text-muted-foreground">Email</Label>
+                  <Input id="reset-email" type="email" required value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} placeholder="you@university.edu" className="rounded-xl" />
                 </div>
               )}
               {!resetSent && (
-                <Button type="submit" disabled={busy} className="w-full text-xs">
-                  {busy && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
+                <Button type="submit" disabled={busy} className="w-full">
+                  {busy && <Loader2 className="animate-spin" aria-hidden="true" />}
                   {busy ? 'Sending reset link…' : 'Send reset link'}
                 </Button>
               )}
@@ -185,13 +184,13 @@ export default function AuthPage() {
 
           {mode === 'recovery' && !confirmEmail && (
             <form onSubmit={saveNewPassword} className="space-y-5">
-              <h2 className="font-sans text-base font-semibold text-foreground">Choose a new password</h2>
+              <h2 className="font-display text-2xl font-semibold tracking-tight">Choose a new password</h2>
               <div className="space-y-2 text-left">
-                <Label htmlFor="new-password" className="text-xs tracking-widest uppercase text-muted-foreground font-mono">New password</Label>
-                <Input id="new-password" type="password" required value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password" className="font-mono" />
+                <Label htmlFor="new-password" className="text-sm text-muted-foreground">New password</Label>
+                <Input id="new-password" type="password" required value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password" className="rounded-xl" />
               </div>
-              <Button type="submit" disabled={busy} className="w-full text-xs">
-                {busy && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
+              <Button type="submit" disabled={busy} className="w-full">
+                {busy && <Loader2 className="animate-spin" aria-hidden="true" />}
                 {busy ? 'Updating password…' : 'Update password'}
               </Button>
             </form>
@@ -199,16 +198,16 @@ export default function AuthPage() {
 
           {mode === 'auth' && !confirmEmail && (
           <Tabs value={activeTab} onValueChange={handleTabChange}>
-            <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted rounded-lg h-10">
+            <TabsList className="mb-6 grid h-11 w-full grid-cols-2 rounded-full bg-background p-1">
               <TabsTrigger
                 value="signin"
-                className="rounded-md text-xs font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold text-muted-foreground"
+                className="rounded-full text-sm data-[state=active]:bg-foreground! data-[state=active]:text-background! data-[state=active]:shadow-none"
               >
                 Sign in
               </TabsTrigger>
               <TabsTrigger
                 value="signup"
-                className="rounded-md text-xs font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold text-muted-foreground"
+                className="rounded-full text-sm data-[state=active]:bg-foreground! data-[state=active]:text-background! data-[state=active]:shadow-none"
               >
                 Sign up
               </TabsTrigger>
@@ -218,7 +217,7 @@ export default function AuthPage() {
             <TabsContent value="signin">
               <form onSubmit={signInForm.handleSubmit(onSignIn)} className="space-y-5">
                 <div className="space-y-2">
-                  <Label htmlFor="signin-email" className="text-xs tracking-widest uppercase text-muted-foreground font-mono">
+                  <Label htmlFor="signin-email" className="text-sm text-muted-foreground">
                     Email
                   </Label>
                   <Input
@@ -229,14 +228,14 @@ export default function AuthPage() {
                     autoComplete="email"
                     aria-invalid={!!signInForm.formState.errors.email}
                     aria-describedby={signInForm.formState.errors.email ? 'signin-email-error' : undefined}
-                    className="bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl focus-visible:ring-primary focus-visible:border-primary"
+                    className="rounded-xl"
                   />
                   {signInForm.formState.errors.email && (
-                    <p id="signin-email-error" className="text-xs text-destructive font-mono">{signInForm.formState.errors.email.message}</p>
+                    <p id="signin-email-error" className="text-xs text-destructive">{signInForm.formState.errors.email.message}</p>
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signin-password" className="text-xs tracking-widest uppercase text-muted-foreground font-mono">
+                  <Label htmlFor="signin-password" className="text-sm text-muted-foreground">
                     Password
                   </Label>
                   <div className="relative">
@@ -248,7 +247,7 @@ export default function AuthPage() {
                       autoComplete="current-password"
                       aria-invalid={!!signInForm.formState.errors.password}
                       aria-describedby={signInForm.formState.errors.password ? 'signin-password-error' : undefined}
-                      className="bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl focus-visible:ring-primary focus-visible:border-primary pr-10"
+                      className="rounded-xl pr-10"
                     />
                     <button
                       type="button"
@@ -260,18 +259,18 @@ export default function AuthPage() {
                     </button>
                   </div>
                   {signInForm.formState.errors.password && (
-                    <p id="signin-password-error" className="text-xs text-destructive font-mono">{signInForm.formState.errors.password.message}</p>
+                    <p id="signin-password-error" className="text-xs text-destructive">{signInForm.formState.errors.password.message}</p>
                   )}
                 </div>
-                <button type="button" onClick={() => setMode('forgot')} className="text-xs font-mono text-muted-foreground hover:text-primary">
+                <button type="button" onClick={() => setMode('forgot')} className="text-sm text-muted-foreground hover:text-foreground">
                   Forgot password?
                 </button>
                 <Button
                   type="submit"
                   disabled={signInForm.formState.isSubmitting}
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs rounded-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/20"
+                  className="w-full"
                 >
-                  {signInForm.formState.isSubmitting && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
+                  {signInForm.formState.isSubmitting && <Loader2 className="animate-spin" aria-hidden="true" />}
                   {signInForm.formState.isSubmitting ? 'Signing in…' : 'Sign in'}
                 </Button>
               </form>
@@ -281,7 +280,7 @@ export default function AuthPage() {
             <TabsContent value="signup">
               <form onSubmit={signUpForm.handleSubmit(onSignUp)} className="space-y-5">
                 <div className="space-y-2">
-                  <Label htmlFor="signup-name" className="text-xs tracking-widest uppercase text-muted-foreground font-mono">
+                  <Label htmlFor="signup-name" className="text-sm text-muted-foreground">
                     Name
                   </Label>
                   <Input
@@ -292,14 +291,14 @@ export default function AuthPage() {
                     autoComplete="name"
                     aria-invalid={!!signUpForm.formState.errors.displayName}
                     aria-describedby={signUpForm.formState.errors.displayName ? 'signup-name-error' : undefined}
-                    className="bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl focus-visible:ring-primary focus-visible:border-primary"
+                    className="rounded-xl"
                   />
                   {signUpForm.formState.errors.displayName && (
-                    <p id="signup-name-error" className="text-xs text-destructive font-mono">{signUpForm.formState.errors.displayName.message}</p>
+                    <p id="signup-name-error" className="text-xs text-destructive">{signUpForm.formState.errors.displayName.message}</p>
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email" className="text-xs tracking-widest uppercase text-muted-foreground font-mono">
+                  <Label htmlFor="signup-email" className="text-sm text-muted-foreground">
                     Email
                   </Label>
                   <Input
@@ -310,14 +309,14 @@ export default function AuthPage() {
                     autoComplete="email"
                     aria-invalid={!!signUpForm.formState.errors.email}
                     aria-describedby={signUpForm.formState.errors.email ? 'signup-email-error' : undefined}
-                    className="bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl focus-visible:ring-primary focus-visible:border-primary"
+                    className="rounded-xl"
                   />
                   {signUpForm.formState.errors.email && (
-                    <p id="signup-email-error" className="text-xs text-destructive font-mono">{signUpForm.formState.errors.email.message}</p>
+                    <p id="signup-email-error" className="text-xs text-destructive">{signUpForm.formState.errors.email.message}</p>
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password" className="text-xs tracking-widest uppercase text-muted-foreground font-mono">
+                  <Label htmlFor="signup-password" className="text-sm text-muted-foreground">
                     Password
                   </Label>
                   <div className="relative">
@@ -329,7 +328,7 @@ export default function AuthPage() {
                       autoComplete="new-password"
                       aria-invalid={!!signUpForm.formState.errors.password}
                       aria-describedby={signUpForm.formState.errors.password ? 'signup-password-error' : undefined}
-                      className="bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl focus-visible:ring-primary focus-visible:border-primary pr-10"
+                      className="rounded-xl pr-10"
                     />
                     <button
                       type="button"
@@ -341,18 +340,18 @@ export default function AuthPage() {
                     </button>
                   </div>
                   {signUpForm.formState.errors.password && (
-                    <p id="signup-password-error" className="text-xs text-destructive font-mono">{signUpForm.formState.errors.password.message}</p>
+                    <p id="signup-password-error" className="text-xs text-destructive">{signUpForm.formState.errors.password.message}</p>
                   )}
                 </div>
                 <Button
                   type="submit"
                   disabled={signUpForm.formState.isSubmitting}
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs rounded-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/20"
+                  className="w-full"
                 >
-                  {signUpForm.formState.isSubmitting && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
+                  {signUpForm.formState.isSubmitting && <Loader2 className="animate-spin" aria-hidden="true" />}
                   {signUpForm.formState.isSubmitting ? 'Creating account…' : 'Create account'}
                 </Button>
-                <p className="text-center text-xs text-muted-foreground">
+                <p className="text-center text-sm text-muted-foreground">
                   Your data is private and secured by Supabase.
                 </p>
               </form>
@@ -362,7 +361,7 @@ export default function AuthPage() {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-xs text-muted-foreground mt-6">
+        <p className="mt-6 text-center text-sm text-muted-foreground">
           Calculate · persist · visualize
         </p>
       </div>
