@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Trash2 } from "lucide-react"
+import { X } from "lucide-react"
 import type { GradeRow } from "@/lib/queries/gradeScales"
 import { isUngradedGrade, UNGRADED_GRADE } from "@/lib/score"
 import { priorSemesterKey, priorSemesters, type PriorModuleOption } from "@/lib/priorModules"
@@ -56,35 +56,37 @@ export function ModuleRow({ module, gradeScale, priorModules = [], onChange, onR
     }
   }
 
+  const removeLabel = module.name.trim() ? `Delete ${module.name.trim()}` : 'Delete module'
+
   return (
-    <div className="flex flex-col gap-2 w-full animate-in fade-in slide-in-from-bottom-2 duration-300 p-3 sm:p-0 border border-border sm:border-transparent rounded-md bg-muted/50 sm:bg-transparent">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full">
-        <div className="flex w-full sm:flex-1 gap-2 items-center">
+    <div className="flex w-full flex-col gap-2">
+      <div className="flex flex-col gap-2 sm:grid sm:grid-cols-[minmax(0,1fr)_5.5rem_8.5rem_2.25rem] sm:items-center">
+        <div className="flex items-center gap-2 sm:contents">
           <Input
             value={module.name}
             onChange={(e) => onChange(module.id, 'name', e.target.value)}
             placeholder="Module name"
             aria-label="Module name"
-            className="flex-1 min-w-[120px]"
+            className="min-w-0 flex-1 rounded-xl"
           />
           <Button
             variant="ghost"
-            size="icon"
-            className="sm:hidden text-muted-foreground hover:text-destructive shrink-0"
-            aria-label={module.name.trim() ? `Delete ${module.name.trim()}` : 'Delete module'}
+            size="icon-sm"
+            className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive sm:hidden"
+            aria-label={removeLabel}
             onClick={() => onRemove(module.id)}
           >
-            <Trash2 className="w-4 h-4" />
+            <X />
           </Button>
         </div>
-        <div className="flex w-full sm:w-auto gap-2 items-center">
+        <div className="flex items-center gap-2 sm:contents">
           <Input
             type="number"
             value={module.credits || ''}
             onChange={(e) => onChange(module.id, 'credits', parseFloat(e.target.value) || 0)}
-            placeholder="Cr"
+            placeholder="Credits"
             aria-label="Credits"
-            className="w-[80px]"
+            className="w-24 rounded-xl sm:w-auto"
             min={0.5}
             step={0.5}
           />
@@ -92,7 +94,7 @@ export function ModuleRow({ module, gradeScale, priorModules = [], onChange, onR
             value={!module.grade || isUngradedGrade(module.grade) ? UNGRADED_GRADE : module.grade}
             onValueChange={(val) => onChange(module.id, 'grade', val)}
           >
-            <SelectTrigger className="flex-1 sm:w-[120px]" aria-label="Grade">
+            <SelectTrigger className="min-w-0 flex-1 rounded-xl sm:w-full" aria-label="Grade">
               <SelectValue placeholder="Grade" />
             </SelectTrigger>
             <SelectContent>
@@ -104,16 +106,16 @@ export function ModuleRow({ module, gradeScale, priorModules = [], onChange, onR
               ))}
             </SelectContent>
           </Select>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="hidden sm:inline-flex text-muted-foreground hover:text-destructive shrink-0"
-            aria-label={module.name.trim() ? `Delete ${module.name.trim()}` : 'Delete module'}
-            onClick={() => onRemove(module.id)}
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
         </div>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="hidden text-muted-foreground hover:bg-destructive/10 hover:text-destructive sm:inline-flex"
+          aria-label={removeLabel}
+          onClick={() => onRemove(module.id)}
+        >
+          <X />
+        </Button>
       </div>
 
       {options.length > 0 && (

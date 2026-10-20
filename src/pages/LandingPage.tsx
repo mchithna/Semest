@@ -64,25 +64,21 @@ export default function LandingPage() {
         </div>
 
         {/* Guest Calculator Demo */}
-        <div className="w-full max-w-4xl bg-linear-to-b from-border/50 to-transparent p-1 rounded-3xl">
-          <div className="w-full bg-card rounded-[22px] p-6 md:p-12 border shadow-2xl">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-sans font-semibold tracking-tight text-foreground mb-2">
-                Try the calculator
-              </h2>
-              <p className="text-muted-foreground text-sm">
-                Calculate a semester below. Save it to keep your draft when you sign up!
-              </p>
-            </div>
-            
-            {/* The calculator key resets when initialModules loads */}
-            <Calculator 
-              key={initialModules.length ? 'loaded' : 'empty'}
-              initialModules={initialModules}
-              gradeScale={GUEST_SCALE}
-              onSave={handleGuestSave}
-            />
+        <div className="w-full max-w-6xl">
+          <div className="mb-8 text-center">
+            <h2 className="font-display text-3xl font-semibold tracking-tight">
+              Try the calculator
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Calculate a semester below. Save it to keep your draft when you sign up.
+            </p>
           </div>
+          <Calculator
+            key={initialModules.length ? 'loaded' : 'empty'}
+            initialModules={initialModules}
+            gradeScale={GUEST_SCALE}
+            onSave={handleGuestSave}
+          />
         </div>
 
         {/* Feature Highlights */}
