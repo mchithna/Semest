@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { 
-  Plus, Edit2, Trash2, Shield, Loader2, 
-  Sliders, User, Database, Download, Copy, LogOut, Check, Sparkles,
+  Plus, Edit2, Trash2, Shield, Loader2,
+  User, Database, Download, Copy, LogOut, Check,
   ChevronDown, ChevronUp
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -10,7 +10,8 @@ import { useGradeScales } from '@/hooks/useGradeScales'
 import type { GradeScale } from '@/lib/queries/gradeScales'
 import { GradeScaleEditor } from '@/components/settings/GradeScaleEditor'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { BAND_TEXT_CLASS, cardAccentClass } from '@/components/ruler/tone'
 import { useAuth } from '@/context/AuthContext'
 import { useDegrees } from '@/hooks/useDegrees'
 import { supabase } from '@/lib/supabase'
@@ -191,176 +192,118 @@ export default function ScalesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-4 sm:p-8 pb-32">
-      <div className="max-w-4xl mx-auto space-y-8 animate-slideUp">
-        
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b pb-6">
+    <div className="min-h-screen bg-background pb-32 text-foreground">
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-3xl font-display font-bold tracking-tight text-primary flex items-center gap-3">
-              <Sliders className="w-7 h-7" /> Settings
-            </h1>
-            <p className="text-muted-foreground text-sm mt-2">
+            <h1 className="font-display text-5xl font-semibold tracking-tight sm:text-6xl">Settings</h1>
+            <p className="mt-3 text-sm text-muted-foreground">
               Manage your grading systems and account preferences.
             </p>
           </div>
+          <Button onClick={handleCreate}>
+            <Plus />
+            New scale
+          </Button>
         </div>
 
-        {/* Custom grade scales */}
-        <div className="space-y-4">
-          <div className="flex justify-between items-end border-b pb-3">
-            <div>
-              <h2 className="font-sans text-base font-semibold text-foreground flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-primary" /> Your custom scales
-              </h2>
-              <p className="text-xs text-muted-foreground mt-1">
-                Custom grading systems for your university or special programs.
-              </p>
-            </div>
-            <Button
-              onClick={handleCreate}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded text-xs"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              New scale
-            </Button>
-          </div>
+        <div className="mt-12">
+          <h2 className="text-lg font-semibold">Your custom scales</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Custom grading systems for your university or special programs.
+          </p>
 
           {userScales.length === 0 ? (
-            <div className="bg-card border border-border border-dashed rounded-lg p-8 text-center space-y-3">
-              <Sliders className="w-8 h-8 text-muted-foreground mx-auto opacity-40" />
-              <h3 className="font-sans text-sm font-semibold text-foreground">No custom scales yet</h3>
-              <p className="text-muted-foreground text-xs max-w-md mx-auto">
-                System grade scales (Standard 4.0, Sri Lankan UGC) are used by default. Create a custom scale if your university uses unique point values.
+            <div className="mt-4 rounded-[22px] border border-dashed border-foreground/20 px-8 py-12 text-center">
+              <h3 className="font-display text-2xl font-semibold tracking-tight">No custom scales yet</h3>
+              <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+                Built-in scales are used by default. Create a custom scale if your university uses its own point values.
               </p>
             </div>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2">
-              {userScales.map((scale) => (
-                <Card key={scale.id} className="p-5 bg-card border-border relative flex flex-col justify-between group hover:border-primary/50 transition-all">
-                  <div>
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <h3 className="font-mono text-sm font-bold text-foreground group-hover:text-primary transition-colors">{scale.label}</h3>
-                        <p className="text-xs font-mono text-muted-foreground mt-0.5">{scale.grades.length} grades defined</p>
-                      </div>
-                      <div className="bg-primary/10 text-primary px-2 py-0.5 rounded text-xs font-mono font-bold uppercase">
-                        Custom
-                      </div>
-                    </div>
-
-                    {/* Grade Preview Chips */}
-                    <div className="flex flex-wrap gap-1.5 my-3">
-                      {scale.grades.slice(0, 6).map((g, idx) => (
-                        <span key={idx} className="bg-muted/80 text-foreground border border-border px-2 py-0.5 rounded text-xs font-mono font-bold">
-                          {g.grade} <span className="text-muted-foreground">({g.points})</span>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              {userScales.map((scale, index) => (
+                <article key={scale.id} className="flex h-full flex-col overflow-hidden rounded-[22px] bg-card">
+                  <div className={`h-[3px] shrink-0 ${cardAccentClass(index)}`} aria-hidden="true" />
+                  <div className="flex flex-1 flex-col p-5">
+                    <h3 className="text-lg font-semibold">{scale.label}</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">{scale.grades.length} grades</p>
+                    <div className="mt-4 flex flex-wrap gap-1.5">
+                      {scale.grades.slice(0, 6).map((grade, gradeIndex) => (
+                        <span key={gradeIndex} className="rounded-full bg-background px-2.5 py-1 text-xs">
+                          {grade.grade} <span className="text-muted-foreground">{grade.points}</span>
                         </span>
                       ))}
                       {scale.grades.length > 6 && (
-                        <span className="text-xs font-mono text-muted-foreground self-center">+{scale.grades.length - 6} more</span>
+                        <span className="self-center text-xs text-muted-foreground">+{scale.grades.length - 6} more</span>
                       )}
                     </div>
+                    <div className="mt-auto flex gap-2 pt-4">
+                      <Button variant="outline" size="sm" onClick={() => handleEdit(scale)}>
+                        <Edit2 /> Edit
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleDelete(scale.id)} className="text-destructive">
+                        <Trash2 /> Delete
+                      </Button>
+                    </div>
                   </div>
-
-                  <div className="flex gap-2 border-t pt-3 mt-2 justify-end">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(scale)}
-                      className="text-xs text-foreground hover:text-primary h-8"
-                    >
-                      <Edit2 className="w-3.5 h-3.5 mr-1" /> Edit
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(scale.id)}
-                      className="text-xs text-destructive hover:bg-destructive/10 h-8"
-                    >
-                      <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete
-                    </Button>
-                  </div>
-                </Card>
+                </article>
               ))}
             </div>
           )}
         </div>
 
-        {/* 3. SYSTEM GRADE SCALES (Abstracted / Collapsible) */}
-        <Card className="bg-card border-border overflow-hidden">
-          <button 
+        <section className="mt-6 overflow-hidden rounded-[22px] bg-card">
+          <div className={`h-[3px] ${cardAccentClass(0)}`} aria-hidden="true" />
+          <button
             onClick={() => setShowSystemScales(!showSystemScales)}
-            className="w-full p-5 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
+            className="flex w-full items-center justify-between p-5 text-left"
           >
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-muted rounded text-muted-foreground">
-                <Shield className="w-5 h-5" />
-              </div>
+              <Shield className={`size-5 ${BAND_TEXT_CLASS.pass}`} />
               <div>
-                <h2 className="font-sans text-base font-semibold text-foreground">
-                  Built-in scales ({systemScales.length})
-                </h2>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Standard grading systems provided by default (Standard 4.0, Sri Lankan UGC...)
+                <h2 className="font-semibold">Built-in scales ({systemScales.length})</h2>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  Standard grading systems, including the 4.0 scale and Sri Lankan UGC.
                 </p>
               </div>
             </div>
-            {showSystemScales ? <ChevronUp className="w-5 h-5 text-muted-foreground" /> : <ChevronDown className="w-5 h-5 text-muted-foreground" />}
+            {showSystemScales ? <ChevronUp className="size-5 text-muted-foreground" /> : <ChevronDown className="size-5 text-muted-foreground" />}
           </button>
 
           {showSystemScales && (
-            <div className="p-5 border-t border-border bg-muted/10 space-y-4 animate-fadeIn">
-              <div className="grid gap-4 sm:grid-cols-2">
-                {systemScales.map((scale) => (
-                  <Card key={scale.id} className="p-4 bg-card border-border flex flex-col justify-between">
-                    <div>
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <h4 className="font-mono text-sm font-bold text-foreground">{scale.label}</h4>
-                          <p className="text-xs font-mono text-muted-foreground mt-0.5">{scale.grades.length} letter grades</p>
-                        </div>
-                        <span className="bg-muted text-muted-foreground px-2 py-0.5 rounded text-xs font-mono uppercase tracking-widest">
-                          System
+            <div className="grid gap-4 border-t border-border px-5 py-5 sm:grid-cols-2">
+              {systemScales.map((scale, index) => (
+                <article key={scale.id} className="flex h-full flex-col overflow-hidden rounded-[22px] bg-background">
+                  <div className={`h-[3px] ${cardAccentClass(index)}`} aria-hidden="true" />
+                  <div className="flex flex-1 flex-col p-4">
+                    <h3 className="font-semibold">{scale.label}</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">{scale.grades.length} letter grades</p>
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {scale.grades.slice(0, 6).map((grade, gradeIndex) => (
+                        <span key={gradeIndex} className="rounded-full bg-card px-2.5 py-1 text-xs">
+                          {grade.grade} <span className="text-muted-foreground">{grade.points}</span>
                         </span>
-                      </div>
-
-                      <div className="flex flex-wrap gap-1.5 my-3">
-                        {scale.grades.slice(0, 6).map((g, idx) => (
-                          <span key={idx} className="bg-muted/80 text-foreground border border-border px-1.5 py-0.5 rounded text-xs font-mono font-bold">
-                            {g.grade} <span className="text-muted-foreground">({g.points})</span>
-                          </span>
-                        ))}
-                      </div>
+                      ))}
                     </div>
-
-                    <div className="flex gap-2 border-t pt-3 mt-1">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleView(scale)}
-                        className="flex-1 text-xs text-foreground hover:text-primary h-8"
-                      >
+                    <div className="mt-auto flex flex-wrap gap-2 pt-4">
+                      <Button variant="outline" size="sm" onClick={() => handleView(scale)}>
                         View
                       </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleCloneScale(scale)}
-                        className="text-xs text-foreground hover:text-primary h-8"
-                      >
-                        <Copy className="w-3.5 h-3.5 mr-1" /> Clone and edit
+                      <Button variant="outline" size="sm" onClick={() => handleCloneScale(scale)}>
+                        <Copy /> Clone and edit
                       </Button>
                     </div>
-                  </Card>
-                ))}
-              </div>
+                  </div>
+                </article>
+              ))}
             </div>
           )}
-        </Card>
+        </section>
 
-        {/* 4. ACCOUNT & SECURITY (Abstracted / Collapsible) */}
-        <Card className="bg-card border-border overflow-hidden">
-          <button 
+        <section className="mt-4 overflow-hidden rounded-[22px] bg-card">
+          <div className={`h-[3px] ${cardAccentClass(1)}`} aria-hidden="true" />
+          <button
             onClick={() => {
               const next = !showAccountDetails
               setShowAccountDetails(next)
@@ -368,50 +311,47 @@ export default function ScalesPage() {
                 getProfile().then((profile) => setDisplayName(profile?.display_name || '')).catch(() => {})
               }
             }}
-            className="w-full p-5 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
+            className="flex w-full items-center justify-between p-5 text-left"
           >
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-muted rounded text-muted-foreground">
-                <User className="w-5 h-5" />
-              </div>
+              <User className={`size-5 ${BAND_TEXT_CLASS['second-lower']}`} />
               <div>
-                <h2 className="font-sans text-base font-semibold text-foreground">
-                  Account
-                </h2>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Signed in as <span className="text-foreground font-bold">{session?.user?.email}</span>
+                <h2 className="font-semibold">Account</h2>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  Signed in as <span className="text-foreground">{session?.user?.email}</span>
                 </p>
               </div>
             </div>
-            {showAccountDetails ? <ChevronUp className="w-5 h-5 text-muted-foreground" /> : <ChevronDown className="w-5 h-5 text-muted-foreground" />}
+            {showAccountDetails ? <ChevronUp className="size-5 text-muted-foreground" /> : <ChevronDown className="size-5 text-muted-foreground" />}
           </button>
 
           {showAccountDetails && (
-            <div className="p-5 border-t border-border bg-muted/10 space-y-4 animate-fadeIn max-w-xl">
-              <div className="space-y-2 font-mono text-xs">
-                <div className="flex justify-between py-2 border-b border-border">
-                  <span className="text-muted-foreground">Email</span>
-                  <span className="text-foreground font-bold">{session?.user?.email}</span>
+            <div className="max-w-xl space-y-5 border-t border-border px-5 py-5">
+              <dl className="space-y-3 text-sm">
+                <div className="flex justify-between gap-4">
+                  <dt className="text-muted-foreground">Email</dt>
+                  <dd>{session?.user?.email}</dd>
                 </div>
-                <div className="flex justify-between py-2 border-b border-border">
-                  <span className="text-muted-foreground">Degrees</span>
-                  <span className="text-primary font-bold tabular-nums">{degrees.length}</span>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-muted-foreground">Degrees</dt>
+                  <dd className="tabular-nums">{degrees.length}</dd>
                 </div>
-                <div className="flex justify-between py-2">
-                  <span className="text-muted-foreground">Status</span>
-                  <span className="text-emerald-400 font-bold flex items-center gap-1">
-                    <Check className="w-3.5 h-3.5" /> Authenticated
-                  </span>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-muted-foreground">Status</dt>
+                  <dd className={`flex items-center gap-1 ${BAND_TEXT_CLASS.pass}`}>
+                    <Check className="size-3.5" /> Signed in
+                  </dd>
                 </div>
-              </div>
+              </dl>
 
               <div className="space-y-2">
-                <label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Display name</label>
+                <label htmlFor="display-name" className="text-sm text-muted-foreground">Display name</label>
                 <div className="flex gap-2">
-                  <input
+                  <Input
+                    id="display-name"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
-                    className="flex-1 h-10 rounded-md border border-border bg-background px-3 font-mono text-sm"
+                    className="rounded-xl"
                   />
                   <Button
                     disabled={savingName || !displayName.trim()}
@@ -426,101 +366,84 @@ export default function ScalesPage() {
                         setSavingName(false)
                       }
                     }}
-                    className="text-xs"
                   >
                     Save
                   </Button>
                 </div>
               </div>
 
-              <div className="pt-2">
-                <Button 
-                  variant="outline" 
-                  onClick={() => signOut()}
-                  className="w-full border-destructive/50 text-destructive hover:bg-destructive/10 h-10"
-                >
-                  <LogOut className="w-4 h-4 mr-2" /> Sign out
-                </Button>
-              </div>
+              <Button variant="destructive" onClick={() => signOut()} className="w-full sm:w-auto">
+                <LogOut /> Sign out
+              </Button>
             </div>
           )}
-        </Card>
+        </section>
 
-        {/* 5. DATA BACKUP & MAINTENANCE (Abstracted / Collapsible) */}
-        <Card className="bg-card border-border overflow-hidden">
-          <button 
+        <section className="mt-4 overflow-hidden rounded-[22px] bg-card">
+          <div className={`h-[3px] ${cardAccentClass(2)}`} aria-hidden="true" />
+          <button
             onClick={() => setShowDataBackup(!showDataBackup)}
-            className="w-full p-5 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
+            className="flex w-full items-center justify-between p-5 text-left"
           >
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-muted rounded text-muted-foreground">
-                <Database className="w-5 h-5" />
-              </div>
+              <Database className={`size-5 ${BAND_TEXT_CLASS['second-upper']}`} />
               <div>
-                <h2 className="font-sans text-base font-semibold text-foreground">
-                  Backup
-                </h2>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Export JSON degree backups and manage local guest session memory.
+                <h2 className="font-semibold">Backup</h2>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  Export a JSON backup and clear the guest calculator draft.
                 </p>
               </div>
             </div>
-            {showDataBackup ? <ChevronUp className="w-5 h-5 text-muted-foreground" /> : <ChevronDown className="w-5 h-5 text-muted-foreground" />}
+            {showDataBackup ? <ChevronUp className="size-5 text-muted-foreground" /> : <ChevronDown className="size-5 text-muted-foreground" />}
           </button>
 
           {showDataBackup && (
-            <div className="p-5 border-t border-border bg-muted/10 grid gap-4 sm:grid-cols-2 animate-fadeIn">
-              <div className="p-4 bg-card border border-border rounded space-y-3 flex flex-col justify-between">
+            <div className="grid gap-4 border-t border-border px-5 py-5 sm:grid-cols-2">
+              <div className="flex flex-col justify-between gap-4 rounded-[22px] bg-background p-4">
                 <div>
-                  <h3 className="font-sans text-sm font-semibold text-foreground">Export your degrees</h3>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Download a JSON backup of all your degrees, semesters, and custom scales.
+                  <h3 className="font-semibold">Export your degrees</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Download a JSON backup of your degrees, semesters, and custom scales.
                   </p>
                 </div>
-                <Button 
-                  onClick={handleExportData}
-                  disabled={isExporting}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs h-9 w-full"
-                >
-                  {isExporting ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" /> : <Download className="w-3.5 h-3.5 mr-1.5" />}
-                  Download backup
-                </Button>
-                <label className="block">
-                  <input
-                    type="file"
-                    accept="application/json"
-                    className="hidden"
-                    disabled={isImporting}
-                    onChange={(event) => {
-                      const file = event.target.files?.[0]
-                      event.target.value = ''
-                      if (file) handleImportData(file)
-                    }}
-                  />
-                  <span className="inline-flex w-full h-9 items-center justify-center rounded-md border border-border text-xs cursor-pointer">
-                    {isImporting ? 'Importing…' : 'Import backup'}
-                  </span>
-                </label>
+                <div className="flex flex-wrap gap-2">
+                  <Button onClick={handleExportData} disabled={isExporting}>
+                    {isExporting ? <Loader2 className="animate-spin" /> : <Download />}
+                    Download backup
+                  </Button>
+                  <label className="inline-flex">
+                    <input
+                      type="file"
+                      accept="application/json"
+                      className="sr-only"
+                      disabled={isImporting}
+                      onChange={(event) => {
+                        const file = event.target.files?.[0]
+                        event.target.value = ''
+                        if (file) handleImportData(file)
+                      }}
+                    />
+                    <span className="inline-flex h-10 cursor-pointer items-center justify-center rounded-full border border-foreground/20 px-4 text-sm">
+                      {isImporting ? 'Importing…' : 'Import backup'}
+                    </span>
+                  </label>
+                </div>
               </div>
 
-              <div className="p-4 bg-card border border-border rounded space-y-3 flex flex-col justify-between">
+              <div className="flex flex-col justify-between gap-4 rounded-[22px] bg-background p-4">
                 <div>
-                  <h3 className="font-sans text-sm font-semibold text-foreground">Guest draft</h3>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Clear temporary guest calculator drafts stored in browser memory.
+                  <h3 className="font-semibold">Guest draft</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Clear the calculator draft stored in this browser.
                   </p>
                 </div>
-                <Button 
-                  onClick={handleClearGuestDraft}
-                  variant="outline"
-                  className="border-amber-500/50 text-amber-400 hover:bg-amber-500/10 font-bold text-xs h-9 w-full"
-                >
+                <Button onClick={handleClearGuestDraft} variant="outline" className="w-fit">
                   Clear draft
                 </Button>
               </div>
             </div>
           )}
-        </Card>
+        </section>
 
       </div>
 
