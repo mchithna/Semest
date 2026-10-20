@@ -1,4 +1,3 @@
-import { ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 export interface BreadcrumbItem {
@@ -12,22 +11,19 @@ interface BreadcrumbProps {
 
 export function Breadcrumb({ items }: BreadcrumbProps) {
   return (
-    <nav className="flex items-center text-sm font-mono whitespace-nowrap overflow-x-auto pb-2 mb-4 -mx-2 px-2 sm:mx-0 sm:px-0 sm:pb-0 sm:overflow-visible text-muted-foreground">
-      <Link to="/degrees" className="hover:text-emerald-400 transition-colors">
+    <nav aria-label="Breadcrumb" className="mb-3 flex items-center gap-2 overflow-x-auto text-sm text-muted-foreground">
+      <Link to="/degrees" className="shrink-0 transition-colors hover:text-foreground">
         Degrees
       </Link>
-      
       {items.map((item, index) => (
-        <div key={index} className="flex items-center">
-          <ChevronRight className="w-4 h-4 mx-2 shrink-0 text-muted-foreground" />
+        <div key={index} className="flex min-w-0 items-center gap-2">
+          <span aria-hidden="true">/</span>
           {item.path ? (
-            <Link to={item.path} className="hover:text-emerald-400 transition-colors truncate max-w-[150px] sm:max-w-[200px]">
+            <Link to={item.path} className="truncate transition-colors hover:text-foreground">
               {item.label}
             </Link>
           ) : (
-            <span className="text-foreground font-bold truncate max-w-[150px] sm:max-w-[200px]">
-              {item.label}
-            </span>
+            <span className="truncate text-foreground/80">{item.label}</span>
           )}
         </div>
       ))}

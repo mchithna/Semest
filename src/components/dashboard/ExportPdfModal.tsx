@@ -114,7 +114,7 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
       />
 
       {/* Main Dialog Box */}
-      <div className="bg-card border border-border rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden text-foreground font-mono">
+      <div className="bg-card border border-border rounded-[22px] shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden text-foreground font-sans">
         
         {/* Header Bar */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/40">
@@ -150,9 +150,9 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
                 <button
                   type="button"
                   onClick={() => handleThemeSelect('official')}
-                  className={`p-3 rounded-lg border text-left flex flex-col items-center text-center gap-1.5 transition-all ${
+                  className={`p-3 rounded-2xl border text-left flex flex-col items-center text-center gap-1.5 transition-all ${
                     options.theme === 'official'
-                      ? 'border-primary bg-primary/10 text-primary font-bold shadow-md'
+                      ? 'border-foreground bg-foreground/10 text-foreground font-semibold'
                       : 'border-border bg-background hover:bg-muted text-muted-foreground'
                   }`}
                 >
@@ -163,9 +163,9 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
                 <button
                   type="button"
                   onClick={() => handleThemeSelect('modern')}
-                  className={`p-3 rounded-lg border text-left flex flex-col items-center text-center gap-1.5 transition-all ${
+                  className={`p-3 rounded-2xl border text-left flex flex-col items-center text-center gap-1.5 transition-all ${
                     options.theme === 'modern'
-                      ? 'border-emerald-400 bg-emerald-500/10 text-emerald-400 font-bold shadow-md'
+                      ? 'border-foreground bg-foreground/10 text-foreground font-semibold'
                       : 'border-border bg-background hover:bg-muted text-muted-foreground'
                   }`}
                 >
@@ -176,9 +176,9 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
                 <button
                   type="button"
                   onClick={() => handleThemeSelect('executive')}
-                  className={`p-3 rounded-lg border text-left flex flex-col items-center text-center gap-1.5 transition-all ${
+                  className={`p-3 rounded-2xl border text-left flex flex-col items-center text-center gap-1.5 transition-all ${
                     options.theme === 'executive'
-                      ? 'border-indigo-400 bg-indigo-500/10 text-indigo-400 font-bold shadow-md'
+                      ? 'border-foreground bg-foreground/10 text-foreground font-semibold'
                       : 'border-border bg-background hover:bg-muted text-muted-foreground'
                   }`}
                 >
@@ -318,7 +318,6 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
             variant="outline"
             onClick={onClose}
             disabled={isExporting}
-            className="text-xs rounded-sm border-border"
           >
             Cancel
           </Button>
@@ -326,7 +325,6 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
           <Button
             onClick={handleExportPdf}
             disabled={isExporting}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs rounded-sm"
           >
             {isExporting ? (
               <>

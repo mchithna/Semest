@@ -1,16 +1,19 @@
 import { useState } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
-import { Plus, Trash2, Edit2, Calendar, LayoutGrid, Milestone } from 'lucide-react'
+import { Trash2, Edit2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useDegrees } from '@/hooks/useDegrees'
 import { useSemesters } from '@/hooks/useSemesters'
-import { attemptedCredits, computeScore, earnedCredits, formatGpa, hasGradedWork, honorsApply } from '@/lib/score'
-import { ClassificationBadge } from '@/components/ui/ClassificationBadge'
+import { computeScore, formatGpa, hasGradedWork, totalCredits } from '@/lib/score'
+import { bandAt, bandsForScale, standingSentence, type RulerMarker } from '@/lib/bands'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
-import { Skeleton } from '@/components/ui/skeleton'
+import { MiniRuler } from '@/components/ruler/MiniRuler'
+import { Ruler } from '@/components/ruler/Ruler'
+import { BAND_BORDER_CLASS, BAND_TEXT_CLASS } from '@/components/ruler/tone'
 import { cn } from '@/lib/utils'
 import type { SemesterWithModules } from '@/lib/queries/semesters'
 import type { GradeRow } from '@/lib/queries/gradeScales'
+import type { BandTrack } from '@/lib/bands'
 
 type SemesterLayout = 'grid' | 'timeline'
 
@@ -24,12 +27,15 @@ function readSemesterLayout(): SemesterLayout {
   }
 }
 
+function formatCredits(value: number): string {
+  const rounded = Math.round(value * 10) / 10
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1)
+}
+
 function semesterStats(semester: SemesterWithModules, scale: GradeRow[]) {
-  const earned = earnedCredits(semester.modules, scale)
-  const attempted = attemptedCredits(semester.modules, scale)
   return {
-    earned,
-    attempted,
+    credits: totalCredits(semester.modules),
+    moduleCount: semester.modules.length,
     score: computeScore(semester.modules, scale),
     graded: hasGradedWork(semester.modules, scale),
   }
@@ -45,67 +51,24 @@ function SemesterActions({
   onDelete: (event: React.MouseEvent) => void
 }) {
   return (
-    <div className="relative z-10 flex sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 transition-opacity gap-1">
+    <div className="relative z-10 flex gap-0.5 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
       <Button
         variant="ghost"
-        size="icon"
+        size="icon-sm"
         aria-label={`Edit ${title}`}
         onClick={onEdit}
-        className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-sm"
       >
-        <Edit2 className="w-4 h-4" />
+        <Edit2 />
       </Button>
       <Button
         variant="ghost"
-        size="icon"
+        size="icon-sm"
         aria-label={`Delete ${title}`}
         onClick={onDelete}
-        className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-sm"
+        className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
       >
-        <Trash2 className="w-4 h-4" />
+        <Trash2 />
       </Button>
-    </div>
-  )
-}
-
-function SemesterMetrics({
-  earned,
-  attempted,
-  score,
-  graded,
-  scale,
-}: {
-  earned: number
-  attempted: number
-  score: number
-  graded: boolean
-  scale: GradeRow[]
-}) {
-  const stats = [
-    { label: 'Passed', value: earned.toFixed(1), tone: 'text-foreground' },
-    { label: 'Graded', value: attempted.toFixed(1), tone: 'text-foreground' },
-    {
-      label: 'GPA',
-      value: attempted > 0 ? formatGpa(score) : '—',
-      tone: attempted > 0 ? 'text-primary' : 'text-muted-foreground',
-    },
-  ]
-
-  return (
-    <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1.5">
-      {stats.map((stat) => (
-        <p key={stat.label} className="flex items-baseline gap-1.5">
-          <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground">{stat.label}</span>
-          <span className={`font-mono text-sm font-semibold tabular-nums ${stat.tone}`}>{stat.value}</span>
-        </p>
-      ))}
-      {honorsApply(scale) && (
-        <ClassificationBadge
-          score={score}
-          graded={graded}
-          className="h-auto w-fit whitespace-normal"
-        />
-      )}
     </div>
   )
 }
@@ -117,15 +80,14 @@ function LayoutToggle({
   value: SemesterLayout
   onChange: (next: SemesterLayout) => void
 }) {
-  const options: { id: SemesterLayout; label: string; icon: typeof LayoutGrid }[] = [
-    { id: 'grid', label: 'Grid', icon: LayoutGrid },
-    { id: 'timeline', label: 'Timeline', icon: Milestone },
+  const options: { id: SemesterLayout; label: string }[] = [
+    { id: 'grid', label: 'Grid' },
+    { id: 'timeline', label: 'Timeline' },
   ]
 
   return (
-    <div role="group" aria-label="Semester view" className="inline-flex self-end rounded-lg border border-border bg-muted/40 p-0.5">
+    <div role="group" aria-label="Semester view" className="inline-flex items-center gap-1">
       {options.map((option) => {
-        const Icon = option.icon
         const selected = value === option.id
         return (
           <button
@@ -134,13 +96,12 @@ function LayoutToggle({
             aria-pressed={selected}
             onClick={() => onChange(option.id)}
             className={cn(
-              'inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium',
+              'h-10 rounded-full px-4 text-sm font-medium transition-colors',
               selected
-                ? 'bg-background text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground',
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-card text-muted-foreground hover:text-foreground',
             )}
           >
-            <Icon className="size-3.5" aria-hidden="true" />
             {option.label}
           </button>
         )
@@ -149,10 +110,146 @@ function LayoutToggle({
   )
 }
 
+function SemesterCard({
+  semester,
+  degreeId,
+  scale,
+  track,
+  onDelete,
+  compact = false,
+}: {
+  semester: SemesterWithModules
+  degreeId: string
+  scale: GradeRow[]
+  track: BandTrack
+  onDelete: (event: React.MouseEvent) => void
+  compact?: boolean
+}) {
+  const navigate = useNavigate()
+  const stats = semesterStats(semester, scale)
+  const editPath = `/degrees/${degreeId}/semesters/${semester.id}/edit`
+  const band = stats.graded ? bandAt(stats.score, track) : null
+  const sentence = standingSentence(stats.score, stats.graded, track)
+  const tone = band?.tone ?? 'plain'
+  const detail = stats.moduleCount === 0
+    ? 'No modules added'
+    : `${formatCredits(stats.credits)} ${stats.credits === 1 ? 'credit' : 'credits'}`
+
+  if (compact) {
+    return (
+      <article
+        className={cn(
+          'group relative flex min-w-0 flex-col gap-3 rounded-[22px] px-4 py-3 sm:flex-row sm:items-center sm:gap-5',
+          stats.graded
+            ? cn('border bg-card', BAND_BORDER_CLASS[tone])
+            : 'border border-dashed border-foreground/20',
+        )}
+      >
+        <div className="flex min-w-0 items-start justify-between gap-2 sm:w-44 sm:shrink-0">
+          <div className="min-w-0">
+            <h3 className="truncate text-sm font-medium">
+              <Link to={editPath} className="after:absolute after:inset-0">
+                {semester.title}
+              </Link>
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              {detail}
+              {semester.term ? ` · ${semester.term}` : ''}
+            </p>
+          </div>
+          <div className="sm:hidden">
+            <SemesterActions
+              title={semester.title}
+              onEdit={() => navigate(editPath)}
+              onDelete={onDelete}
+            />
+          </div>
+        </div>
+        {stats.graded ? (
+          <>
+            <p className="font-display text-3xl font-semibold tabular-nums tracking-tight sm:w-16 sm:shrink-0">
+              {formatGpa(stats.score)}
+            </p>
+            {sentence && (
+              <p className={cn('truncate text-sm font-medium sm:w-60 sm:shrink-0', BAND_TEXT_CLASS[tone])}>
+                {sentence}
+              </p>
+            )}
+            <MiniRuler className="min-w-0 flex-1" track={track} value={stats.score} />
+          </>
+        ) : (
+          <>
+            <MiniRuler className="min-w-0 flex-1" track={track} value={null} />
+            <Button variant="outline" size="sm" className="relative z-10 w-fit shrink-0" asChild>
+              <Link to={editPath}>Add grades</Link>
+            </Button>
+          </>
+        )}
+        <div className="hidden sm:block">
+          <SemesterActions
+            title={semester.title}
+            onEdit={() => navigate(editPath)}
+            onDelete={onDelete}
+          />
+        </div>
+      </article>
+    )
+  }
+
+  return (
+    <article
+      className={cn(
+        'group relative flex h-full min-w-0 flex-col rounded-[22px] p-5',
+        stats.graded
+          ? cn('border bg-card', BAND_BORDER_CLASS[tone])
+          : 'border border-dashed border-foreground/20',
+      )}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <h3 className="truncate text-sm font-medium">
+            <Link to={editPath} className="after:absolute after:inset-0">
+              {semester.title}
+            </Link>
+          </h3>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {detail}
+            {semester.term ? ` · ${semester.term}` : ''}
+          </p>
+        </div>
+        <SemesterActions
+          title={semester.title}
+          onEdit={() => navigate(editPath)}
+          onDelete={onDelete}
+        />
+      </div>
+
+      {stats.graded ? (
+        <div className="mt-8">
+          <p className="font-display text-5xl font-semibold tabular-nums tracking-tight">
+            {formatGpa(stats.score)}
+          </p>
+          {sentence && (
+            <p className={cn('mt-1 text-sm font-medium', BAND_TEXT_CLASS[tone])}>{sentence}</p>
+          )}
+          <MiniRuler className="mt-6" track={track} value={stats.score} />
+        </div>
+      ) : (
+        <div className="mt-8 flex flex-1 flex-col justify-end">
+          <MiniRuler className="mb-5" track={track} value={null} />
+          <Button variant="outline" size="sm" className="relative z-10 w-fit" asChild>
+            <Link to={editPath}>Add grades</Link>
+          </Button>
+        </div>
+      )}
+    </article>
+  )
+}
+
 export default function SemestersPage() {
   const { degreeId } = useParams()
   const navigate = useNavigate()
-  
+
   const { degrees, isLoading: isDegreesLoading } = useDegrees()
   const { semesters, isLoading: isSemestersLoading, deleteSemester } = useSemesters(degreeId || '')
   const [layout, setLayout] = useState<SemesterLayout>(readSemesterLayout)
@@ -166,191 +263,149 @@ export default function SemestersPage() {
     }
   }
 
-  const degree = degrees.find(d => d.id === degreeId)
+  const degree = degrees.find((item) => item.id === degreeId)
 
   if (isDegreesLoading || isSemestersLoading) {
     return (
-      <div role="status" className="min-h-screen bg-background text-foreground p-4 sm:p-8">
+      <div role="status" className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
         <title>Semesters · Semest</title>
         <span className="sr-only">Loading</span>
-        <div className="max-w-6xl mx-auto space-y-8">
-          <div className="flex justify-between items-end border-b pb-6">
-            <div className="flex flex-col gap-2">
-              <Skeleton className="h-5 w-32 bg-muted" />
-              <Skeleton className="h-8 w-64 bg-muted" />
-              <Skeleton className="h-4 w-48 bg-muted" />
-            </div>
-            <Skeleton className="h-9 w-36 bg-muted" />
-          </div>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-48 bg-muted rounded-xl" />
-            ))}
-          </div>
+        <div className="h-4 w-40 animate-pulse rounded-full bg-muted" />
+        <div className="mt-4 h-16 w-64 animate-pulse rounded-full bg-muted" />
+        <div className="mt-10 h-10 animate-pulse rounded-full bg-muted" />
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {[1, 2, 3, 4].map((item) => (
+            <div key={item} className="h-52 animate-pulse rounded-[22px] bg-muted" />
+          ))}
         </div>
       </div>
     )
   }
 
-  if (!degree) {
+  if (!degree || !degreeId) {
     return (
-      <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center">
+      <div className="mx-auto flex min-h-[70vh] max-w-lg items-center px-4">
         <title>Semesters · Semest</title>
-        <p>Degree not found.</p>
-        <Button onClick={() => navigate('/degrees')} className="mt-4" variant="outline">
-          Back to Degrees
-        </Button>
+        <div className="w-full rounded-[22px] border border-dashed border-foreground/20 px-8 py-12 text-center">
+          <MiniRuler track={bandsForScale([])} value={null} className="mb-8" />
+          <h1 className="font-display text-3xl font-semibold tracking-tight">Degree not found</h1>
+          <Button variant="outline" className="mt-6" onClick={() => navigate('/degrees')}>
+            Back to Degrees
+          </Button>
+        </div>
       </div>
     )
   }
 
-  const handleDelete = async (id: string, title: string, e: React.MouseEvent) => {
-    e.stopPropagation()
+  const handleDelete = async (id: string, title: string, event: React.MouseEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
     if (!confirm(`Delete ${title}? Its modules and grades will be removed.`)) return
     try {
       await deleteSemester(id)
-    } catch (err: any) {
+    } catch {
       // toast is handled in the hook
     }
   }
 
+  const scale = degree.grade_scale?.grades || []
+  const track = bandsForScale(scale)
+
   return (
-    <div className="flex h-[calc(100dvh-4rem-1px)] flex-col overflow-hidden bg-background p-4 text-foreground sm:p-8">
+    <div className="min-h-screen bg-background text-foreground">
       <title>{`${degree.title} · Semest`}</title>
-      <div className="mx-auto flex h-full min-h-0 w-full max-w-6xl flex-col animate-slideUp">
-        
-        {/* Header */}
-        <div className="flex shrink-0 flex-col gap-4 border-b pb-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="flex flex-col gap-2 min-w-0">
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="min-w-0">
             <Breadcrumb items={[{ label: degree.title }]} />
-            <h1 className="text-2xl font-display font-bold tracking-tight text-foreground">
+            <h1 className="font-display text-5xl font-semibold tracking-tight sm:text-7xl">
               {degree.title}
             </h1>
-            <p className="text-muted-foreground text-sm">
+            <p className="mt-3 text-sm text-muted-foreground">
               Manage semesters for this degree.
             </p>
           </div>
-          <div className="flex flex-col items-stretch gap-2 sm:items-end">
+          <div className="flex flex-wrap items-center gap-2">
             {semesters.length > 0 && (
               <LayoutToggle value={layout} onChange={chooseLayout} />
             )}
-            <Button
-              onClick={() => navigate(`/degrees/${degreeId}/semesters/new`)}
-              className="self-end bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl text-xs"
-            >
-              <Plus className="w-4 h-4 mr-2" />
+            <Button onClick={() => navigate(`/degrees/${degreeId}/semesters/new`)}>
               New semester
             </Button>
           </div>
         </div>
 
-        {/* Semesters Grid */}
         {semesters.length === 0 ? (
-          <div className="mt-6 bg-card border border-border border-dashed rounded-xl p-12 text-center">
-            <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-            <h3 className="text-foreground font-sans text-lg font-semibold mb-2">No semesters found</h3>
-            <p className="text-muted-foreground text-sm mb-6">Create your first semester to start calculating your GPA.</p>
+          <div className="mt-12 rounded-[22px] border border-dashed border-foreground/20 px-8 py-12 text-center">
+            <MiniRuler track={track} value={null} className="mx-auto mb-8 max-w-sm" />
+            <h2 className="font-display text-2xl font-semibold tracking-tight">No semesters yet</h2>
+            <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
+              Create the first semester to start calculating a GPA.
+            </p>
             <Button
-              onClick={() => navigate(`/degrees/${degreeId}/semesters/new`)}
               variant="outline"
-              className="border-border text-primary hover:bg-muted hover:text-primary rounded-xl text-xs"
+              className="mt-6"
+              onClick={() => navigate(`/degrees/${degreeId}/semesters/new`)}
             >
               Add semester
             </Button>
           </div>
         ) : (
-          <div className="mt-4 min-h-0 flex-1 overflow-y-auto overscroll-contain">
-            {layout === 'grid' ? (
-              <div className="grid gap-3 pb-1 md:grid-cols-2 lg:grid-cols-3">
-                {semesters.map((sem) => {
-                  const scale = degree.grade_scale?.grades || []
-                  const stats = semesterStats(sem, scale)
-
-                  return (
-                    <div
-                      key={sem.id}
-                      className="relative flex h-full min-w-0 flex-col gap-2 overflow-hidden rounded-xl border border-border bg-card p-3 group transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg"
-                    >
-                      <div className="absolute inset-y-0 start-0 w-1 rounded-s-xl bg-primary/50"></div>
-
-                      <div className="flex min-w-0 items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <h3 className="truncate font-mono text-base font-bold text-foreground transition-colors group-hover:text-primary">
-                            <Link
-                              to={`/degrees/${degreeId}/semesters/${sem.id}/edit`}
-                              className="after:absolute after:inset-0"
-                            >
-                              {sem.title}
-                            </Link>
-                          </h3>
-                          {sem.term && (
-                            <p className="mt-0.5 font-mono text-xs text-muted-foreground">
-                              {sem.term}
-                            </p>
-                          )}
-                        </div>
-                        <SemesterActions
-                          title={sem.title}
-                          onEdit={() => navigate(`/degrees/${degreeId}/semesters/${sem.id}/edit`)}
-                          onDelete={(event) => handleDelete(sem.id, sem.title, event)}
-                        />
-                      </div>
-
-                      <SemesterMetrics scale={scale} {...stats} />
-                    </div>
-                  )
-                })}
-              </div>
-            ) : (
-              <ol aria-label="Semesters in order" className="max-w-3xl pb-1">
-                {semesters.map((sem, index) => {
-                  const scale = degree.grade_scale?.grades || []
-                  const stats = semesterStats(sem, scale)
-
-                  return (
-                    <li key={sem.id} className="relative pb-3 last:pb-0">
-                      {index < semesters.length - 1 && (
-                        <span
-                          aria-hidden="true"
-                          className="absolute start-3 top-9 bottom-0 w-px bg-border"
-                        />
-                      )}
-                      <span className="absolute start-0 top-3 z-10 flex size-6 items-center justify-center rounded-full border border-primary bg-background font-mono text-xs font-bold tabular-nums text-primary">
+          <>
+            <Ruler className="mt-10" track={track} markers={semesterPins(semesters, scale)} />
+            <div className="mt-10">
+              {layout === 'grid' ? (
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                  {semesters.map((semester) => (
+                    <SemesterCard
+                      key={semester.id}
+                      semester={semester}
+                      degreeId={degreeId}
+                      scale={scale}
+                      track={track}
+                      onDelete={(event) => handleDelete(semester.id, semester.title, event)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <ol aria-label="Semesters in order" className="relative space-y-2 ps-10">
+                  <span aria-hidden="true" className="absolute start-3 top-3 bottom-3 w-px bg-border" />
+                  {semesters.map((semester, index) => (
+                    <li key={semester.id} className="relative">
+                      <span className="absolute -start-10 top-1/2 z-10 flex size-6 -translate-y-1/2 items-center justify-center rounded-full border border-foreground/25 bg-background text-xs tabular-nums text-muted-foreground">
                         {index + 1}
                       </span>
-                      <div className="relative ms-9 flex min-w-0 flex-col gap-2 rounded-xl border border-border bg-card p-3 group transition-colors hover:border-primary/50">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <h3 className="font-mono text-base font-bold text-foreground transition-colors group-hover:text-primary">
-                              <Link
-                                to={`/degrees/${degreeId}/semesters/${sem.id}/edit`}
-                                className="after:absolute after:inset-0"
-                              >
-                                {sem.title}
-                              </Link>
-                            </h3>
-                            {sem.term && (
-                              <p className="mt-0.5 font-mono text-xs text-muted-foreground">
-                                {sem.term}
-                              </p>
-                            )}
-                          </div>
-                          <SemesterActions
-                            title={sem.title}
-                            onEdit={() => navigate(`/degrees/${degreeId}/semesters/${sem.id}/edit`)}
-                            onDelete={(event) => handleDelete(sem.id, sem.title, event)}
-                          />
-                        </div>
-                        <SemesterMetrics scale={scale} {...stats} />
-                      </div>
+                      <SemesterCard
+                        compact
+                        semester={semester}
+                        degreeId={degreeId}
+                        scale={scale}
+                        track={track}
+                        onDelete={(event) => handleDelete(semester.id, semester.title, event)}
+                      />
                     </li>
-                  )
-                })}
-              </ol>
-            )}
-          </div>
+                  ))}
+                </ol>
+              )}
+            </div>
+          </>
         )}
       </div>
     </div>
   )
+}
+
+function semesterPins(semesters: SemesterWithModules[], scale: GradeRow[]): RulerMarker[] {
+  const pins: RulerMarker[] = []
+  for (const semester of semesters) {
+    if (!hasGradedWork(semester.modules, scale)) continue
+    const score = computeScore(semester.modules, scale)
+    pins.push({
+      id: semester.id,
+      value: score,
+      label: `${semester.title} ${formatGpa(score)}`,
+      kind: 'pin',
+    })
+  }
+  return pins
 }
