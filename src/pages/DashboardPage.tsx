@@ -170,14 +170,15 @@ export default function DashboardPage() {
 
             <Ruler className="mt-8" track={track} markers={rulerMarkers(metrics.cgpa, graded, target, semesters, scale)} />
 
-            <div className="mt-12 grid items-start gap-10 lg:grid-cols-[1.3fr_0.9fr]">
+            <div className="mt-12">
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <h2 className="text-lg font-semibold">Semesters</h2>
+                <Button variant="outline" asChild>
+                  <Link to={`/degrees/${activeDegreeId}/semesters/new`}>New semester</Link>
+                </Button>
+              </div>
+              <div className="grid items-start gap-10 lg:grid-cols-[1.3fr_0.9fr]">
               <section>
-                <div className="mb-2 flex items-center justify-between gap-3">
-                  <h2 className="text-lg font-semibold">Semesters</h2>
-                  <Button variant="outline" asChild>
-                    <Link to={`/degrees/${activeDegreeId}/semesters/new`}>New semester</Link>
-                  </Button>
-                </div>
                 {semesters.length === 0 ? (
                   <div className="rounded-[22px] border border-dashed border-foreground/20 px-6 py-10 text-center">
                     <MiniRuler track={track} value={null} className="mb-6" />
@@ -227,6 +228,7 @@ export default function DashboardPage() {
                 target={target}
                 onTargetChange={setTarget}
               />
+              </div>
             </div>
           </>
         )}

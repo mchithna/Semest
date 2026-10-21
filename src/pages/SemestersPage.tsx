@@ -315,24 +315,24 @@ export default function SemestersPage() {
     <div className="min-h-screen bg-background text-foreground">
       <title>{`${degree.title} · Semest`}</title>
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="min-w-0">
-            <Breadcrumb items={[{ label: degree.title }]} />
-            <h1 className="font-display text-5xl font-semibold tracking-tight sm:text-7xl">
-              {degree.title}
-            </h1>
-            <p className="mt-3 text-sm text-muted-foreground">
-              Manage semesters for this degree.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {semesters.length > 0 && (
-              <LayoutToggle value={layout} onChange={chooseLayout} />
-            )}
-            <Button onClick={() => navigate(`/degrees/${degreeId}/semesters/new`)}>
-              New semester
-            </Button>
-          </div>
+        <div className="min-w-0">
+          <Breadcrumb items={[{ label: degree.title }]} />
+          <h1 className="font-display text-5xl font-semibold tracking-tight sm:text-7xl">
+            {degree.title}
+          </h1>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Manage semesters for this degree.
+          </p>
+        </div>
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+          {semesters.length > 0 ? (
+            <LayoutToggle value={layout} onChange={chooseLayout} />
+          ) : (
+            <span />
+          )}
+          <Button className="ml-auto" onClick={() => navigate(`/degrees/${degreeId}/semesters/new`)}>
+            New semester
+          </Button>
         </div>
 
         {semesters.length === 0 ? (

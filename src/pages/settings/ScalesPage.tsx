@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { 
   Plus, Edit2, Trash2, Shield, Loader2,
-  User, Database, Download, Copy, LogOut, Check, Sparkles,
+  User, Database, Download, Copy, Check, Sparkles,
   ChevronDown, ChevronUp
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -24,7 +24,7 @@ import { queryClient } from '@/lib/queryClient'
 
 export default function ScalesPage() {
   const { scales, isLoading, createScale, updateScale, deleteScale } = useGradeScales()
-  const { session, signOut } = useAuth()
+  const { session } = useAuth()
   const { degrees } = useDegrees()
 
   // Modal State
@@ -270,9 +270,6 @@ export default function ScalesPage() {
                   }}
                 >
                   Save
-                </Button>
-                <Button variant="destructive" onClick={() => signOut()}>
-                  <LogOut /> Sign out
                 </Button>
               </div>
             </div>
