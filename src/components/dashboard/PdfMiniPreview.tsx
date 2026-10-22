@@ -1,8 +1,12 @@
 import React from 'react'
-import { formatGpa } from '@/lib/score'
-import type { PdfExportOptions } from './PdfTemplates'
+import { bandsForScale, markerPercent } from '@/lib/bands'
+import { computeScore, formatGpa, hasGradedWork, totalCredits } from '@/lib/score'
+import { compareSemesters } from '@/lib/semesterOrder'
+import { cn } from '@/lib/utils'
 import type { DegreeWithScale } from '@/lib/queries/degrees'
 import type { SemesterWithModules } from '@/lib/queries/semesters'
+import type { PdfExportOptions } from './PdfTemplates'
+import { BAND_TONE_CLASS } from '@/components/ruler/tone'
 
 type PdfMiniPreviewProps = {
   degree: DegreeWithScale | undefined
@@ -23,270 +27,207 @@ export const PdfMiniPreview: React.FC<PdfMiniPreviewProps> = ({
   options,
 }) => {
   const isModern = options.theme === 'modern'
-  const isExecutive = options.theme === 'executive'
+  const isCompact = options.theme === 'executive'
+  const scale = degree?.grade_scale?.grades ?? []
+  const track = bandsForScale(scale)
+  const sorted = [...semesters].sort(compareSemesters)
+  const visibleSemesters = sorted.slice(0, isCompact ? 1 : 2)
+  const moduleLimit = isCompact ? 3 : 2
+  const generatedOn = new Date().toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+  const gradedCount = semesters.filter((semester) => hasGradedWork(semester.modules, scale)).length
+  const ticks = [...track.bands.map((band) => band.min), track.max]
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="text-[11px] font-mono text-muted-foreground uppercase tracking-widest mb-2 flex items-center gap-1.5">
-        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        Live Page Layout Preview
-      </div>
-
-      {/* A4 Sheet Miniature Representation */}
-      <div
-        className={`w-[260px] h-[360px] rounded-md shadow-2xl border p-4 transition-all duration-300 relative overflow-hidden flex flex-col justify-between select-none ${
-          isModern
-            ? 'bg-slate-950 border-slate-800 text-slate-200 font-mono'
-            : isExecutive
-            ? 'bg-white border-indigo-200 text-slate-900 font-sans shadow-indigo-500/10'
-            : 'bg-white border-slate-300 text-slate-900 font-serif'
-        }`}
-      >
-        <div className="space-y-3">
-          {/* Header Block */}
-          <div
-            className={`pb-2 border-b ${
-              isModern
-                ? 'border-slate-800'
-                : isExecutive
-                ? 'border-indigo-100'
-                : 'border-slate-300'
-            }`}
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <div
-                  className={`text-[11px] font-bold truncate max-w-[150px] uppercase ${
-                    isModern
-                      ? 'text-emerald-400 font-mono'
-                      : isExecutive
-                      ? 'text-indigo-600 font-sans'
-                      : 'text-slate-900 font-serif'
-                  }`}
-                >
-                  {options.reportTitle || degree?.title || 'Academic Report'}
-                </div>
-                {options.includeMetadata && (
-                  <div
-                    className={`text-[8px] truncate max-w-[140px] ${
-                      isExecutive ? 'text-indigo-400' : 'text-slate-400'
-                    }`}
-                  >
-                    {degree?.institution || 'University Name'}
-                  </div>
-                )}
-              </div>
-              <div
-                className={`text-[7px] px-1.5 py-0.5 rounded font-mono font-semibold uppercase ${
-                  isModern
-                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                    : isExecutive
-                    ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
-                    : 'bg-slate-100 text-slate-800 border border-slate-300'
-                }`}
-              >
-                {metrics.standing.split(' ')[0]}
-              </div>
-            </div>
-
-            {/* Student Name Meta */}
-            {options.includeName && (options.studentName || options.studentEmail) && (
-              <div
-                className={`mt-1.5 pt-1 border-t border-dashed text-[8px] flex justify-between ${
-                  isModern
-                    ? 'border-slate-800 text-slate-400'
-                    : isExecutive
-                    ? 'border-indigo-100 text-slate-600'
-                    : 'border-slate-200 text-slate-600'
-                }`}
-              >
-                <span className="truncate max-w-[110px]">
-                  {options.studentName || 'Student Name'}
-                </span>
-                <span className="font-mono text-[7px]">
-                  {options.studentEmail || 'student@univ.edu'}
-                </span>
-              </div>
+    <div
+      className={cn(
+        'w-full max-w-[340px] overflow-hidden text-[#1c1915] shadow-[0_16px_40px_rgba(0,0,0,0.35)]',
+        isModern ? 'bg-white font-sans' : 'bg-[#f7f4ee]',
+        options.theme === 'official' && 'font-serif',
+      )}
+      style={{ aspectRatio: options.pageSize === 'LETTER' ? '8.5 / 11' : '210 / 297' }}
+    >
+      {isModern && (
+        <div className="flex h-[3px]" aria-hidden="true">
+          <span className="flex-1 bg-band-pass" />
+          <span className="flex-1 bg-band-second-lower" />
+          <span className="flex-1 bg-band-second-upper" />
+          <span className="flex-1 bg-band-first" />
+        </div>
+      )}
+      <div className={cn('flex h-full flex-col', isCompact ? 'p-3' : 'p-4')}>
+        <div className="flex items-start justify-between gap-2 border-b border-black/10 pb-2">
+          <div className="min-w-0">
+            <p className={cn('truncate font-semibold leading-tight', isCompact ? 'text-[12px]' : 'text-[13px]')}>
+              {options.reportTitle || degree?.title || 'Academic Transcript'}
+            </p>
+            {options.includeMetadata && (
+              <p className="mt-1 truncate text-[8px] tracking-wide text-black/45 uppercase">
+                {degree?.institution || 'Institution'}
+              </p>
             )}
           </div>
-
-          {/* Executive Stats Cards Preview */}
-          {options.includeStats && (
-            <div className="grid grid-cols-4 gap-1">
-              <div
-                className={`p-1 rounded text-center border ${
-                  isModern
-                    ? 'bg-slate-900 border-slate-800'
-                    : isExecutive
-                    ? 'bg-indigo-50/50 border-indigo-100'
-                    : 'bg-slate-50 border-slate-200'
-                }`}
-              >
-                <div className="text-[6px] uppercase text-slate-400">CGPA</div>
-                <div
-                  className={`text-[9px] font-bold font-mono ${
-                    isModern
-                      ? 'text-emerald-400'
-                      : isExecutive
-                      ? 'text-indigo-600'
-                      : 'text-slate-900'
-                  }`}
-                >
-                  {formatGpa(metrics.cgpa)}
-                </div>
-              </div>
-
-              <div
-                className={`p-1 rounded text-center border ${
-                  isModern
-                    ? 'bg-slate-900 border-slate-800'
-                    : isExecutive
-                    ? 'bg-indigo-50/50 border-indigo-100'
-                    : 'bg-slate-50 border-slate-200'
-                }`}
-              >
-                <div className="text-[6px] uppercase text-slate-400">Credits</div>
-                <div className="text-[9px] font-bold font-mono text-sky-500">
-                  {metrics.earnedCredits.toFixed(0)}
-                </div>
-              </div>
-
-              <div
-                className={`p-1 rounded text-center border ${
-                  isModern
-                    ? 'bg-slate-900 border-slate-800'
-                    : isExecutive
-                    ? 'bg-indigo-50/50 border-indigo-100'
-                    : 'bg-slate-50 border-slate-200'
-                }`}
-              >
-                <div className="text-[6px] uppercase text-slate-400">Best</div>
-                <div className="text-[9px] font-bold font-mono text-amber-500">
-                  {formatGpa(metrics.highestGpa)}
-                </div>
-              </div>
-
-              <div
-                className={`p-1 rounded text-center border ${
-                  isModern
-                    ? 'bg-slate-900 border-slate-800'
-                    : isExecutive
-                    ? 'bg-indigo-50/50 border-indigo-100'
-                    : 'bg-slate-50 border-slate-200'
-                }`}
-              >
-                <div className="text-[6px] uppercase text-slate-400">Sems</div>
-                <div
-                  className={`text-[9px] font-bold font-mono ${
-                    isExecutive ? 'text-indigo-600' : 'text-indigo-500'
-                  }`}
-                >
-                  {semesters.length}
-                </div>
-              </div>
-            </div>
+          {metrics.standing && (
+            <span className="shrink-0 rounded-[2px] border border-black/15 px-1 py-0.5 text-[7px] tracking-wide text-black/55 uppercase">
+              {metrics.standing}
+            </span>
           )}
+        </div>
 
-          {/* Trend Chart Miniature Bar Sketch */}
-          {options.includeTrendChart && (
-            <div
-              className={`p-1.5 rounded border ${
-                isModern
-                  ? 'bg-slate-900 border-slate-800'
-                  : isExecutive
-                  ? 'bg-indigo-50/50 border-indigo-100'
-                  : 'bg-slate-50 border-slate-200'
-              }`}
-            >
-              <div className="text-[7px] uppercase font-bold text-slate-400 mb-1">
-                GPA Trend Graph
-              </div>
-              <div className="flex items-end gap-1 h-6 pt-1">
-                {[65, 80, 75, 95, 90].map((val, idx) => (
-                  <div
-                    key={idx}
-                    className={`flex-1 rounded-t ${
-                      isModern
-                        ? 'bg-emerald-500'
-                        : isExecutive
-                        ? 'bg-indigo-600'
-                        : 'bg-slate-800'
-                    }`}
-                    style={{ height: `${val}%` }}
-                  />
-                ))}
-              </div>
+        {options.includeName && (options.studentName || options.studentEmail) && (
+          <div className="mt-2 flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[7px] tracking-wide text-black/40 uppercase">Student name</p>
+              <p className="truncate text-[9px] font-medium">{options.studentName || 'Student name'}</p>
             </div>
-          )}
-
-          {/* Target Goal Summary Preview */}
-          {options.includeTargetGoal && (
-            <div
-              className={`p-1.5 rounded border text-[8px] flex justify-between ${
-                isModern
-                  ? 'bg-slate-900 border-slate-800 text-amber-400'
-                  : 'bg-amber-50 border-amber-200 text-amber-900'
-              }`}
-            >
-              <span className="font-semibold">Target CGPA: {options.targetCgpa || '3.70'}</span>
-              <span>Req: {options.remainingCredits || '30'} CR</span>
+            <div className="min-w-0 text-right">
+              <p className="text-[7px] tracking-wide text-black/40 uppercase">Email or ID</p>
+              <p className="truncate text-[9px]">{options.studentEmail || '—'}</p>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Module Tables Sketch */}
-          {options.includeModules && (
-            <div className="space-y-1.5">
-              <div className="text-[7px] font-bold uppercase tracking-wider text-slate-400">
-                Semester Course Breakdowns
+        {options.includeStats && (
+          <div className="mt-3 grid grid-cols-4 border-y border-black/10">
+            <Stat label="CGPA" value={formatGpa(metrics.cgpa)} tone={isModern ? 'text-band-pass' : undefined} />
+            <Stat
+              label="Credits"
+              value={formatCount(metrics.earnedCredits)}
+              tone={isModern ? 'text-band-second-lower' : undefined}
+            />
+            <Stat
+              label="Best semester"
+              value={formatGpa(metrics.highestGpa)}
+              tone={isModern ? 'text-band-second-upper' : undefined}
+            />
+            <Stat
+              label="Graded"
+              value={String(gradedCount)}
+              tone={isModern ? 'text-band-first' : undefined}
+              last
+            />
+          </div>
+        )}
+
+        {options.includeTrendChart && (
+          <div className="mt-3">
+            <p className="text-[8px] text-black/45">Classification</p>
+            <div className="relative mt-1.5">
+              <div className="flex h-1.5 overflow-hidden rounded-full">
+                {track.bands.map((band) => {
+                  const span = track.max - track.min
+                  const width = span > 0 ? ((band.max - band.min) / span) * 100 : 0
+                  return (
+                    <div
+                      key={band.id}
+                      className={cn('h-full', BAND_TONE_CLASS[band.tone])}
+                      style={{ width: `${width}%` }}
+                    />
+                  )
+                })}
               </div>
-
-              {[1, 2].map((sIdx) => (
-                <div
-                  key={sIdx}
-                  className={`rounded border text-[7px] p-1.5 ${
-                    isModern
-                      ? 'border-slate-800 bg-slate-900/60'
-                      : isExecutive
-                      ? 'border-indigo-100 bg-indigo-50/30'
-                      : 'border-slate-200 bg-slate-50'
-                  }`}
-                >
-                  <div className="flex justify-between font-semibold border-b border-slate-300/30 pb-0.5 mb-1">
-                    <span>Semester {sIdx}</span>
-                    <span
-                      className={`font-mono ${
-                        isModern
-                          ? 'text-emerald-400'
-                          : isExecutive
-                          ? 'text-indigo-600'
-                          : 'text-slate-800'
-                      }`}
-                    >
-                      GPA: 3.85
-                    </span>
-                  </div>
-
-                  <div className="space-y-0.5">
-                    <div className="flex justify-between text-slate-400">
-                      <span>Advanced Algorithms</span>
-                      <span className="font-mono">A+</span>
-                    </div>
-                    <div className="flex justify-between text-slate-400">
-                      <span>Database Systems</span>
-                      <span className="font-mono">A</span>
-                    </div>
-                  </div>
-                </div>
+              {metrics.earnedCredits > 0 && (
+                <span
+                  className="absolute top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#1c1915] ring-2 ring-white"
+                  style={{ left: `${markerPercent(metrics.cgpa, track)}%` }}
+                />
+              )}
+            </div>
+            <div className="mt-1 flex justify-between text-[7px] text-black/40">
+              {ticks.map((tick, index) => (
+                <span key={`${tick}-${index}`}>{formatGpa(tick)}</span>
               ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* Mini Watermark Footer */}
-        <div className="text-[6px] text-center text-slate-400 border-t border-slate-300/20 pt-1">
-          A4 Document • Semest
-        </div>
+        {options.includeTargetGoal && (
+          <p className="mt-3 border-y border-black/10 py-1.5 text-[8px]">
+            Target CGPA {options.targetCgpa || '—'} · {options.remainingCredits || '0'} credits left
+          </p>
+        )}
+
+        {options.includeModules && (
+          <div className="mt-3 space-y-2.5">
+            {visibleSemesters.length === 0 && (
+              <p className="text-[8px] text-black/40">No semesters yet.</p>
+            )}
+            {visibleSemesters.map((semester) => {
+              const gpa = computeScore(semester.modules, scale)
+              const credits = totalCredits(semester.modules)
+              const modules = semester.modules.slice(0, moduleLimit)
+              const hidden = semester.modules.length - modules.length
+              return (
+                <div key={semester.id}>
+                  <div className="flex items-baseline justify-between gap-2 border-b border-black/10 pb-1">
+                    <p className="truncate text-[8px] font-semibold">{semesterLabel(semester)}</p>
+                    <p className="shrink-0 text-[8px]">
+                      GPA {formatGpa(gpa)}, {formatCount(credits)} credits
+                    </p>
+                  </div>
+                  <div>
+                    {modules.map((mod) => (
+                      <div key={mod.id} className="flex items-baseline justify-between gap-2 border-b border-black/10 py-0.5">
+                        <span className="truncate text-[8px]">{mod.name}</span>
+                        <span className="shrink-0 text-[8px]">{mod.grade}</span>
+                      </div>
+                    ))}
+                    {hidden > 0 && (
+                      <p className="pt-0.5 text-[7px] text-black/40 italic">
+                        and {hidden} more {hidden === 1 ? 'module' : 'modules'}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+            {sorted.length > visibleSemesters.length && (
+              <p className="text-[7px] text-black/40 italic">
+                and {sorted.length - visibleSemesters.length} more{' '}
+                {sorted.length - visibleSemesters.length === 1 ? 'semester' : 'semesters'}
+              </p>
+            )}
+          </div>
+        )}
+
+        <p className="mt-auto border-t border-black/10 pt-2 text-[7px] text-black/40">
+          Generated by Semest on {generatedOn}. Not an official transcript.
+        </p>
       </div>
     </div>
   )
+}
+
+function Stat({
+  label,
+  value,
+  tone,
+  last = false,
+}: {
+  label: string
+  value: string
+  tone?: string
+  last?: boolean
+}) {
+  return (
+    <div className={cn('px-1 py-1.5', !last && 'border-r border-black/10')}>
+      <p className="text-[6px] tracking-wide text-black/40 uppercase">{label}</p>
+      <p className={cn('text-[12px] leading-tight font-semibold', tone)}>{value}</p>
+    </div>
+  )
+}
+
+function semesterLabel(semester: SemesterWithModules) {
+  if (semester.term && !semester.title.toLowerCase().includes(semester.term.toLowerCase())) {
+    return `${semester.title}, ${semester.term}`
+  }
+  return semester.title
+}
+
+function formatCount(value: number): string {
+  const rounded = Math.round(value * 10) / 10
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1)
 }

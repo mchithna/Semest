@@ -3,8 +3,9 @@ import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/rendere
 import type { DegreeWithScale } from '@/lib/queries/degrees'
 import type { SemesterWithModules } from '@/lib/queries/semesters'
 import type { PdfExportOptions } from './PdfTemplates'
-import { computeScore, formatGpa, totalCredits } from '@/lib/score'
+import { computeScore, formatGpa, hasGradedWork, totalCredits } from '@/lib/score'
 import { compareSemesters } from '@/lib/semesterOrder'
+import { bandsForScale, markerPercent, type BandTone } from '@/lib/bands'
 
 // Register standard fonts
 Font.register({
@@ -15,23 +16,35 @@ Font.register({
   ]
 })
 
+const BAND_FILL: Record<BandTone, string> = {
+  pass: '#5B6CFF',
+  'second-lower': '#38B6C9',
+  'second-upper': '#E6B84A',
+  first: '#F07A5A',
+  plain: '#D6D3D1',
+}
+
 const getThemeStyles = (theme: 'official' | 'modern' | 'executive') => {
   const isModern = theme === 'modern'
   const isExecutive = theme === 'executive'
+  const ink = '#1C1915'
+  const muted = '#8A847C'
+  const line = '#E6E1D6'
+  const paper = isModern ? '#FFFFFF' : '#FBF8F3'
 
   return StyleSheet.create({
     page: {
-      padding: 32,
-      fontSize: 9,
+      padding: isExecutive ? 28 : 36,
+      fontSize: isExecutive ? 8 : 9,
       fontFamily: 'Helvetica',
-      backgroundColor: isModern ? '#090D16' : '#FFFFFF',
-      color: isModern ? '#F8FAFC' : '#0F172A',
+      backgroundColor: paper,
+      color: ink,
     },
     header: {
       borderBottomWidth: 1,
-      borderBottomColor: isModern ? '#1E293B' : '#CBD5E1',
-      paddingBottom: 12,
-      marginBottom: 16,
+      borderBottomColor: line,
+      paddingBottom: 10,
+      marginBottom: 12,
     },
     headerTop: {
       flexDirection: 'row',
@@ -39,207 +52,174 @@ const getThemeStyles = (theme: 'official' | 'modern' | 'executive') => {
       alignItems: 'flex-start',
     },
     title: {
-      fontSize: 18,
+      fontSize: isExecutive ? 13 : 16,
       fontFamily: 'Helvetica-Bold',
-      textTransform: 'uppercase',
-      color: isModern ? '#34D399' : isExecutive ? '#4F46E5' : '#0F172A',
+      color: ink,
     },
     subtitle: {
-      fontSize: 9,
-      color: isModern ? '#94A3B8' : '#64748B',
-      marginTop: 2,
+      fontSize: 8,
+      color: muted,
+      marginTop: 3,
+      textTransform: 'uppercase',
     },
     badge: {
-      paddingHorizontal: 8,
-      paddingVertical: 4,
-      borderRadius: 3,
-      backgroundColor: isModern ? '#064E3B' : isExecutive ? '#EEF2FF' : '#F1F5F9',
-      color: isModern ? '#34D399' : isExecutive ? '#4338CA' : '#0F172A',
-      borderWidth: isModern ? 1 : 0,
-      borderColor: isModern ? '#059669' : 'transparent',
-      fontSize: 8,
-      fontFamily: 'Helvetica-Bold',
+      paddingHorizontal: 6,
+      paddingVertical: 3,
+      borderWidth: 1,
+      borderColor: line,
+      color: muted,
+      fontSize: 7,
       textTransform: 'uppercase',
     },
     studentMeta: {
       flexDirection: 'row',
-      gap: 20,
+      justifyContent: 'space-between',
       marginTop: 10,
       paddingTop: 8,
-      borderTopWidth: 1,
-      borderTopColor: isModern ? '#1E293B' : '#E2E8F0',
     },
     metaItem: {
       flexDirection: 'column',
     },
     metaLabel: {
       fontSize: 7,
-      color: isModern ? '#64748B' : '#94A3B8',
+      color: muted,
       textTransform: 'uppercase',
     },
     metaValue: {
       fontSize: 9,
       fontFamily: 'Helvetica-Bold',
-      color: isModern ? '#F1F5F9' : '#1E293B',
+      color: ink,
       marginTop: 1,
     },
     statsRow: {
       flexDirection: 'row',
-      gap: 8,
-      marginBottom: 16,
+      borderTopWidth: 1,
+      borderBottomWidth: 1,
+      borderColor: line,
+      marginBottom: 14,
     },
     statCard: {
       flex: 1,
-      padding: 8,
-      backgroundColor: isModern ? '#1E293B' : '#F8FAFC',
-      borderRadius: 4,
-      borderWidth: 1,
-      borderColor: isModern ? '#334155' : '#E2E8F0',
+      paddingVertical: 8,
+      paddingHorizontal: 8,
+      borderRightWidth: 1,
+      borderRightColor: line,
+    },
+    statCardLast: {
+      borderRightWidth: 0,
     },
     statLabel: {
       fontSize: 7,
-      color: isModern ? '#94A3B8' : '#64748B',
+      color: muted,
       textTransform: 'uppercase',
     },
     statValueCgpa: {
-      fontSize: 14,
+      fontSize: isExecutive ? 12 : 14,
       fontFamily: 'Helvetica-Bold',
-      color: isModern ? '#34D399' : isExecutive ? '#4F46E5' : '#0F172A',
+      color: isModern ? '#5B6CFF' : ink,
       marginTop: 2,
     },
     statValueCredits: {
-      fontSize: 14,
+      fontSize: isExecutive ? 12 : 14,
       fontFamily: 'Helvetica-Bold',
-      color: '#38BDF8',
+      color: isModern ? '#38B6C9' : ink,
       marginTop: 2,
     },
     statValueBest: {
-      fontSize: 14,
+      fontSize: isExecutive ? 12 : 14,
       fontFamily: 'Helvetica-Bold',
-      color: '#F59E0B',
+      color: isModern ? '#E6B84A' : ink,
       marginTop: 2,
     },
     statValueSems: {
-      fontSize: 14,
+      fontSize: isExecutive ? 12 : 14,
       fontFamily: 'Helvetica-Bold',
-      color: isModern ? '#A78BFA' : '#6366F1',
+      color: isModern ? '#F07A5A' : ink,
       marginTop: 2,
     },
-    chartBox: {
-      padding: 10,
-      backgroundColor: isModern ? '#1E293B' : '#F8FAFC',
-      borderRadius: 4,
-      borderWidth: 1,
-      borderColor: isModern ? '#334155' : '#E2E8F0',
-      marginBottom: 16,
+    rulerBox: {
+      marginBottom: 14,
     },
-    chartTitle: {
+    rulerTitle: {
       fontSize: 8,
-      fontFamily: 'Helvetica-Bold',
-      color: isModern ? '#94A3B8' : '#64748B',
-      textTransform: 'uppercase',
-      marginBottom: 8,
+      color: muted,
+      marginBottom: 6,
     },
-    chartTrack: {
+    rulerTrack: {
       flexDirection: 'row',
-      alignItems: 'flex-end',
-      height: 45,
-      gap: 6,
-    },
-    chartCol: {
-      flex: 1,
-      alignItems: 'center',
-    },
-    chartVal: {
-      fontSize: 7,
-      color: isModern ? '#CBD5E1' : '#334155',
-      marginBottom: 2,
-    },
-    chartBar: {
-      width: '100%',
-      backgroundColor: isModern ? '#34D399' : isExecutive ? '#4F46E5' : '#0F172A',
-      borderRadius: 2,
-    },
-    chartTerm: {
-      fontSize: 7,
-      color: isModern ? '#94A3B8' : '#64748B',
-      marginTop: 2,
-    },
-    targetGoalBox: {
-      padding: 8,
-      backgroundColor: isModern ? '#1E293B' : '#FEF3C7',
+      height: 7,
       borderRadius: 4,
-      borderWidth: 1,
-      borderColor: isModern ? '#334155' : '#FDE68A',
-      marginBottom: 16,
+      overflow: 'hidden',
+    },
+    rulerLabels: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      alignItems: 'center',
+      marginTop: 3,
+    },
+    rulerLabel: {
+      fontSize: 7,
+      color: muted,
+    },
+    targetGoalBox: {
+      paddingVertical: 6,
+      borderTopWidth: 1,
+      borderBottomWidth: 1,
+      borderColor: line,
+      marginBottom: 14,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
     },
     targetGoalText: {
       fontSize: 8,
-      fontFamily: 'Helvetica-Bold',
-      color: isModern ? '#F59E0B' : '#92400E',
+      color: ink,
     },
     semesterCard: {
       marginBottom: 12,
-      borderWidth: 1,
-      borderColor: isModern ? '#334155' : '#E2E8F0',
-      borderRadius: 4,
-      overflow: 'hidden',
-      backgroundColor: isModern ? '#0F172A' : '#FFFFFF',
     },
     semesterHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      backgroundColor: isModern ? '#1E293B' : '#F1F5F9',
-      paddingHorizontal: 10,
-      paddingVertical: 6,
+      borderBottomWidth: 1,
+      borderBottomColor: line,
+      paddingBottom: 4,
+      marginBottom: 2,
     },
     semesterTitle: {
       fontSize: 9,
       fontFamily: 'Helvetica-Bold',
-      color: isModern ? '#34D399' : '#0F172A',
-      textTransform: 'uppercase',
+      color: ink,
     },
     semesterMeta: {
-      fontSize: 9,
-      fontFamily: 'Helvetica-Bold',
-      color: isModern ? '#F1F5F9' : '#0F172A',
+      fontSize: 8,
+      color: ink,
     },
     tableHeader: {
       flexDirection: 'row',
-      backgroundColor: isModern ? '#090D16' : '#F8FAFC',
-      borderBottomWidth: 1,
-      borderBottomColor: isModern ? '#1E293B' : '#E2E8F0',
-      paddingHorizontal: 10,
-      paddingVertical: 4,
+      paddingVertical: 3,
     },
     tableRow: {
       flexDirection: 'row',
-      borderBottomWidth: 1,
-      borderBottomColor: isModern ? '#1E293B' : '#F1F5F9',
-      paddingHorizontal: 10,
-      paddingVertical: 5,
+      borderTopWidth: 1,
+      borderTopColor: line,
+      paddingVertical: 4,
       alignItems: 'center',
     },
-    thIndex: { width: 24, fontSize: 7, color: isModern ? '#64748B' : '#64748B', fontFamily: 'Helvetica-Bold' },
-    thName: { flex: 1, fontSize: 7, color: isModern ? '#64748B' : '#64748B', fontFamily: 'Helvetica-Bold' },
-    thCredits: { width: 45, textAlign: 'center', fontSize: 7, color: isModern ? '#64748B' : '#64748B', fontFamily: 'Helvetica-Bold' },
-    thGrade: { width: 45, textAlign: 'center', fontSize: 7, color: isModern ? '#64748B' : '#64748B', fontFamily: 'Helvetica-Bold' },
-    tdIndex: { width: 24, fontSize: 8, color: isModern ? '#64748B' : '#94A3B8' },
-    tdName: { flex: 1, fontSize: 8, color: isModern ? '#F1F5F9' : '#1E293B' },
-    tdCredits: { width: 45, textAlign: 'center', fontSize: 8, color: isModern ? '#CBD5E1' : '#334155' },
-    tdGrade: { width: 45, textAlign: 'center', fontSize: 8, fontFamily: 'Helvetica-Bold', color: isModern ? '#34D399' : '#0F172A' },
+    thIndex: { width: 24, fontSize: 7, color: muted, fontFamily: 'Helvetica-Bold' },
+    thName: { flex: 1, fontSize: 7, color: muted, fontFamily: 'Helvetica-Bold' },
+    thCredits: { width: 45, textAlign: 'center', fontSize: 7, color: muted, fontFamily: 'Helvetica-Bold' },
+    thGrade: { width: 45, textAlign: 'right', fontSize: 7, color: muted, fontFamily: 'Helvetica-Bold' },
+    tdIndex: { width: 24, fontSize: 8, color: muted },
+    tdName: { flex: 1, fontSize: 8, color: ink },
+    tdCredits: { width: 45, textAlign: 'center', fontSize: 8, color: ink },
+    tdGrade: { width: 45, textAlign: 'right', fontSize: 8, color: ink },
     footer: {
-      marginTop: 20,
-      paddingTop: 10,
+      marginTop: 16,
+      paddingTop: 8,
       borderTopWidth: 1,
-      borderTopColor: isModern ? '#1E293B' : '#E2E8F0',
-      textAlign: 'center',
+      borderTopColor: line,
       fontSize: 7,
-      color: isModern ? '#64748B' : '#94A3B8',
-    }
+      color: muted,
+    },
   })
 }
 
@@ -255,6 +235,11 @@ type ReactPdfDocumentProps = {
   options: PdfExportOptions
 }
 
+function formatCount(value: number): string {
+  const rounded = Math.round(value * 10) / 10
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1)
+}
+
 export const ReactPdfDocument: React.FC<ReactPdfDocumentProps> = ({
   degree,
   semesters,
@@ -264,10 +249,18 @@ export const ReactPdfDocument: React.FC<ReactPdfDocumentProps> = ({
   const sortedSemesters = [...semesters].sort(compareSemesters)
   const gradeScale = degree.grade_scale?.grades || []
   const styles = getThemeStyles(options.theme)
+  const track = bandsForScale(gradeScale)
+  const gradedCount = semesters.filter((semester) => hasGradedWork(semester.modules, gradeScale)).length
+  const generatedOn = new Date().toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+  const rulerTicks = [...track.bands.map((band) => band.min), track.max]
 
   return (
     <Document title={options.reportTitle || degree.title}>
-      <Page size="A4" style={styles.page}>
+      <Page size={options.pageSize === 'LETTER' ? 'LETTER' : 'A4'} style={styles.page}>
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerTop}>
@@ -280,7 +273,7 @@ export const ReactPdfDocument: React.FC<ReactPdfDocumentProps> = ({
                 </Text>
               )}
             </View>
-            <Text style={styles.badge}>{metrics.standing}</Text>
+            {metrics.standing ? <Text style={styles.badge}>{metrics.standing}</Text> : null}
           </View>
 
           {options.includeName && (options.studentName || options.studentEmail) && (
@@ -309,40 +302,64 @@ export const ReactPdfDocument: React.FC<ReactPdfDocumentProps> = ({
         {options.includeStats && (
           <View style={styles.statsRow}>
             <View style={styles.statCard}>
-              <Text style={styles.statLabel}>Cumulative GPA</Text>
+              <Text style={styles.statLabel}>CGPA</Text>
               <Text style={styles.statValueCgpa}>{formatGpa(metrics.cgpa)}</Text>
             </View>
             <View style={styles.statCard}>
-              <Text style={styles.statLabel}>Earned Credits</Text>
-              <Text style={styles.statValueCredits}>{metrics.earnedCredits.toFixed(1)}</Text>
+              <Text style={styles.statLabel}>Credits</Text>
+              <Text style={styles.statValueCredits}>{formatCount(metrics.earnedCredits)}</Text>
             </View>
             <View style={styles.statCard}>
-              <Text style={styles.statLabel}>Best Sem GPA</Text>
+              <Text style={styles.statLabel}>Best semester</Text>
               <Text style={styles.statValueBest}>{formatGpa(metrics.highestGpa)}</Text>
             </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statLabel}>Semesters</Text>
-              <Text style={styles.statValueSems}>{semesters.length}</Text>
+            <View style={[styles.statCard, styles.statCardLast]}>
+              <Text style={styles.statLabel}>Graded</Text>
+              <Text style={styles.statValueSems}>{gradedCount}</Text>
             </View>
           </View>
         )}
 
-        {/* Trend Summary Chart */}
-        {options.includeTrendChart && sortedSemesters.length > 0 && (
-          <View style={styles.chartBox}>
-            <Text style={styles.chartTitle}>Semester GPA Progression Summary</Text>
-            <View style={styles.chartTrack}>
-              {sortedSemesters.map((sem, i) => {
-                const sgpa = computeScore(sem.modules, gradeScale)
-                const barHeight = Math.max(6, Math.min(30, (sgpa / 4.0) * 30))
-                return (
-                  <View key={sem.id || i} style={styles.chartCol}>
-                    <Text style={styles.chartVal}>{formatGpa(sgpa)}</Text>
-                    <View style={[styles.chartBar, { height: barHeight }]} />
-                    <Text style={styles.chartTerm}>{sem.term || `S${i + 1}`}</Text>
-                  </View>
-                )
-              })}
+        {options.includeTrendChart && (
+          <View style={styles.rulerBox}>
+            <Text style={styles.rulerTitle}>Classification</Text>
+            <View style={{ position: 'relative' }}>
+              <View style={styles.rulerTrack}>
+                {track.bands.map((band) => (
+                  <View
+                    key={band.id}
+                    style={{
+                      flexGrow: Math.max(band.max - band.min, 0.01),
+                      flexBasis: 0,
+                      height: 7,
+                      backgroundColor: BAND_FILL[band.tone],
+                    }}
+                  />
+                ))}
+              </View>
+              {metrics.earnedCredits > 0 && (
+                <View
+                  style={{
+                    position: 'absolute',
+                    left: `${markerPercent(metrics.cgpa, track)}%`,
+                    top: -1,
+                    width: 8,
+                    height: 9,
+                    marginLeft: -4,
+                    borderRadius: 4,
+                    backgroundColor: '#1C1915',
+                    borderWidth: 1,
+                    borderColor: '#FFFFFF',
+                  }}
+                />
+              )}
+            </View>
+            <View style={styles.rulerLabels}>
+              {rulerTicks.map((tick, index) => (
+                <Text key={`${tick}-${index}`} style={styles.rulerLabel}>
+                  {formatGpa(tick)}
+                </Text>
+              ))}
             </View>
           </View>
         )}
@@ -396,7 +413,7 @@ export const ReactPdfDocument: React.FC<ReactPdfDocumentProps> = ({
           })}
 
         <Text style={styles.footer}>
-          Generated via Semest • Academic Progression Report
+          {`Generated by Semest on ${generatedOn}. Not an official transcript.`}
         </Text>
       </Page>
     </Document>
