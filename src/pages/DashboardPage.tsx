@@ -10,7 +10,7 @@ import { bandsForScale, nextBandSentence, standingSentence, type RulerMarker } f
 import { MiniRuler } from '@/components/ruler/MiniRuler'
 import { Ruler } from '@/components/ruler/Ruler'
 import { TargetPredictor } from '@/components/dashboard/TargetPredictor'
-import { ExportPdfModal } from '@/components/dashboard/ExportPdfModal'
+import { ExportReportModal } from '@/components/export/ExportReportModal'
 import {
   Select,
   SelectContent,
@@ -112,14 +112,13 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <ExportPdfModal
+      <ExportReportModal
         isOpen={isExportModalOpen}
         onClose={() => setIsExportModalOpen(false)}
         degree={activeDegree}
         semesters={semesters}
-        metrics={metrics}
         defaultStudentName={studentName}
-        defaultStudentEmail={user?.email || ''}
+        targetCgpa={target}
       />
 
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
@@ -140,7 +139,7 @@ export default function DashboardPage() {
             </SelectContent>
           </Select>
           <Button onClick={() => setIsExportModalOpen(true)} disabled={!activeDegree || isSemestersLoading}>
-            Export PDF
+            Export
           </Button>
         </div>
         {isSemestersLoading ? (
