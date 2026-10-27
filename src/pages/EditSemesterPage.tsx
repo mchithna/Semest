@@ -70,17 +70,12 @@ export default function EditSemesterPage() {
   const priorModules = earlierModuleOptions(semesters, semester.sem_index)
 
   const handleSave = async (modules: ModuleData[]) => {
-    try {
-      await saveSemester({
-        semesterId: semester.id,
-        title,
-        term,
-        modules
-      })
-      navigate(`/degrees/${degreeId}/semesters`)
-    } catch (e) {
-      // handled
-    }
+    await saveSemester({
+      semesterId: semester.id,
+      title,
+      term,
+      modules
+    })
   }
 
   return (
@@ -106,6 +101,7 @@ export default function EditSemesterPage() {
           savedElsewhere={semesters.filter((item) => item.id !== semester.id).flatMap((item) => item.modules)}
           detailsChanged={detailsChanged}
           onSave={handleSave}
+          onComplete={() => navigate(`/degrees/${degreeId}/semesters`)}
           isSaving={isSaving}
           details={
             <div className="grid gap-4 sm:grid-cols-[minmax(0,1.4fr)_minmax(12rem,0.8fr)]">

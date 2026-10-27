@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import type { GradeRow } from '@/lib/queries/gradeScales'
 import { bandsForScale } from '@/lib/bands'
 import { formatGpa, GPA_DECIMALS } from '@/lib/score'
+import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
 
 type TargetPredictorProps = {
   currentCgpa: number
@@ -64,7 +65,7 @@ export function TargetPredictor({
         <p className="text-sm text-muted-foreground">You need an average of</p>
         {requiredGpa !== null && requiredGpa > 0 && requiredGpa <= maxPoints ? (
           <p className="mt-1 font-display text-5xl font-semibold tabular-nums tracking-tight text-band-first">
-            {requiredGpa.toFixed(GPA_DECIMALS)}
+            <AnimatedNumber value={requiredGpa} decimals={GPA_DECIMALS} />
           </p>
         ) : (
           <p className="mt-1 text-2xl font-semibold text-foreground">

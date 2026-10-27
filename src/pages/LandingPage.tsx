@@ -27,7 +27,6 @@ export default function LandingPage() {
 
   const handleGuestSave = (modules: ModuleData[]) => {
     saveGuestDraft(modules)
-    navigate('/auth')
   }
 
   if (loading) {
@@ -99,6 +98,7 @@ export default function LandingPage() {
             initialModules={initialModules}
             gradeScale={GUEST_SCALE}
             onSave={handleGuestSave}
+            onComplete={() => navigate('/auth')}
           />
         </div>
 

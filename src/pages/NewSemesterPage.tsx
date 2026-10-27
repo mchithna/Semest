@@ -74,16 +74,11 @@ export default function NewSemesterPage() {
   }
 
   const handleSave = async (modules: ModuleData[]) => {
-    try {
-      await saveSemester({
-        title,
-        term,
-        modules
-      })
-      navigate(`/degrees/${degreeId}/semesters`)
-    } catch (e) {
-      // handled by useSemesters toast
-    }
+    await saveSemester({
+      title,
+      term,
+      modules
+    })
   }
 
   return (
@@ -108,6 +103,7 @@ export default function NewSemesterPage() {
           savedElsewhere={semesters.flatMap((semester) => semester.modules)}
           detailsChanged={detailsChanged}
           onSave={handleSave}
+          onComplete={() => navigate(`/degrees/${degreeId}/semesters`)}
           isSaving={isSaving}
           details={
             <div className="grid gap-4 sm:grid-cols-[minmax(0,1.4fr)_minmax(12rem,0.8fr)]">

@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
+import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
 import type { GradeRow } from '@/lib/queries/gradeScales'
 import type { SemesterWithModules } from '@/lib/queries/semesters'
 
@@ -155,7 +156,7 @@ export default function DashboardPage() {
                 <div>
                   <p className="text-sm text-muted-foreground">Cumulative GPA</p>
                   <h1 className="mt-2 font-display text-7xl font-semibold tabular-nums tracking-tight sm:text-8xl">
-                    {graded ? formatGpa(metrics.cgpa) : '—'}
+                    {graded ? <AnimatedNumber value={metrics.cgpa} decimals={2} /> : '—'}
                   </h1>
                 </div>
                 <div className="max-w-md lg:pt-16 lg:pb-2">

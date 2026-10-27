@@ -1,4 +1,5 @@
 import { markerPercent, type BandTrack } from '@/lib/bands'
+import { markerShift } from '@/lib/motion'
 import { cn } from '@/lib/utils'
 import { BAND_TONE_CLASS } from './tone'
 
@@ -45,7 +46,7 @@ export function MiniRuler({
       </div>
       {graded ? (
         <span
-          className="absolute top-1/2 size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-background ring-2 ring-foreground"
+          className={cn('absolute top-1/2 size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-background ring-2 ring-foreground', markerShift)}
           style={{ left: `${markerPercent(value, track)}%` }}
         />
       ) : null}

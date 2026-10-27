@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect, type ReactNode } from 'react'
+import { Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import confetti from 'canvas-confetti'
 import { ModuleRow, type ModuleData, type PriorModuleOption } from './ModuleRow'
@@ -20,7 +21,9 @@ type CalculatorProps = {
   initialModules?: ModuleData[]
   gradeScale: GradeRow[]
   priorModules?: PriorModuleOption[]
-  onSave?: (modules: ModuleData[]) => void
+  onSave?: (modules: ModuleData[]) => void | Promise<void>
+  /** Runs after a successful save, once the brief confirmation has shown. */
+  onComplete?: () => void
   isSaving?: boolean
   /** Saved modules for an existing semester. A new semester has no baseline. */
   baselineModules?: ModuleData[]
@@ -41,6 +44,7 @@ export function Calculator({
   gradeScale,
   priorModules = [],
   onSave,
+  onComplete,
   isSaving = false,
   baselineModules,
   detailsChanged = false,
@@ -89,10 +93,16 @@ export function Calculator({
     previousScore.current = { score, credits }
   }, [score, credits])
 
+  const savedTimer = useRef<number | null>(null)
+  const [saved, setSaved] = useState(false)
+  const [enteredIds, setEnteredIds] = useState<string[]>([])
+
   const handleAddModule = () => {
+    const id = crypto.randomUUID()
+    setEnteredIds((ids) => [...ids, id])
     setModules([
       ...modules,
-      { id: crypto.randomUUID(), name: '', credits: 3, grade: '' },
+      { id, name: '', credits: 3, grade: '' },
     ])
   }
 
@@ -106,7 +116,23 @@ export function Calculator({
     setModules(modules.filter((mod) => mod.id !== id))
   }
 
-  const save = () => onSave?.(modules)
+  useEffect(() => () => {
+    if (savedTimer.current !== null) window.clearTimeout(savedTimer.current)
+  }, [])
+
+  const save = async () => {
+    try {
+      await onSave?.(modules)
+    } catch {
+      return
+    }
+    if (prefersReducedMotion()) {
+      onComplete?.()
+      return
+    }
+    setSaved(true)
+    savedTimer.current = window.setTimeout(() => onComplete?.(), 420)
+  }
   // Signed-out visitors keep the result in the card. The pinned bar is for a signed-in save.
   const pinSave = Boolean(onSave && session)
 
@@ -133,6 +159,7 @@ export function Calculator({
               module={module}
               gradeScale={gradeScale}
               priorModules={priorModules}
+              enter={enteredIds.includes(module.id)}
               onChange={handleUpdateModule}
               onRemove={handleRemoveModule}
             />
@@ -172,8 +199,8 @@ export function Calculator({
         )}
 
         {onSave && (
-          <Button className={cn('mt-6 w-full', pinSave && 'hidden lg:inline-flex')} onClick={save} disabled={isSaving || !canSave}>
-            {isSaving ? 'Saving...' : 'Save semester'}
+          <Button className={cn('mt-6 w-full', pinSave && 'hidden lg:inline-flex', saved && 'disabled:opacity-100')} onClick={save} disabled={isSaving || saved || !canSave}>
+            <SaveLabel saving={isSaving} saved={saved} />
           </Button>
         )}
       </aside>
@@ -183,16 +210,29 @@ export function Calculator({
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
             <div>
               <p className="text-xs text-muted-foreground">Semester GPA</p>
-              <p className="font-display text-3xl font-semibold tabular-nums">{graded ? formatGpa(score) : '—'}</p>
+              <p className="font-display text-3xl font-semibold tabular-nums">{graded ? <AnimatedNumber value={score} decimals={2} /> : '—'}</p>
             </div>
-            <Button onClick={save} disabled={isSaving || !canSave}>
-              {isSaving ? 'Saving...' : 'Save semester'}
+            <Button className={cn(saved && 'disabled:opacity-100')} onClick={save} disabled={isSaving || saved || !canSave}>
+              <SaveLabel saving={isSaving} saved={saved} />
             </Button>
           </div>
         </div>
       )}
     </div>
   )
+}
+
+function SaveLabel({ saving, saved }: { saving: boolean; saved: boolean }) {
+  if (saving) return 'Saving...'
+  if (saved) {
+    return (
+      <>
+        <Check />
+        Saved
+      </>
+    )
+  }
+  return 'Save semester'
 }
 
 function asRetake(module: ModuleData): RetakeModule {

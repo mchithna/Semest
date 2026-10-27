@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
@@ -12,6 +12,8 @@ import { X } from "lucide-react"
 import type { GradeRow } from "@/lib/queries/gradeScales"
 import { isUngradedGrade, UNGRADED_GRADE } from "@/lib/score"
 import { priorSemesterKey, priorSemesters, type PriorModuleOption } from "@/lib/priorModules"
+import { prefersReducedMotion } from "@/lib/motion"
+import { cn } from "@/lib/utils"
 
 export type { PriorModuleOption }
 
@@ -29,9 +31,13 @@ type ModuleRowProps = {
   priorModules?: PriorModuleOption[]
   onChange: (id: string, field: keyof Omit<ModuleData, 'id'>, value: string | number | null) => void
   onRemove: (id: string) => void
+  /** Play the open animation. Existing rows stay still. */
+  enter?: boolean
 }
 
-export function ModuleRow({ module, gradeScale, priorModules = [], onChange, onRemove }: ModuleRowProps) {
+const ROW_MS = 180
+
+export function ModuleRow({ module, gradeScale, priorModules = [], onChange, onRemove, enter = false }: ModuleRowProps) {
   const [pickingRetake, setPickingRetake] = useState(false)
   const [semesterChoice, setSemesterChoice] = useState<string | null>(null)
   const options = priorModules.filter((prior) => prior.id !== module.id)
@@ -57,9 +63,38 @@ export function ModuleRow({ module, gradeScale, priorModules = [], onChange, onR
   }
 
   const removeLabel = module.name.trim() ? `Delete ${module.name.trim()}` : 'Delete module'
+  const [open, setOpen] = useState(!enter || prefersReducedMotion())
+  const [leaving, setLeaving] = useState(false)
+  const removeTimer = useRef<number | null>(null)
+
+  useEffect(() => {
+    if (!enter || prefersReducedMotion()) return
+    const frame = requestAnimationFrame(() => setOpen(true))
+    return () => cancelAnimationFrame(frame)
+  }, [enter])
+
+  useEffect(() => () => {
+    if (removeTimer.current !== null) window.clearTimeout(removeTimer.current)
+  }, [])
+
+  const requestRemove = () => {
+    if (leaving) return
+    if (prefersReducedMotion()) {
+      onRemove(module.id)
+      return
+    }
+    setLeaving(true)
+    removeTimer.current = window.setTimeout(() => onRemove(module.id), ROW_MS)
+  }
 
   return (
-    <div className="flex w-full flex-col gap-2">
+    <div
+      className={cn(
+        'grid transition-[grid-template-rows,opacity] duration-[180ms] ease-out',
+        open && !leaving ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0',
+      )}
+    >
+    <div className={cn('flex min-h-0 w-full flex-col gap-2 overflow-hidden', leaving && 'pointer-events-none')}>
       <div className="flex flex-col gap-2 sm:grid sm:grid-cols-[minmax(0,1fr)_5.5rem_8.5rem_2.25rem] sm:items-center">
         <div className="flex items-center gap-2 sm:contents">
           <Input
@@ -74,7 +109,7 @@ export function ModuleRow({ module, gradeScale, priorModules = [], onChange, onR
             size="icon-sm"
             className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive sm:hidden"
             aria-label={removeLabel}
-            onClick={() => onRemove(module.id)}
+            onClick={requestRemove}
           >
             <X />
           </Button>
@@ -112,7 +147,7 @@ export function ModuleRow({ module, gradeScale, priorModules = [], onChange, onR
           size="icon-sm"
           className="hidden text-muted-foreground hover:bg-destructive/10 hover:text-destructive sm:inline-flex"
           aria-label={removeLabel}
-          onClick={() => onRemove(module.id)}
+          onClick={requestRemove}
         >
           <X />
         </Button>
@@ -182,6 +217,7 @@ export function ModuleRow({ module, gradeScale, priorModules = [], onChange, onR
           </button>
         )
       )}
+    </div>
     </div>
   )
 }

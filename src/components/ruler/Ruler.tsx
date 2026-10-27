@@ -7,6 +7,7 @@ import {
   type BandTrack,
   type RulerMarker,
 } from '@/lib/bands'
+import { markerShift } from '@/lib/motion'
 import { cn } from '@/lib/utils'
 import { BAND_TONE_CLASS } from './tone'
 
@@ -82,7 +83,7 @@ export function Ruler({
             return (
               <span
                 key={`${marker.id}-dot`}
-                className="absolute top-[78%] size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-background ring-2 ring-foreground"
+                className={cn('absolute top-[78%] size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-background ring-2 ring-foreground', markerShift)}
                 style={{ left: `${markerPercent(marker.value, track)}%` }}
               />
             )
@@ -130,7 +131,12 @@ function MarkerPill({
   const target = marker.kind === 'target'
   return (
     <div
-      className={cn('absolute flex -translate-x-1/2 flex-col items-center', side === 'above' ? 'bottom-0' : 'top-0')}
+      className={cn(
+        'absolute flex -translate-x-1/2 flex-col items-center',
+        markerShift,
+        side === 'below' && 'animate-[marker-fade_180ms_ease-out]',
+        side === 'above' ? 'bottom-0' : 'top-0',
+      )}
       style={{ left: `${markerPercent(marker.value, track)}%` }}
     >
       {side === 'below' && <Stem dashed={target} />}
