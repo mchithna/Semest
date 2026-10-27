@@ -1,139 +1,193 @@
 import { formatGpa } from '@/lib/score'
-import { HAIRLINE, INK, INK_MUTED, PAPER_PX } from '@/lib/export/palette'
-import { disclaimer, formatCredits, type ReportModel } from '@/lib/export/reportModel'
-import { ClassRuler } from './ClassRuler'
+import { HAIRLINE, INK, INK_MUTED, SPACE } from '@/lib/export/palette'
+import { bandPaint } from '@/lib/export/rulerStyle'
+import { paperMetrics } from '@/lib/export/rulerStyle'
+import { rulerGeometry } from '@/lib/export/geometry'
+import { contentWidth, headerRightWidth, heroNumeralSize, MARGIN, PAGE_PT, RULER, RULER_STATEMENT_W } from '@/lib/export/layout'
+import { degreeLine, formatCredits, studentLine, type ReportModel } from '@/lib/export/reportModel'
+import { heroDetail, heroGpa, heroStatement, NO_BANDS_NOTE, rulerSummary } from '@/lib/export/copy'
+import { Logo } from '@/components/layout/Logo'
+import { ClassRuler, ReportMiniRuler } from './ClassRuler'
+import { DocFooter, DocKey } from './ReportParts'
 
+const SANS = 'Instrument Sans, sans-serif'
+const DISPLAY = 'Bricolage Grotesque, Instrument Sans, sans-serif'
+const NUMERALS = { fontVariantNumeric: 'lining-nums tabular-nums' } as const
+
+/** Ruler report as HTML in pt units: the same numbers the PDF uses, so the preview matches the file. */
 export function RulerReport({ model, pageIndex }: { model: ReportModel; pageIndex: number }) {
   const page = model.pages[pageIndex] ?? model.pages[0]
-  const size = PAPER_PX[model.paper]
+  const size = PAGE_PT[model.paper]
   const semesters = model.semesters.filter((semester) => page?.semesterIds.includes(semester.id))
-  const showNumbers = !model.hideExactGpa
+  const intro = Boolean(page?.showIntro)
+  const showRuler = model.show.classificationRuler && model.hasClassBands
+  const student = studentLine(model)
+  const geo = rulerGeometry(model.track)
+  const width = contentWidth(model.paper)
 
   return (
     <article
+      data-export="ruler"
+      data-gpa={model.cgpa ?? ''}
       style={{
-        width: size.width,
-        height: size.height,
+        position: 'relative',
+        width: `${size.width}pt`,
+        height: `${size.height}pt`,
         boxSizing: 'border-box',
+        overflow: 'hidden',
         background: '#FFFFFF',
         color: INK,
-        fontFamily: 'Instrument Sans, sans-serif',
-        padding: '0 48px 32px',
-        display: 'flex',
-        flexDirection: 'column',
+        fontFamily: SANS,
+        fontSize: '10pt',
+        padding: `${MARGIN}pt`,
+        ...NUMERALS,
       }}
     >
-      <div style={{ height: 8, margin: '0 -48px 28px', display: 'flex' }}>
-        {['#B9C0FF', '#9BD8E2', '#F0D488', '#F7C4B5'].map((color) => (
-          <span key={color} style={{ flex: 1, background: color }} />
-        ))}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: `${RULER.stripH}pt` }}>
+        {model.hasClassBands &&
+          geo.bands.map((band) => (
+            <span
+              key={band.id}
+              style={{
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                left: `${band.left}%`,
+                width: `${band.width}%`,
+                background: bandPaint(band, true, 'paper').fill,
+              }}
+            />
+          ))}
       </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Wordmark />
-        <span style={{ fontSize: 12, color: INK_MUTED }}>
-          {[model.degreeTitle, model.show.degreeInstitution ? model.institution : ''].filter(Boolean).join(', ')}
-        </span>
-      </div>
 
-      {page?.showIntro && model.show.summaryFigures && (
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 28, marginTop: 36 }}>
-          <div>
-            <p style={{ margin: 0, fontSize: 14, color: INK_MUTED }}>Cumulative GPA</p>
-            <p style={{ margin: '2px 0 0', fontFamily: 'Bricolage Grotesque, sans-serif', fontSize: 120, lineHeight: 0.86, fontWeight: 700, letterSpacing: '-0.04em' }}>
-              {showNumbers && model.cgpa != null ? formatGpa(model.cgpa) : model.classification || '—'}
-            </p>
-          </div>
-          <div style={{ maxWidth: 340, paddingBottom: 12 }}>
-            <p style={{ margin: 0, fontFamily: 'Bricolage Grotesque, sans-serif', fontSize: 24, fontWeight: 650, lineHeight: 1.15 }}>
-              {model.standing || 'No classification yet'}
-            </p>
-            <p style={{ margin: '8px 0 0', fontSize: 13, lineHeight: 1.45, color: INK_MUTED }}>
-              {[model.nextBand, `${formatCredits(model.earnedCredits)} of ${formatCredits(model.totalCredits)} credits graded.`]
-                .filter(Boolean)
-                .join(' ')}
-            </p>
-          </div>
+      <header style={{ height: `${RULER.headerH}pt`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Logo scale={0.8} unit="pt" color={INK} />
+        <div
+          style={{
+            width: `${headerRightWidth(model.paper)}pt`,
+            textAlign: 'right',
+            fontSize: '10pt',
+            lineHeight: '12pt',
+            color: INK_MUTED,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          <div style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{degreeLine(model)}</div>
+          {student && <div style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{student}</div>}
         </div>
-      )}
+      </header>
 
-      {page?.showIntro && model.show.studentDetails && (model.studentName || model.studentId) && (
-        <p style={{ margin: '12px 0 0', fontSize: 13, color: INK_MUTED }}>
-          {[model.studentName, model.studentId].filter(Boolean).join(' · ')}
-        </p>
-      )}
+      {intro && (
+        <>
+          <section style={{ marginTop: `${SPACE.xxl}pt`, height: `${RULER.heroH}pt` }}>
+            <p style={{ margin: 0, fontSize: '10pt', lineHeight: '12pt', color: INK_MUTED }}>Cumulative GPA</p>
+            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginTop: `${SPACE.xs}pt` }}>
+              <p
+                style={{
+                  margin: 0,
+                  fontFamily: DISPLAY,
+                  fontSize: `${heroNumeralSize(heroGpa(model), model.paper)}pt`,
+                  lineHeight: `${RULER.heroNumeralLine}pt`,
+                  height: `${RULER.heroNumeralLine}pt`,
+                  fontWeight: 700,
+                  letterSpacing: '-0.03em',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {heroGpa(model)}
+              </p>
+              <div style={{ width: `${RULER_STATEMENT_W}pt`, paddingBottom: `${SPACE.sm}pt` }}>
+                <p style={{ margin: 0, fontFamily: DISPLAY, fontSize: '20pt', lineHeight: '24pt', fontWeight: 500 }}>
+                  {heroStatement(model)}
+                </p>
+                <p style={{ margin: `${SPACE.xs}pt 0 0`, fontSize: '10pt', lineHeight: '13pt', color: INK_MUTED }}>{heroDetail(model)}</p>
+              </div>
+            </div>
+          </section>
 
-      {page?.showIntro && model.show.classificationRuler && model.hasClassBands && (
-        <div style={{ marginTop: 36 }}>
-          <ClassRuler
-            track={model.track}
-            value={model.cgpa}
-            semesterValues={model.semesters.flatMap((semester) => (semester.gpa == null ? [] : [semester.gpa]))}
-            target={model.targetCgpa}
-            variant="print"
-            showNumbers={showNumbers}
-            showBandLabels
-            youLabel={showNumbers && model.cgpa != null ? `You ${formatGpa(model.cgpa)}` : 'You'}
-          />
-        </div>
-      )}
+          {model.show.summaryFigures && (
+            <section
+              style={{
+                marginTop: `${SPACE.xxl}pt`,
+                height: `${RULER.summaryH}pt`,
+                boxSizing: 'border-box',
+                borderTop: `1pt solid ${INK}`,
+                paddingTop: `${SPACE.md}pt`,
+                display: 'flex',
+              }}
+            >
+              {rulerSummary(model).map((cell) => (
+                <div key={cell.label} style={{ flex: 1 }}>
+                  <div style={{ fontSize: '9pt', lineHeight: '11pt', color: INK_MUTED }}>{cell.label}</div>
+                  <div style={{ marginTop: '2pt', fontFamily: DISPLAY, fontSize: '18pt', lineHeight: '22pt', fontWeight: 600 }}>{cell.value}</div>
+                </div>
+              ))}
+            </section>
+          )}
 
-      {page?.showIntro && !model.hasClassBands && (
-        <p style={{ margin: '16px 0 0', fontSize: 12, color: INK_MUTED }}>
-          This grade scale has no class bands, so the classification ruler is left out.
-        </p>
+          {showRuler && (
+            <section style={{ marginTop: `${SPACE.xxl}pt` }}>
+              <ClassRuler
+                track={model.track}
+                variant="paper"
+                metrics={paperMetrics(width)}
+                value={model.cgpa}
+                youLabel={model.cgpa != null ? `You ${formatGpa(model.cgpa)}` : undefined}
+                target={model.targetCgpa}
+              />
+            </section>
+          )}
+          {model.show.classificationRuler && !model.hasClassBands && (
+            <p style={{ margin: `${SPACE.xxl}pt 0 0`, fontSize: '10pt', lineHeight: '14pt', color: INK_MUTED }}>{NO_BANDS_NOTE}</p>
+          )}
+        </>
       )}
 
       {model.show.semesterTables && (
-        <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 18 }}>
+        <section style={{ marginTop: `${SPACE.xxl}pt` }}>
           {semesters.map((semester) => (
-            <div key={semester.id} style={{ display: 'grid', gridTemplateColumns: '210px 1fr 78px', gap: 18, alignItems: 'center' }}>
-              <div>
-                <div style={{ fontSize: 15, fontWeight: 650 }}>{semester.title}</div>
-                <div style={{ marginTop: 2, fontSize: 12, color: INK_MUTED }}>{formatCredits(semester.credits)} credits</div>
+            <div
+              key={semester.id}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: `${SPACE.lg}pt`,
+                padding: `${RULER.semesterPad}pt 0`,
+                boxSizing: 'border-box',
+                borderBottom: `0.75pt solid ${HAIRLINE}`,
+              }}
+            >
+              <div style={{ flex: '1.2 1 0', minWidth: 0 }}>
+                <div
+                  style={{
+                    fontSize: '11pt',
+                    lineHeight: '14pt',
+                    fontWeight: 600,
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                  }}
+                >
+                  {semester.title}
+                </div>
+                <div style={{ marginTop: '2pt', fontSize: '9.5pt', lineHeight: '12pt', color: INK_MUTED }}>
+                  {formatCredits(semester.credits)} credits
+                </div>
               </div>
-              <ClassRuler track={model.track} value={semester.gpa} variant="print" showNumbers={false} marker height={12} />
-              <div style={{ textAlign: 'right', fontFamily: 'Bricolage Grotesque, sans-serif', fontSize: 28, fontWeight: 700, letterSpacing: '-0.03em' }}>
-                {showNumbers && semester.gpa != null ? formatGpa(semester.gpa) : '—'}
+              <div style={{ flex: '3 1 0', minWidth: 0 }}>
+                {model.hasClassBands ? <ReportMiniRuler track={model.track} value={semester.gpa} unit="pt" /> : null}
+              </div>
+              <div style={{ width: '64pt', textAlign: 'right', fontFamily: DISPLAY, fontSize: '20pt', lineHeight: '24pt', fontWeight: 600 }}>
+                {semester.gpa != null ? formatGpa(semester.gpa) : '—'}
               </div>
             </div>
           ))}
-        </div>
+        </section>
       )}
 
-      {page?.showIntro && model.show.gradeScale && (
-        <p style={{ margin: '16px 0 0', fontSize: 10, lineHeight: 1.4, color: INK_MUTED }}>{model.scaleNote}</p>
-      )}
-
-      <footer
-        style={{
-          marginTop: 'auto',
-          borderTop: `1px solid ${HAIRLINE}`,
-          paddingTop: 8,
-          display: 'flex',
-          justifyContent: 'space-between',
-          fontSize: 9,
-          color: INK_MUTED,
-        }}
-      >
-        <span>{disclaimer()}</span>
-        <span>
-          Page {pageIndex + 1} of {model.pages.length}
-        </span>
-      </footer>
+      <DocKey model={model} fontFamily={SANS} show={model.show.gradeScale} />
+      <DocFooter model={model} pageIndex={pageIndex} fontFamily={SANS} />
     </article>
-  )
-}
-
-function Wordmark() {
-  const bars = ['#7C8BFF', '#38B6C9', '#E6B84A', '#F07A5A']
-  return (
-    <span style={{ display: 'inline-flex', alignItems: 'flex-end', gap: 8 }}>
-      <span style={{ display: 'inline-flex', alignItems: 'flex-end', gap: 2 }}>
-        {bars.map((color, index) => (
-          <span key={color} style={{ width: 3, height: 8 + index * 3, borderRadius: 99, background: color }} />
-        ))}
-      </span>
-      <span style={{ fontWeight: 700, fontSize: 16 }}>Semest</span>
-    </span>
   )
 }

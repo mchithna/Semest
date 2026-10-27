@@ -5,7 +5,9 @@ import { toPng } from 'html-to-image'
 import { toast } from 'sonner'
 import { bandsForScale } from '@/lib/bands'
 import { friendlyError } from '@/lib/errors'
-import { PAPER_PX, SOCIAL_PX } from '@/lib/export/palette'
+import { NIGHT, SOCIAL_PX } from '@/lib/export/palette'
+import { PAGE_PT } from '@/lib/export/layout'
+import { socialFontCss, waitForExportFonts } from '@/lib/export/fontEmbed'
 import { loadIdentity, loadOverrides, saveIdentity, saveOverrides, type ThemeOverrides } from '@/lib/export/preferences'
 import {
   buildReport,
@@ -193,11 +195,16 @@ export function ExportReportModal({
       if (extension === 'png') {
         if (!pngRef.current) throw new Error('The card is not ready yet.')
         const size = SOCIAL_PX[aspect]
+        await waitForExportFonts()
         const dataUrl = await toPng(pngRef.current, {
           pixelRatio: 1,
           width: size.width,
           height: size.height,
-          cacheBust: true,
+          canvasWidth: size.width,
+          canvasHeight: size.height,
+          backgroundColor: NIGHT,
+          fontEmbedCSS: await socialFontCss(),
+          style: { margin: '0', transform: 'none' },
         })
         const link = document.createElement('a')
         link.href = dataUrl
@@ -504,7 +511,8 @@ function ScaledPreview({ model, pageIndex }: { model: ReportModel; pageIndex: nu
     return () => observer.disconnect()
   }, [])
 
-  const full = model.theme === 'social' ? SOCIAL_PX[model.aspect] : PAPER_PX[model.paper]
+  const paper = PAGE_PT[model.paper]
+  const full = model.theme === 'social' ? SOCIAL_PX[model.aspect] : { width: (paper.width * 4) / 3, height: (paper.height * 4) / 3 }
   const scale = Math.min(box.width / full.width, box.height / full.height)
 
   return (

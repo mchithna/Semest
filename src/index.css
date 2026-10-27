@@ -1,8 +1,12 @@
 @import '@fontsource/instrument-sans/400.css' layer(base);
 @import '@fontsource/instrument-sans/500.css' layer(base);
 @import '@fontsource/instrument-sans/600.css' layer(base);
+@import '@fontsource/bricolage-grotesque/500.css' layer(base);
 @import '@fontsource/bricolage-grotesque/600.css' layer(base);
 @import '@fontsource/bricolage-grotesque/700.css' layer(base);
+@import '@fontsource/source-serif-4/400.css' layer(base);
+@import '@fontsource/source-serif-4/600.css' layer(base);
+@import '@fontsource/source-serif-4/700.css' layer(base);
 
 @import 'tailwindcss';
 @import 'tw-animate-css';

@@ -1,4 +1,4 @@
-import { StrictMode } from 'react'
+import { lazy, StrictMode, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -23,6 +23,7 @@ import NewPresetPage from './pages/NewPresetPage'
 import MyPresetsPage from './pages/MyPresetsPage'
 import PresetDetailPage from './pages/PresetDetailPage'
 import { AppShell } from './components/layout/AppShell'
+const ExportQA = import.meta.env.DEV ? lazy(() => import('./pages/dev/ExportQA')) : null
 
 function AppToaster() {
   return <Toaster position="top-right" richColors theme="dark" />
@@ -52,6 +53,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/presets/new" element={<ProtectedRoute><><title>New preset · Semest</title><NewPresetPage /></></ProtectedRoute>} />
               <Route path="/presets/mine" element={<ProtectedRoute><><title>My presets · Semest</title><MyPresetsPage /></></ProtectedRoute>} />
               
+              {ExportQA && <Route path="/dev/export-qa" element={<Suspense fallback={null}><ExportQA /></Suspense>} />}
               {/* Public Preset Routes */}
               <Route path="/presets" element={<><title>Presets · Semest</title><PresetsPage /></>} />
               <Route path="/presets/:code" element={<PresetDetailPage />} />

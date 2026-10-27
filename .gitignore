@@ -26,3 +26,12 @@ dist-ssr
 .env
 plan.md
 presets-redesign.md
+prompt.md
+report.md
+
+# local notes and editor plans
+.cursor/
+docs/
+
+# export QA images and scratch output
+qa/

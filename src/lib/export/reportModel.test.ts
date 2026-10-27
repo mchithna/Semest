@@ -199,6 +199,7 @@ describe('export report model', () => {
       credits: 15,
       gpa: 3,
       graded: true,
+      className: 'Second class upper',
       modules: Array.from({ length: 8 }, (__, row) => ({
         id: `${index}-${row}`,
         code: '00',
@@ -209,7 +210,7 @@ describe('export report model', () => {
         inProgress: false,
       })),
     }))
-    const pages = paginate(semesters, 'A4', 280, (semester) => 44 + 24 + semester.modules.length * 22 + 14)
+    const pages = paginate(semesters, { firstStart: 280, laterStart: 96, limit: 640 }, (semester) => 44 + 24 + semester.modules.length * 22 + 14)
     const seen = pages.flatMap((page) => page.semesterIds)
     expect(new Set(seen).size).toBe(seen.length)
     expect(seen).toHaveLength(6)

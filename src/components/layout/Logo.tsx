@@ -1,21 +1,31 @@
 import { cn } from '@/lib/utils'
+import { LOGO_BAR_GAP, LOGO_BAR_WIDTH, LOGO_BARS, LOGO_TEXT_GAP, LOGO_TEXT_SIZE } from '@/lib/brand'
 
-const bars = [
-  'h-2.5 bg-band-pass',
-  'h-3.5 bg-band-second-lower',
-  'h-4 bg-band-second-upper',
-  'h-3 bg-band-first',
-]
+type LogoProps = {
+  className?: string
+  /** Multiplier on the 17px header size. Export templates pass their own scale. */
+  scale?: number
+  /** Unit for the scaled sizes. PDF-sized previews use "pt". */
+  unit?: 'px' | 'pt'
+  color?: string
+}
 
-export function Logo({ className }: { className?: string }) {
+export function Logo({ className, scale = 1, unit = 'px', color }: LogoProps) {
+  const u = (value: number) => `${value * scale}${unit}`
   return (
-    <span className={cn('inline-flex items-center gap-2.5 text-foreground', className)}>
-      <span className="flex items-end gap-[3px]" aria-hidden="true">
-        {bars.map((bar) => (
-          <span key={bar} className={cn('w-[3px] rounded-full', bar)} />
+    <span
+      className={cn('inline-flex items-center text-foreground', className)}
+      style={{ gap: u(LOGO_TEXT_GAP), color, lineHeight: 1 }}
+    >
+      <span style={{ display: 'flex', alignItems: 'flex-end', gap: u(LOGO_BAR_GAP) }} aria-hidden="true">
+        {LOGO_BARS.map((bar) => (
+          <span
+            key={bar.color}
+            style={{ width: u(LOGO_BAR_WIDTH), height: u(bar.height), borderRadius: 999, background: bar.color }}
+          />
         ))}
       </span>
-      <span className="text-[17px] font-semibold tracking-tight">Semest</span>
+      <span style={{ fontSize: u(LOGO_TEXT_SIZE), fontWeight: 600, letterSpacing: '-0.01em' }}>Semest</span>
     </span>
   )
 }

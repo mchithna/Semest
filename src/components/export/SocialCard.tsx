@@ -1,144 +1,266 @@
-import { forwardRef } from 'react'
+import { forwardRef, type CSSProperties } from 'react'
 import { formatGpa } from '@/lib/score'
-import { AMBER, NIGHT, SOCIAL_PX } from '@/lib/export/palette'
-import { formatCredits, type ReportModel } from '@/lib/export/reportModel'
+import { AMBER, NIGHT, NIGHT_MUTED, NIGHT_RAISED, NIGHT_TEXT, SPACE } from '@/lib/export/palette'
+import { SOCIAL, socialChipSlice, socialPlan } from '@/lib/export/layout'
+import { nightMetrics } from '@/lib/export/rulerStyle'
+import { formatCredits, studentLine, type ReportModel, type ReportSemester } from '@/lib/export/reportModel'
+import { Logo } from '@/components/layout/Logo'
 import { ClassRuler } from './ClassRuler'
 
+const DISPLAY = 'Bricolage Grotesque, Instrument Sans, sans-serif'
+const NUMERALS: CSSProperties = { fontVariantNumeric: 'lining-nums tabular-nums' }
+
+/**
+ * Social card. Rendered unscaled at the exact export size. The preview scales a wrapper around it,
+ * the PNG capture reads this node directly, so both come from one component.
+ */
 export const SocialCard = forwardRef<HTMLElement, { model: ReportModel }>(function SocialCard({ model }, ref) {
-  const size = SOCIAL_PX[model.aspect]
-  const tall = model.aspect === '9:16'
-  const chips = model.show.semesterTables ? model.semesters : model.semesters.slice(0, 2)
-  const showNumbers = !model.hideExactGpa
-  const gpaSize = tall ? 248 : model.aspect === '1:1' ? 176 : 210
+  const hide = model.hideExactGpa
+  const showHero = model.show.summaryFigures
+  const showRuler = model.show.classificationRuler && model.hasClassBands
+  const chipSource = model.show.semesterTables ? model.semesters : model.semesters.slice(-2)
+  const { shown, more } = socialChipSlice(chipSource)
+  const student = studentLine(model)
+  const mutedLine = !hide && model.distanceToNext && model.nextClass ? `${model.distanceToNext} from ${model.nextClass}` : ''
+  const hasTarget = showRuler && model.targetCgpa != null
+
+  const plan = socialPlan({
+    aspect: model.aspect,
+    chipCount: shown.length,
+    hasMore: more > 0,
+    hideGpa: hide,
+    hasRuler: showRuler,
+    showTicks: !hide,
+    hasTarget,
+    hasStudent: Boolean(student),
+    hasMutedLine: Boolean(mutedLine),
+    hasHero: showHero,
+  })
+  const trackWidth = plan.width - plan.margin * 2
 
   return (
     <article
       ref={ref}
+      data-export="social"
+      data-gpa={model.cgpa ?? ''}
       style={{
-        width: size.width,
-        height: size.height,
+        position: 'relative',
+        width: plan.width,
+        height: plan.height,
         boxSizing: 'border-box',
+        overflow: 'hidden',
         background: NIGHT,
-        color: '#E6E9F7',
+        color: NIGHT_TEXT,
         fontFamily: 'Instrument Sans, sans-serif',
-        padding: tall ? 88 : 76,
-        display: 'flex',
-        flexDirection: 'column',
+        ...NUMERALS,
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Wordmark />
-        {model.show.degreeInstitution && (
-          <span
-            style={{
-              border: '1px solid rgba(230,233,247,0.24)',
-              borderRadius: 999,
-              padding: '12px 22px',
-              fontSize: 26,
-              fontWeight: 650,
-            }}
-          >
-            {model.degreeTitle}
-          </span>
-        )}
-      </div>
-
-      {model.show.studentDetails && (model.studentName || model.studentId) && (
-        <p style={{ margin: '28px 0 0', fontSize: 24, color: '#A3AAD1' }}>
-          {[model.studentName, model.studentId].filter(Boolean).join(' · ')}
-        </p>
-      )}
-
-      <div style={{ marginTop: tall ? 96 : 64 }}>
-        {model.show.summaryFigures && (
-          <>
-            <p style={{ margin: 0, fontSize: 30, color: '#A3AAD1' }}>Cumulative GPA</p>
-            {showNumbers && model.cgpa != null ? (
-              <p
-                style={{
-                  margin: '4px 0 0',
-                  fontFamily: 'Bricolage Grotesque, sans-serif',
-                  fontSize: gpaSize,
-                  lineHeight: 0.86,
-                  fontWeight: 700,
-                  letterSpacing: '-0.045em',
-                }}
-              >
-                {formatGpa(model.cgpa)}
-              </p>
-            ) : null}
-            <p
+      <div
+        style={{
+          position: 'absolute',
+          left: plan.margin,
+          right: plan.margin,
+          top: plan.top,
+          bottom: plan.bottom,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+        }}
+      >
+        <header style={{ height: plan.header, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: SPACE.xl }}>
+          <Logo scale={2.1} color={NIGHT_TEXT} />
+          {model.show.degreeInstitution && model.degreeTitle && (
+            <span
               style={{
-                margin: '10px 0 0',
-                fontFamily: 'Bricolage Grotesque, sans-serif',
-                fontSize: tall ? 64 : 52,
-                fontWeight: 700,
-                letterSpacing: '-0.03em',
-                color: AMBER,
+                boxSizing: 'border-box',
+                height: 64,
+                maxWidth: 640,
+                padding: '0 28px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                border: '2px solid rgba(244, 246, 255, 0.28)',
+                borderRadius: 999,
+                fontSize: 32,
+                fontWeight: 600,
+                lineHeight: 1,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
               }}
             >
-              {model.classification || 'No class yet'}
-            </p>
-            {showNumbers && model.distanceToNext && model.nextClass && (
-              <p style={{ margin: '10px 0 0', fontSize: 30, color: '#A3AAD1' }}>
-                {model.distanceToNext} from {model.nextClass}
+              {model.degreeTitle}
+            </span>
+          )}
+        </header>
+
+        {(showHero || student) && (
+          <section style={{ height: plan.heroH }}>
+            {showHero && (hide ? <HiddenHero model={model} plan={plan} /> : <Hero model={model} plan={plan} mutedLine={plan.showMuted ? mutedLine : ''} />)}
+            {student && (
+              <p style={{ margin: 0, marginTop: showHero ? SPACE.lg : 0, fontSize: 32, lineHeight: `${SOCIAL.studentLine}px`, color: NIGHT_MUTED }}>
+                {student}
               </p>
             )}
-          </>
+          </section>
         )}
-      </div>
 
-      {model.show.classificationRuler && model.hasClassBands && (
-        <div style={{ marginTop: tall ? 36 : 20 }}>
+        {showRuler && (
           <ClassRuler
             track={model.track}
+            variant="night"
+            metrics={nightMetrics(trackWidth)}
             value={model.cgpa}
-            target={model.targetCgpa}
-            variant="screen"
-            showNumbers={false}
-            showBandLabels
             youLabel="You"
+            showTicks={!hide}
+            target={model.targetCgpa}
+            targetLabel={hide ? 'Target' : undefined}
           />
-        </div>
-      )}
+        )}
 
-      {chips.length > 0 && (
-        <div style={{ marginTop: 'auto', display: 'flex', flexWrap: 'wrap', gap: 24, paddingTop: 56 }}>
-          {chips.map((semester) => (
-            <div
-              key={semester.id}
-              style={{
-                flex: '1 1 280px',
-                background: '#171B3A',
-                borderRadius: 28,
-                padding: '28px 30px 24px',
-              }}
-            >
-              <div style={{ fontSize: 26, color: '#A3AAD1' }}>{semester.title}</div>
-              <div style={{ marginTop: 4, fontSize: 20, color: '#A3AAD1' }}>{formatCredits(semester.credits)} credits</div>
-              {showNumbers && semester.gpa != null && (
-                <div style={{ marginTop: 12, fontFamily: 'Bricolage Grotesque, sans-serif', fontSize: 64, fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1 }}>
-                  {formatGpa(semester.gpa)}
-                </div>
-              )}
+        {shown.length > 0 && (
+          <section style={{ display: 'flex', flexDirection: 'column', gap: plan.chipGap }}>
+            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${plan.chipCols}, minmax(0, 1fr))`, gap: plan.chipGap }}>
+              {shown.map((semester) => (
+                <Chip key={semester.id} semester={semester} plan={plan} hide={hide} trackWidth={trackWidth} />
+              ))}
             </div>
-          ))}
-        </div>
-      )}
+            {more > 0 && (
+              <div
+                style={{
+                  boxSizing: 'border-box',
+                  height: plan.moreH,
+                  borderRadius: 36,
+                  border: '2px solid rgba(244, 246, 255, 0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 30,
+                  color: NIGHT_MUTED,
+                }}
+              >
+                +{more} more
+              </div>
+            )}
+          </section>
+        )}
+      </div>
     </article>
   )
 })
 
-function Wordmark() {
-  const bars = ['#7C8BFF', '#38B6C9', '#E6B84A', '#F07A5A']
+function Hero({ model, plan, mutedLine }: { model: ReportModel; plan: ReturnType<typeof socialPlan>; mutedLine: string }) {
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 12 }}>
-      <span style={{ display: 'inline-flex', alignItems: 'flex-end', gap: 3 }}>
-        {bars.map((color, index) => (
-          <span key={color} style={{ width: 6, height: 14 + index * 6, borderRadius: 99, background: color }} />
-        ))}
-      </span>
-      <span style={{ fontWeight: 700, fontSize: 36 }}>Semest</span>
-    </span>
+    <div>
+      <p style={{ margin: 0, fontSize: SOCIAL.label, lineHeight: `${SOCIAL.labelLine}px`, color: NIGHT_MUTED }}>Cumulative GPA</p>
+      <p
+        style={{
+          margin: 0,
+          marginTop: SPACE.lg,
+          height: plan.numeralLine,
+          fontFamily: DISPLAY,
+          fontSize: plan.numeral,
+          lineHeight: `${plan.numeralLine}px`,
+          fontWeight: 700,
+          letterSpacing: '-0.03em',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {model.cgpa != null ? formatGpa(model.cgpa) : '—'}
+      </p>
+      <p
+        style={{
+          margin: 0,
+          marginTop: SPACE.lg,
+          fontFamily: DISPLAY,
+          fontSize: plan.classSize,
+          lineHeight: `${plan.classLine}px`,
+          fontWeight: 600,
+          color: AMBER,
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {model.classification || 'No class yet'}
+      </p>
+      {mutedLine && (
+        <p style={{ margin: 0, marginTop: SPACE.sm, fontSize: SOCIAL.mutedSize, lineHeight: `${SOCIAL.mutedLine}px`, color: NIGHT_MUTED }}>
+          {mutedLine}
+        </p>
+      )}
+    </div>
+  )
+}
+
+/** Hide exact GPA: class name only, no numeral anywhere. */
+function HiddenHero({ model, plan }: { model: ReportModel; plan: ReturnType<typeof socialPlan> }) {
+  return (
+    <div>
+      <p style={{ margin: 0, fontSize: SOCIAL.label, lineHeight: `${SOCIAL.labelLine}px`, color: NIGHT_MUTED }}>Classification</p>
+      <p
+        style={{
+          margin: 0,
+          marginTop: SPACE.lg,
+          height: plan.hiddenClassLine * 2,
+          fontFamily: DISPLAY,
+          fontSize: plan.hiddenClassSize,
+          lineHeight: `${plan.hiddenClassLine}px`,
+          fontWeight: 700,
+          letterSpacing: '-0.03em',
+          color: AMBER,
+        }}
+      >
+        {model.classification || 'No class yet'}
+      </p>
+    </div>
+  )
+}
+
+function Chip({
+  semester,
+  plan,
+  hide,
+  trackWidth,
+}: {
+  semester: ReportSemester
+  plan: ReturnType<typeof socialPlan>
+  hide: boolean
+  trackWidth: number
+}) {
+  const inner = (trackWidth - plan.chipGap * (plan.chipCols - 1)) / plan.chipCols - plan.chipPadX * 2
+  const className = semester.className ?? 'In progress'
+  const classSize = Math.min(40, Math.floor(inner / (className.length * 0.54)))
+  return (
+    <div
+      style={{
+        boxSizing: 'border-box',
+        height: plan.chipH,
+        padding: `${plan.chipPadY}px ${plan.chipPadX}px`,
+        borderRadius: 36,
+        background: NIGHT_RAISED,
+        overflow: 'hidden',
+      }}
+    >
+      <div style={{ fontSize: plan.chipLabel, lineHeight: '36px', color: NIGHT_MUTED, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        {semester.title}
+      </div>
+      {plan.chipCredits && (
+        <div style={{ marginTop: SPACE.xs, fontSize: SOCIAL.chipCreditsSize, lineHeight: `${SOCIAL.chipCreditsLine}px`, color: NIGHT_MUTED }}>
+          {formatCredits(semester.credits)} credits
+        </div>
+      )}
+      <div
+        style={{
+          marginTop: SPACE.sm,
+          height: hide ? 48 : plan.chipGpa,
+          fontFamily: DISPLAY,
+          fontSize: hide ? classSize : plan.chipGpa,
+          lineHeight: `${hide ? 48 : plan.chipGpa}px`,
+          fontWeight: hide ? 600 : 700,
+          letterSpacing: '-0.02em',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {hide ? className : semester.gpa != null ? formatGpa(semester.gpa) : '—'}
+      </div>
+    </div>
   )
 }

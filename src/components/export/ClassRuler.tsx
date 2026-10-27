@@ -1,175 +1,280 @@
-import { markerPercent, type BandTone, type BandTrack } from '@/lib/bands'
+import type { BandTrack } from '@/lib/bands'
 import { formatGpa } from '@/lib/score'
-import { BAND_PRINT, BAND_SCREEN } from '@/lib/export/palette'
+import { clampPill, fitBandLabel, pillWidth, rulerGeometry, bandReached } from '@/lib/export/geometry'
+import {
+  bandPaint,
+  RULER_COLORS,
+  TARGET_COLOR,
+  type RulerMetrics,
+  type RulerVariant,
+} from '@/lib/export/rulerStyle'
+import { INK } from '@/lib/export/palette'
 
 type ClassRulerProps = {
   track: BandTrack
+  variant: RulerVariant
+  metrics: RulerMetrics
   value: number | null
-  semesterValues?: number[]
-  target?: number | null
-  variant: 'print' | 'screen'
-  showNumbers?: boolean
-  showBandLabels?: boolean
+  /** Text in the pill above the bar. Omit for no pill. */
   youLabel?: string
-  /** Draw a dot on this ruler at `value`. Used for a semester row. */
-  marker?: boolean
-  height?: number
+  /** Show the numeric tick row. Off when exact GPA is hidden. */
+  showTicks?: boolean
+  target?: number | null
+  targetLabel?: string
 }
 
-const TONE_INK: Record<BandTone, string> = {
-  pass: '#1C2438',
-  'second-lower': '#14343A',
-  'second-upper': '#3A2E10',
-  first: '#3A2018',
-  plain: '#242424',
-}
-
-const METRICS = {
-  print: { bar: 28, label: 11, you: 12, tick: 11, lift: 30, dot: 9, pillPad: '4px 9px' },
-  screen: { bar: 64, label: 16, you: 22, tick: 18, lift: 46, dot: 16, pillPad: '8px 16px' },
-} as const
-
+/**
+ * Main classification ruler. Same structure in the Ruler report and the Social card:
+ * pill and stem above, a clean bar, tick values under it, optional target below.
+ * Every position comes from rulerGeometry.
+ */
 export function ClassRuler({
   track,
-  value,
-  semesterValues = [],
-  target = null,
   variant,
-  showNumbers = true,
-  showBandLabels = false,
+  metrics,
+  value,
   youLabel,
-  marker = false,
-  height,
+  showTicks = true,
+  target = null,
+  targetLabel,
 }: ClassRulerProps) {
-  const palette = variant === 'print' ? BAND_PRINT : BAND_SCREEN
-  const metrics = METRICS[variant]
-  const bar = height ?? metrics.bar
-  const span = track.max - track.min
-  const ticks = [...track.bands.map((band) => band.min), track.max]
-  const ink = variant === 'screen' ? '#10132A' : undefined
-  const onScreen = variant === 'screen'
+  const geo = rulerGeometry(track)
+  const colors = RULER_COLORS[variant]
+  const u = (n: number) => `${n}${metrics.unit}`
+  const hasPill = youLabel != null && value != null
+  const top = hasPill ? metrics.pillHeight + metrics.stem : 0
+  const barTop = top
+  const tickTop = barTop + metrics.bar + metrics.tickGap
+  const targetTop = (showTicks ? tickTop + metrics.tickLine : barTop + metrics.bar) + metrics.targetGap
+  const youPct = value != null ? geo.pct(value) : 0
+  const pillW = hasPill ? pillWidth(youLabel, metrics.pillFont, metrics.pillPadX) : 0
+  const hasTarget = target != null && Number.isFinite(target)
+  const targetText = targetLabel ?? (hasTarget ? `Target ${formatGpa(target)}` : '')
+  const targetPct = hasTarget ? geo.pct(target) : 0
+  const targetW = hasTarget ? pillWidth(targetText, metrics.pillFont, metrics.pillPadX) : 0
+  const height =
+    targetTop + (hasTarget ? metrics.targetStem + metrics.pillHeight : 0) - (hasTarget ? 0 : metrics.targetGap)
 
   return (
-    <div style={{ paddingTop: youLabel ? metrics.lift : 0, fontFamily: 'Instrument Sans, sans-serif' }}>
-      <div style={{ position: 'relative' }}>
-        {youLabel && value != null && (
+    <div
+      style={{
+        position: 'relative',
+        width: u(metrics.width),
+        height: u(height),
+        fontFamily: 'Instrument Sans, sans-serif',
+        fontVariantNumeric: 'lining-nums tabular-nums',
+      }}
+    >
+      {hasPill && (
+        <>
           <div
             style={{
               position: 'absolute',
-              left: `${markerPercent(value, track)}%`,
-              top: -metrics.lift + 4,
+              top: 0,
+              left: `${clampPill(youPct, pillW, metrics.width)}%`,
               transform: 'translateX(-50%)',
-              zIndex: 3,
-              background: onScreen ? '#F4F6FF' : '#14213D',
-              color: onScreen ? '#10132A' : '#FDFCF9',
-              fontSize: metrics.you,
-              fontWeight: 700,
-              lineHeight: 1.2,
-              padding: metrics.pillPad,
+              width: u(pillW),
+              height: u(metrics.pillHeight),
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               borderRadius: 999,
+              background: colors.pillBg,
+              color: colors.pillText,
+              fontSize: u(metrics.pillFont),
+              fontWeight: 600,
               whiteSpace: 'nowrap',
-              boxShadow: onScreen ? '0 8px 18px rgba(0,0,0,0.35)' : 'none',
+              lineHeight: 1,
             }}
           >
             {youLabel}
           </div>
-        )}
-        {youLabel && value != null && (
-          <span
+          {/* The stem ends at the top edge of the bar and never crosses it. */}
+          <div
+            data-ruler-stem
             style={{
               position: 'absolute',
-              left: `${markerPercent(value, track)}%`,
-              top: -8,
-              width: 2,
-              height: 10,
-              marginLeft: -1,
-              background: onScreen ? '#F4F6FF' : '#14213D',
-              zIndex: 2,
+              top: u(metrics.pillHeight),
+              left: `${youPct}%`,
+              marginLeft: u(-metrics.stemWidth / 2),
+              width: u(metrics.stemWidth),
+              height: u(metrics.stem),
+              background: colors.pillBg,
             }}
           />
-        )}
-        <div style={{ display: 'flex', height: bar, borderRadius: 999, overflow: 'hidden' }}>
-          {track.bands.map((band) => {
-            const reached = value == null || value + 0.0001 >= band.min
-            const share = span > 0 ? (band.max - band.min) / span : 1
-            const showLabel = showBandLabels && band.label && share >= 0.1
-            const labelColor = variant === 'screen' && !reached ? '#F4F6FF' : (ink ?? TONE_INK[band.tone])
-            return (
-              <div
-                key={band.id}
-                style={{
-                  position: 'relative',
-                  flexGrow: span > 0 ? Math.max(band.max - band.min, 0.01) : 1,
-                  color: labelColor,
-                  fontSize: metrics.label,
-                  fontWeight: 650,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  overflow: 'hidden',
-                  whiteSpace: 'nowrap',
-                  padding: '0 6px',
-                }}
-              >
-                <span style={{ position: 'absolute', inset: 0, background: palette[band.tone], opacity: reached ? 1 : 0.35 }} />
-                {showLabel ? <span style={{ position: 'relative' }}>{band.label}</span> : null}
-              </div>
-            )
-          })}
-        </div>
-        {semesterValues.map((semesterValue, index) => (
-          <Dot key={`${semesterValue}-${index}`} percent={markerPercent(semesterValue, track)} bar={bar} size={7} anchor="bottom" />
-        ))}
-        {marker && value != null && <Dot percent={markerPercent(value, track)} bar={bar} size={Math.max(8, bar * 0.75)} anchor="center" />}
-        {target != null && Number.isFinite(target) && (
-          <span
-            style={{
-              position: 'absolute',
-              left: `${markerPercent(target, track)}%`,
-              top: -3,
-              width: 2,
-              height: bar + 6,
-              marginLeft: -1,
-              background: '#14213D',
-              zIndex: 2,
-            }}
-          />
-        )}
+        </>
+      )}
+
+      <div
+        data-ruler-bar
+        style={{
+          position: 'absolute',
+          top: u(barTop),
+          left: 0,
+          right: 0,
+          height: u(metrics.bar),
+          borderRadius: 999,
+          overflow: 'hidden',
+        }}
+      >
+        {geo.bands.map((band) => {
+          const reached = bandReached(band, value)
+          const paint = bandPaint(band, reached, variant)
+          const inner = metrics.width * (band.width / 100) - metrics.labelPad * 2
+          const fit = fitBandLabel(band.label, inner, metrics.label)
+          return (
+            <div
+              key={band.id}
+              data-ruler-band={band.min}
+              style={{
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                left: `${band.left}%`,
+                width: `${band.width}%`,
+                boxSizing: 'border-box',
+                background: paint.fill,
+                color: paint.text,
+                borderTop: paint.edge ? `1px dashed ${paint.edge}` : undefined,
+                borderBottom: paint.edge ? `1px dashed ${paint.edge}` : undefined,
+                borderRight: paint.edge ? `1px dashed ${paint.edge}` : undefined,
+                display: 'flex',
+                alignItems: 'center',
+                padding: `0 ${u(metrics.labelPad)}`,
+                fontSize: u(fit.fontSize),
+                fontWeight: 600,
+                lineHeight: 1.05,
+                textAlign: 'left',
+              }}
+            >
+              <span>{band.label}</span>
+            </div>
+          )
+        })}
       </div>
-      {showNumbers && (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            marginTop: 8,
-            fontSize: metrics.tick,
-            color: variant === 'screen' ? '#A3AAD1' : '#5A6483',
-          }}
-        >
-          {ticks.map((tick, index) => (
-            <span key={`${tick}-${index}`}>{formatGpa(tick)}</span>
-          ))}
-        </div>
+
+      {showTicks &&
+        geo.ticks.map((tick) => (
+          <span
+            key={tick.value}
+            data-ruler-tick={tick.value}
+            style={{
+              position: 'absolute',
+              top: u(tickTop),
+              left: `${tick.left}%`,
+              transform: `translateX(${tick.align === 'start' ? '0' : tick.align === 'end' ? '-100%' : '-50%'})`,
+              fontSize: u(metrics.tick),
+              lineHeight: u(metrics.tickLine),
+              height: u(metrics.tickLine),
+              color: colors.muted,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {formatGpa(tick.value)}
+          </span>
+        ))}
+
+      {hasTarget && (
+        <>
+          <div
+            style={{
+              position: 'absolute',
+              top: u(targetTop),
+              left: `${targetPct}%`,
+              marginLeft: u(-metrics.stemWidth / 2),
+              height: u(metrics.targetStem),
+              borderLeft: `${u(metrics.stemWidth)} dashed ${TARGET_COLOR}`,
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              top: u(targetTop + metrics.targetStem),
+              left: `${clampPill(targetPct, targetW, metrics.width)}%`,
+              transform: 'translateX(-50%)',
+              width: u(targetW),
+              height: u(metrics.pillHeight),
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: 999,
+              background: TARGET_COLOR,
+              color: variant === 'night' ? '#10132A' : INK,
+              fontSize: u(metrics.pillFont),
+              fontWeight: 600,
+              whiteSpace: 'nowrap',
+              lineHeight: 1,
+            }}
+          >
+            {targetText}
+          </div>
+        </>
       )}
     </div>
   )
 }
 
-function Dot({ percent, bar, size, anchor }: { percent: number; bar: number; size: number; anchor: 'center' | 'bottom' }) {
+type MiniProps = {
+  track: BandTrack
+  value: number | null
+  unit: 'pt' | 'px'
+}
+
+/** Semester row ruler: 6pt track, 12pt dot with a 2pt white ring, same geometry as the main ruler. */
+export function ReportMiniRuler({ track, value, unit }: MiniProps) {
+  const geo = rulerGeometry(track)
+  const u = (n: number) => `${n}${unit}`
+  const dot = 12
+  const ring = 2
+  const trackH = 6
   return (
-    <span
-      style={{
-        position: 'absolute',
-        left: `${percent}%`,
-        top: anchor === 'bottom' ? bar - 1 : bar / 2,
-        width: size,
-        height: size,
-        transform: anchor === 'bottom' ? 'translate(-50%, -100%)' : 'translate(-50%, -50%)',
-        borderRadius: 99,
-        background: '#14213D',
-        boxShadow: '0 0 0 2px #FDFCF9',
-        zIndex: 2,
-      }}
-    />
+    <div style={{ position: 'relative', height: u(dot + ring * 2), width: '100%' }}>
+      <div
+        data-mini-track
+        style={{
+          position: 'absolute',
+          top: u((dot + ring * 2 - trackH) / 2),
+          left: 0,
+          right: 0,
+          height: u(trackH),
+          borderRadius: 999,
+          overflow: 'hidden',
+        }}
+      >
+        {geo.bands.map((band) => {
+          const paint = bandPaint(band, bandReached(band, value), 'paper')
+          return (
+            <div
+              key={band.id}
+              style={{
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                left: `${band.left}%`,
+                width: `${band.width}%`,
+                background: paint.fill,
+              }}
+            />
+          )
+        })}
+      </div>
+      {value != null && (
+        <div
+          data-mini-dot={value}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: `${geo.pct(value)}%`,
+            width: u(dot),
+            height: u(dot),
+            marginLeft: u(-(dot / 2 + ring)),
+            boxSizing: 'content-box',
+            border: `${u(ring)} solid #FFFFFF`,
+            borderRadius: 999,
+            background: INK,
+          }}
+        />
+      )}
+    </div>
   )
 }
