@@ -122,26 +122,6 @@ export default function DashboardPage() {
       />
 
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
-        <div className="mb-8 flex flex-wrap items-center justify-end gap-2">
-          <Select value={activeDegreeId} onValueChange={chooseDegree}>
-            <SelectTrigger
-              aria-label="Degree"
-              className="h-10 w-full max-w-[14rem] rounded-full border-foreground/20 bg-transparent px-4 sm:w-auto"
-            >
-              <SelectValue placeholder="Degree" />
-            </SelectTrigger>
-            <SelectContent>
-              {degrees.map((degree) => (
-                <SelectItem key={degree.id} value={degree.id}>
-                  {degree.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button onClick={() => setIsExportModalOpen(true)} disabled={!activeDegree || isSemestersLoading}>
-            Export
-          </Button>
-        </div>
         {isSemestersLoading ? (
           <div role="status" className="space-y-6">
             <div className="h-24 w-48 animate-pulse rounded-full bg-muted" />
@@ -150,32 +130,49 @@ export default function DashboardPage() {
           </div>
         ) : (
           <>
-            <div className="grid items-end gap-6 lg:grid-cols-[1.3fr_0.9fr]">
-              <div>
-                <p className="text-sm text-muted-foreground">Cumulative GPA</p>
-                <h1 className="mt-2 font-display text-7xl font-semibold tabular-nums tracking-tight sm:text-8xl">
-                  {graded ? formatGpa(metrics.cgpa) : '—'}
-                </h1>
+            <div className="relative">
+              <div className="mb-8 flex flex-wrap items-center justify-end gap-2 lg:absolute lg:top-0 lg:right-0 lg:mb-0">
+                <Select value={activeDegreeId} onValueChange={chooseDegree}>
+                  <SelectTrigger
+                    aria-label="Degree"
+                    className="h-10 w-full max-w-[14rem] rounded-full border-foreground/20 bg-transparent px-4 sm:w-auto"
+                  >
+                    <SelectValue placeholder="Degree" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {degrees.map((degree) => (
+                      <SelectItem key={degree.id} value={degree.id}>
+                        {degree.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button onClick={() => setIsExportModalOpen(true)} disabled={!activeDegree || isSemestersLoading}>
+                  Export
+                </Button>
               </div>
-              <div className="max-w-md lg:pb-2">
-                {standing && (
-                  <p className="font-display text-2xl font-semibold tracking-tight sm:text-[1.7rem]">{standing}</p>
-                )}
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  {[next, creditSentence(metrics.attemptedCredits, metrics.ungradedCredits)].filter(Boolean).join(' ')}
-                </p>
+              <div className="grid items-end gap-6 lg:grid-cols-[1.3fr_0.9fr]">
+                <div>
+                  <p className="text-sm text-muted-foreground">Cumulative GPA</p>
+                  <h1 className="mt-2 font-display text-7xl font-semibold tabular-nums tracking-tight sm:text-8xl">
+                    {graded ? formatGpa(metrics.cgpa) : '—'}
+                  </h1>
+                </div>
+                <div className="max-w-md lg:pt-16 lg:pb-2">
+                  {standing && (
+                    <p className="font-display text-2xl font-semibold tracking-tight sm:text-[1.7rem]">{standing}</p>
+                  )}
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    {[next, creditSentence(metrics.attemptedCredits, metrics.ungradedCredits)].filter(Boolean).join(' ')}
+                  </p>
+                </div>
               </div>
             </div>
 
             <Ruler className="mt-8" track={track} markers={rulerMarkers(metrics.cgpa, graded, target, semesters, scale)} />
 
             <div className="mt-12">
-              <div className="mb-2 flex items-center justify-between gap-3">
-                <h2 className="text-lg font-semibold">Semesters</h2>
-                <Button variant="outline" asChild>
-                  <Link to={`/degrees/${activeDegreeId}/semesters/new`}>New semester</Link>
-                </Button>
-              </div>
+              <h2 className="mb-2 text-lg font-semibold">Semesters</h2>
               <div className="grid items-start gap-10 lg:grid-cols-[1.3fr_0.9fr]">
               <section>
                 {semesters.length === 0 ? (

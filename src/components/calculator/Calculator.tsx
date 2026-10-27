@@ -11,6 +11,7 @@ import { CLASS_CUTOFFS, bandAt, bandsForScale, standingSentence } from '@/lib/ba
 import { MiniRuler } from '@/components/ruler/MiniRuler'
 import { BAND_TEXT_CLASS } from '@/components/ruler/tone'
 import { projectCumulative } from '@/lib/semesterProjection'
+import { useAuth } from '@/context/AuthContext'
 import { cn } from '@/lib/utils'
 
 const CONFETTI_COLORS = ['#5B6CFF', '#38B6C9', '#E6B84A', '#F07A5A']
@@ -47,6 +48,7 @@ export function Calculator({
   savedElsewhere,
   className,
 }: CalculatorProps) {
+  const { session } = useAuth()
   const [modules, setModules] = useState<ModuleData[]>(
     initialModules.length > 0
       ? initialModules
@@ -105,9 +107,11 @@ export function Calculator({
   }
 
   const save = () => onSave?.(modules)
+  // Signed-out visitors keep the result in the card. The pinned bar is for a signed-in save.
+  const pinSave = Boolean(onSave && session)
 
   return (
-    <div className={cn('grid items-start gap-8 pb-24 lg:grid-cols-[minmax(0,1fr)_22rem] lg:pb-0', className)}>
+    <div className={cn('grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]', pinSave && 'pb-24 lg:pb-0', className)}>
       <div>
         {details}
         <div className={cn('flex items-baseline justify-between gap-3', details ? 'mt-8' : undefined)}>
@@ -168,13 +172,13 @@ export function Calculator({
         )}
 
         {onSave && (
-          <Button className="mt-6 hidden w-full lg:inline-flex" onClick={save} disabled={isSaving || !canSave}>
+          <Button className={cn('mt-6 w-full', pinSave && 'hidden lg:inline-flex')} onClick={save} disabled={isSaving || !canSave}>
             {isSaving ? 'Saving...' : 'Save semester'}
           </Button>
         )}
       </aside>
 
-      {onSave && (
+      {pinSave && (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/70 bg-background/95 px-4 py-3 backdrop-blur lg:hidden">
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
             <div>

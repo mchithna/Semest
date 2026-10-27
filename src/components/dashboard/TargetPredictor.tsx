@@ -41,17 +41,57 @@ export function TargetPredictor({
   const requiredGpa = requiredAverage(currentCgpa, gradedCredits, target, remaining)
 
   return (
-    <Card className="rounded-[22px] border-border bg-card p-6 shadow-none">
-      <h2 className="text-lg font-semibold text-foreground">Target planner</h2>
+    <Card size="sm" className="gap-4 rounded-[22px] border-border bg-card p-5 shadow-none">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-base font-semibold text-foreground">Target planner</h2>
+        <div className="flex items-center gap-2">
+          <Label htmlFor="remaining-credits" className="text-xs text-muted-foreground">
+            Credits left
+          </Label>
+          <Input
+            id="remaining-credits"
+            type="number"
+            step="1"
+            min="1"
+            value={remainingCredits}
+            onChange={(event) => setRemainingCredits(event.target.value)}
+            className="h-8 w-16 px-2 text-right"
+          />
+        </div>
+      </div>
+
+      <div>
+        <p className="text-sm text-muted-foreground">You need an average of</p>
+        {requiredGpa !== null && requiredGpa > 0 && requiredGpa <= maxPoints ? (
+          <p className="mt-1 font-display text-5xl font-semibold tabular-nums tracking-tight text-band-first">
+            {requiredGpa.toFixed(GPA_DECIMALS)}
+          </p>
+        ) : (
+          <p className="mt-1 text-2xl font-semibold text-foreground">
+            {requiredGpa !== null && requiredGpa <= 0 ? 'Already secured' : '—'}
+          </p>
+        )}
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+          {plannerCopy({
+            requiredGpa,
+            target,
+            remaining,
+            remainingText: remainingCredits,
+            maxPoints,
+            highestGpa,
+          })}
+        </p>
+      </div>
 
       {classBands.length > 0 ? (
-        <div className="mt-5 flex flex-wrap gap-2" role="group" aria-label="Target class">
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Target class">
           {classBands.map((band) => {
             const selected = target === band.min
             return (
               <Button
                 key={band.id}
                 type="button"
+                size="sm"
                 variant={selected ? 'default' : 'outline'}
                 aria-pressed={selected}
                 onClick={() => onTargetChange(band.min)}
@@ -62,7 +102,7 @@ export function TargetPredictor({
           })}
         </div>
       ) : (
-        <div className="mt-5 space-y-2">
+        <div className="space-y-2">
           <Label htmlFor="desired-cgpa">Target GPA</Label>
           <Input
             id="desired-cgpa"
@@ -78,41 +118,6 @@ export function TargetPredictor({
           />
         </div>
       )}
-
-      <div className="mt-8">
-        <p className="text-sm text-muted-foreground">You need an average of</p>
-        {requiredGpa !== null && requiredGpa > 0 && requiredGpa <= maxPoints ? (
-          <p className="mt-1 font-display text-6xl font-semibold tabular-nums tracking-tight text-band-first">
-            {requiredGpa.toFixed(GPA_DECIMALS)}
-          </p>
-        ) : (
-          <p className="mt-3 text-2xl font-semibold text-foreground">
-            {requiredGpa !== null && requiredGpa <= 0 ? 'Already secured' : '—'}
-          </p>
-        )}
-        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-          {plannerCopy({
-            requiredGpa,
-            target,
-            remaining,
-            remainingText: remainingCredits,
-            maxPoints,
-            highestGpa,
-          })}
-        </p>
-      </div>
-
-      <div className="mt-6 space-y-2">
-        <Label htmlFor="remaining-credits">Remaining credits</Label>
-        <Input
-          id="remaining-credits"
-          type="number"
-          step="1"
-          min="1"
-          value={remainingCredits}
-          onChange={(event) => setRemainingCredits(event.target.value)}
-        />
-      </div>
     </Card>
   )
 }
@@ -152,18 +157,14 @@ function plannerCopy({
   if (requiredGpa <= 0) return 'You have already secured this target.'
   if (requiredGpa > maxPoints) return 'That average is above the top of this scale.'
 
-  const lead = `across your remaining ${formatCredits(remaining)} credits to finish on ${formatGpa(target)}.`
+  const lead = `Across ${formatCredits(remaining)} credits still to take, to finish on ${formatGpa(target)}.`
   if (highestGpa <= 0) return lead
 
   const delta = Math.round((requiredGpa - highestGpa) * 100) / 100
   const best = formatGpa(highestGpa)
-  if (delta > 0) {
-    return `${lead} That is ${delta.toFixed(2)} above your best semester so far (${best}), so the remaining semesters have to beat it on average.`
-  }
-  if (delta < 0) {
-    return `${lead} That is ${Math.abs(delta).toFixed(2)} below your best semester so far (${best}).`
-  }
-  return `${lead} That matches your best semester so far (${best}).`
+  if (delta > 0) return `${lead} ${delta.toFixed(2)} above your best semester (${best}).`
+  if (delta < 0) return `${lead} ${Math.abs(delta).toFixed(2)} below your best semester (${best}).`
+  return `${lead} That matches your best semester (${best}).`
 }
 
 function formatCredits(value: number): string {

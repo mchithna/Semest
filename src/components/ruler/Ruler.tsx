@@ -102,7 +102,7 @@ export function Ruler({
         </div>
 
         {hasBelow && (
-          <div className="relative mt-1 h-16">
+          <div className="pointer-events-none absolute inset-x-0 top-full z-10 mt-1">
             {markers.map((marker) =>
               placement.get(marker.id) === 'below' ? (
                 <MarkerPill key={marker.id} marker={marker} track={track} side="below" />
