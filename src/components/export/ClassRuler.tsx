@@ -1,7 +1,6 @@
-import { markerPercent, type BandTrack } from '@/lib/bands'
+import { markerPercent, type BandTone, type BandTrack } from '@/lib/bands'
 import { formatGpa } from '@/lib/score'
 import { BAND_PRINT, BAND_SCREEN } from '@/lib/export/palette'
-import type { BandTone } from '@/lib/bands'
 
 type ClassRulerProps = {
   track: BandTrack
@@ -12,6 +11,8 @@ type ClassRulerProps = {
   showNumbers?: boolean
   showBandLabels?: boolean
   youLabel?: string
+  /** Draw a dot on this ruler at `value`. Used for a semester row. */
+  marker?: boolean
   height?: number
 }
 
@@ -20,8 +21,13 @@ const TONE_INK: Record<BandTone, string> = {
   'second-lower': '#14343A',
   'second-upper': '#3A2E10',
   first: '#3A2018',
-  plain: '#3A3A3A',
+  plain: '#242424',
 }
+
+const METRICS = {
+  print: { bar: 28, label: 11, you: 12, tick: 11, lift: 30, dot: 9, pillPad: '4px 9px' },
+  screen: { bar: 64, label: 16, you: 22, tick: 18, lift: 46, dot: 16, pillPad: '8px 16px' },
+} as const
 
 export function ClassRuler({
   track,
@@ -32,95 +38,112 @@ export function ClassRuler({
   showNumbers = true,
   showBandLabels = false,
   youLabel,
-  height = 10,
+  marker = false,
+  height,
 }: ClassRulerProps) {
   const palette = variant === 'print' ? BAND_PRINT : BAND_SCREEN
+  const metrics = METRICS[variant]
+  const bar = height ?? metrics.bar
   const span = track.max - track.min
   const ticks = [...track.bands.map((band) => band.min), track.max]
+  const ink = variant === 'screen' ? '#10132A' : undefined
+  const onScreen = variant === 'screen'
 
   return (
-    <div style={{ position: 'relative' }}>
-      {youLabel && value != null && (
-        <div
-          style={{
-            position: 'absolute',
-            left: `${markerPercent(value, track)}%`,
-            top: -22,
-            transform: 'translateX(-50%)',
-            background: '#14213D',
-            color: '#FDFCF9',
-            fontSize: 10,
-            lineHeight: '16px',
-            padding: '0 6px',
-            borderRadius: 999,
-            whiteSpace: 'nowrap',
-            fontFamily: 'Instrument Sans, sans-serif',
-          }}
-        >
-          {youLabel}
+    <div style={{ paddingTop: youLabel ? metrics.lift : 0, fontFamily: 'Instrument Sans, sans-serif' }}>
+      <div style={{ position: 'relative' }}>
+        {youLabel && value != null && (
+          <div
+            style={{
+              position: 'absolute',
+              left: `${markerPercent(value, track)}%`,
+              top: -metrics.lift + 4,
+              transform: 'translateX(-50%)',
+              zIndex: 3,
+              background: onScreen ? '#F4F6FF' : '#14213D',
+              color: onScreen ? '#10132A' : '#FDFCF9',
+              fontSize: metrics.you,
+              fontWeight: 700,
+              lineHeight: 1.2,
+              padding: metrics.pillPad,
+              borderRadius: 999,
+              whiteSpace: 'nowrap',
+              boxShadow: onScreen ? '0 8px 18px rgba(0,0,0,0.35)' : 'none',
+            }}
+          >
+            {youLabel}
+          </div>
+        )}
+        {youLabel && value != null && (
+          <span
+            style={{
+              position: 'absolute',
+              left: `${markerPercent(value, track)}%`,
+              top: -8,
+              width: 2,
+              height: 10,
+              marginLeft: -1,
+              background: onScreen ? '#F4F6FF' : '#14213D',
+              zIndex: 2,
+            }}
+          />
+        )}
+        <div style={{ display: 'flex', height: bar, borderRadius: 999, overflow: 'hidden' }}>
+          {track.bands.map((band) => {
+            const reached = value == null || value + 0.0001 >= band.min
+            const share = span > 0 ? (band.max - band.min) / span : 1
+            const showLabel = showBandLabels && band.label && share >= 0.1
+            const labelColor = variant === 'screen' && !reached ? '#F4F6FF' : (ink ?? TONE_INK[band.tone])
+            return (
+              <div
+                key={band.id}
+                style={{
+                  position: 'relative',
+                  flexGrow: span > 0 ? Math.max(band.max - band.min, 0.01) : 1,
+                  color: labelColor,
+                  fontSize: metrics.label,
+                  fontWeight: 650,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap',
+                  padding: '0 6px',
+                }}
+              >
+                <span style={{ position: 'absolute', inset: 0, background: palette[band.tone], opacity: reached ? 1 : 0.35 }} />
+                {showLabel ? <span style={{ position: 'relative' }}>{band.label}</span> : null}
+              </div>
+            )
+          })}
         </div>
-      )}
-      <div style={{ display: 'flex', height, borderRadius: 999, overflow: 'hidden' }}>
-        {track.bands.map((band) => {
-          const reached = value == null || value + 0.0001 >= band.min
-          return (
-            <div
-              key={band.id}
-              style={{
-                flexGrow: span > 0 ? Math.max(band.max - band.min, 0.01) : 1,
-                background: palette[band.tone],
-                opacity: reached ? 1 : 0.35,
-                color: TONE_INK[band.tone],
-                fontSize: 10,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontFamily: 'Instrument Sans, sans-serif',
-              }}
-            >
-              {showBandLabels && band.label ? band.label : ''}
-            </div>
-          )
-        })}
+        {semesterValues.map((semesterValue, index) => (
+          <Dot key={`${semesterValue}-${index}`} percent={markerPercent(semesterValue, track)} bar={bar} size={7} anchor="bottom" />
+        ))}
+        {marker && value != null && <Dot percent={markerPercent(value, track)} bar={bar} size={Math.max(8, bar * 0.75)} anchor="center" />}
+        {target != null && Number.isFinite(target) && (
+          <span
+            style={{
+              position: 'absolute',
+              left: `${markerPercent(target, track)}%`,
+              top: -3,
+              width: 2,
+              height: bar + 6,
+              marginLeft: -1,
+              background: '#14213D',
+              zIndex: 2,
+            }}
+          />
+        )}
       </div>
-      {semesterValues.map((semesterValue, index) => (
-        <span
-          key={`${semesterValue}-${index}`}
-          style={{
-            position: 'absolute',
-            left: `${markerPercent(semesterValue, track)}%`,
-            top: height / 2 - 3,
-            width: 6,
-            height: 6,
-            marginLeft: -3,
-            borderRadius: 99,
-            background: '#14213D',
-            boxShadow: '0 0 0 1.5px #FDFCF9',
-          }}
-        />
-      ))}
-      {target != null && Number.isFinite(target) && (
-        <span
-          style={{
-            position: 'absolute',
-            left: `${markerPercent(target, track)}%`,
-            top: -2,
-            width: 2,
-            height: height + 4,
-            marginLeft: -1,
-            background: '#14213D',
-          }}
-        />
-      )}
       {showNumbers && (
         <div
           style={{
             display: 'flex',
             justifyContent: 'space-between',
-            marginTop: 4,
-            fontSize: 10,
-            color: '#5A6483',
-            fontFamily: 'Instrument Sans, sans-serif',
+            marginTop: 8,
+            fontSize: metrics.tick,
+            color: variant === 'screen' ? '#A3AAD1' : '#5A6483',
           }}
         >
           {ticks.map((tick, index) => (
@@ -129,5 +152,24 @@ export function ClassRuler({
         </div>
       )}
     </div>
+  )
+}
+
+function Dot({ percent, bar, size, anchor }: { percent: number; bar: number; size: number; anchor: 'center' | 'bottom' }) {
+  return (
+    <span
+      style={{
+        position: 'absolute',
+        left: `${percent}%`,
+        top: anchor === 'bottom' ? bar - 1 : bar / 2,
+        width: size,
+        height: size,
+        transform: anchor === 'bottom' ? 'translate(-50%, -100%)' : 'translate(-50%, -50%)',
+        borderRadius: 99,
+        background: '#14213D',
+        boxShadow: '0 0 0 2px #FDFCF9',
+        zIndex: 2,
+      }}
+    />
   )
 }

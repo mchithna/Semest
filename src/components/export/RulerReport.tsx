@@ -18,11 +18,16 @@ export function RulerReport({ model, pageIndex }: { model: ReportModel; pageInde
         background: '#FFFFFF',
         color: INK,
         fontFamily: 'Instrument Sans, sans-serif',
-        padding: '36px 42px 28px',
+        padding: '0 48px 32px',
         display: 'flex',
         flexDirection: 'column',
       }}
     >
+      <div style={{ height: 8, margin: '0 -48px 28px', display: 'flex' }}>
+        {['#B9C0FF', '#9BD8E2', '#F0D488', '#F7C4B5'].map((color) => (
+          <span key={color} style={{ flex: 1, background: color }} />
+        ))}
+      </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Wordmark />
         <span style={{ fontSize: 12, color: INK_MUTED }}>
@@ -31,15 +36,15 @@ export function RulerReport({ model, pageIndex }: { model: ReportModel; pageInde
       </div>
 
       {page?.showIntro && model.show.summaryFigures && (
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 24, marginTop: 28 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 28, marginTop: 36 }}>
           <div>
-            <p style={{ margin: 0, fontSize: 13, color: INK_MUTED }}>Cumulative GPA</p>
-            <p style={{ margin: '4px 0 0', fontFamily: 'Bricolage Grotesque, sans-serif', fontSize: 104, lineHeight: 0.9, fontWeight: 700 }}>
+            <p style={{ margin: 0, fontSize: 14, color: INK_MUTED }}>Cumulative GPA</p>
+            <p style={{ margin: '2px 0 0', fontFamily: 'Bricolage Grotesque, sans-serif', fontSize: 120, lineHeight: 0.86, fontWeight: 700, letterSpacing: '-0.04em' }}>
               {showNumbers && model.cgpa != null ? formatGpa(model.cgpa) : model.classification || '—'}
             </p>
           </div>
-          <div style={{ maxWidth: 280, paddingBottom: 8 }}>
-            <p style={{ margin: 0, fontFamily: 'Bricolage Grotesque, sans-serif', fontSize: 22, fontWeight: 600, lineHeight: 1.25 }}>
+          <div style={{ maxWidth: 340, paddingBottom: 12 }}>
+            <p style={{ margin: 0, fontFamily: 'Bricolage Grotesque, sans-serif', fontSize: 24, fontWeight: 650, lineHeight: 1.15 }}>
               {model.standing || 'No classification yet'}
             </p>
             <p style={{ margin: '8px 0 0', fontSize: 13, lineHeight: 1.45, color: INK_MUTED }}>
@@ -58,7 +63,7 @@ export function RulerReport({ model, pageIndex }: { model: ReportModel; pageInde
       )}
 
       {page?.showIntro && model.show.classificationRuler && model.hasClassBands && (
-        <div style={{ marginTop: 28 }}>
+        <div style={{ marginTop: 36 }}>
           <ClassRuler
             track={model.track}
             value={model.cgpa}
@@ -68,7 +73,6 @@ export function RulerReport({ model, pageIndex }: { model: ReportModel; pageInde
             showNumbers={showNumbers}
             showBandLabels
             youLabel={showNumbers && model.cgpa != null ? `You ${formatGpa(model.cgpa)}` : 'You'}
-            height={22}
           />
         </div>
       )}
@@ -80,22 +84,15 @@ export function RulerReport({ model, pageIndex }: { model: ReportModel; pageInde
       )}
 
       {model.show.semesterTables && (
-        <div style={{ marginTop: 22, display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 18 }}>
           {semesters.map((semester) => (
-            <div key={semester.id} style={{ display: 'grid', gridTemplateColumns: '180px 1fr 64px', gap: 16, alignItems: 'center' }}>
+            <div key={semester.id} style={{ display: 'grid', gridTemplateColumns: '210px 1fr 78px', gap: 18, alignItems: 'center' }}>
               <div>
-                <div style={{ fontSize: 14, fontWeight: 650 }}>{semester.title}</div>
-                <div style={{ fontSize: 12, color: INK_MUTED }}>{formatCredits(semester.credits)} credits</div>
+                <div style={{ fontSize: 15, fontWeight: 650 }}>{semester.title}</div>
+                <div style={{ marginTop: 2, fontSize: 12, color: INK_MUTED }}>{formatCredits(semester.credits)} credits</div>
               </div>
-              <ClassRuler
-                track={model.track}
-                value={semester.gpa}
-                variant="print"
-                showNumbers={false}
-                showBandLabels={false}
-                height={8}
-              />
-              <div style={{ textAlign: 'right', fontFamily: 'Bricolage Grotesque, sans-serif', fontSize: 22, fontWeight: 700 }}>
+              <ClassRuler track={model.track} value={semester.gpa} variant="print" showNumbers={false} marker height={12} />
+              <div style={{ textAlign: 'right', fontFamily: 'Bricolage Grotesque, sans-serif', fontSize: 28, fontWeight: 700, letterSpacing: '-0.03em' }}>
                 {showNumbers && semester.gpa != null ? formatGpa(semester.gpa) : '—'}
               </div>
             </div>

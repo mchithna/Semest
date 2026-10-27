@@ -6,8 +6,10 @@ import { ClassRuler } from './ClassRuler'
 
 export const SocialCard = forwardRef<HTMLElement, { model: ReportModel }>(function SocialCard({ model }, ref) {
   const size = SOCIAL_PX[model.aspect]
+  const tall = model.aspect === '9:16'
   const chips = model.show.semesterTables ? model.semesters : model.semesters.slice(0, 2)
   const showNumbers = !model.hideExactGpa
+  const gpaSize = tall ? 248 : model.aspect === '1:1' ? 176 : 210
 
   return (
     <article
@@ -19,7 +21,7 @@ export const SocialCard = forwardRef<HTMLElement, { model: ReportModel }>(functi
         background: NIGHT,
         color: '#E6E9F7',
         fontFamily: 'Instrument Sans, sans-serif',
-        padding: size.height > 1400 ? 96 : 72,
+        padding: tall ? 88 : 76,
         display: 'flex',
         flexDirection: 'column',
       }}
@@ -31,8 +33,9 @@ export const SocialCard = forwardRef<HTMLElement, { model: ReportModel }>(functi
             style={{
               border: '1px solid rgba(230,233,247,0.24)',
               borderRadius: 999,
-              padding: '8px 16px',
-              fontSize: 22,
+              padding: '12px 22px',
+              fontSize: 26,
+              fontWeight: 650,
             }}
           >
             {model.degreeTitle}
@@ -46,18 +49,19 @@ export const SocialCard = forwardRef<HTMLElement, { model: ReportModel }>(functi
         </p>
       )}
 
-      <div style={{ marginTop: size.height > 1400 ? 120 : 72 }}>
+      <div style={{ marginTop: tall ? 96 : 64 }}>
         {model.show.summaryFigures && (
           <>
-            <p style={{ margin: 0, fontSize: 28, color: '#A3AAD1' }}>Cumulative GPA</p>
+            <p style={{ margin: 0, fontSize: 30, color: '#A3AAD1' }}>Cumulative GPA</p>
             {showNumbers && model.cgpa != null ? (
               <p
                 style={{
-                  margin: '8px 0 0',
+                  margin: '4px 0 0',
                   fontFamily: 'Bricolage Grotesque, sans-serif',
-                  fontSize: size.height > 1400 ? 220 : 168,
-                  lineHeight: 0.9,
+                  fontSize: gpaSize,
+                  lineHeight: 0.86,
                   fontWeight: 700,
+                  letterSpacing: '-0.045em',
                 }}
               >
                 {formatGpa(model.cgpa)}
@@ -65,17 +69,18 @@ export const SocialCard = forwardRef<HTMLElement, { model: ReportModel }>(functi
             ) : null}
             <p
               style={{
-                margin: '12px 0 0',
+                margin: '10px 0 0',
                 fontFamily: 'Bricolage Grotesque, sans-serif',
-                fontSize: 48,
+                fontSize: tall ? 64 : 52,
                 fontWeight: 700,
+                letterSpacing: '-0.03em',
                 color: AMBER,
               }}
             >
               {model.classification || 'No class yet'}
             </p>
             {showNumbers && model.distanceToNext && model.nextClass && (
-              <p style={{ margin: '8px 0 0', fontSize: 28, color: '#A3AAD1' }}>
+              <p style={{ margin: '10px 0 0', fontSize: 30, color: '#A3AAD1' }}>
                 {model.distanceToNext} from {model.nextClass}
               </p>
             )}
@@ -84,7 +89,7 @@ export const SocialCard = forwardRef<HTMLElement, { model: ReportModel }>(functi
       </div>
 
       {model.show.classificationRuler && model.hasClassBands && (
-        <div style={{ marginTop: 48 }}>
+        <div style={{ marginTop: tall ? 36 : 20 }}>
           <ClassRuler
             track={model.track}
             value={model.cgpa}
@@ -93,27 +98,26 @@ export const SocialCard = forwardRef<HTMLElement, { model: ReportModel }>(functi
             showNumbers={false}
             showBandLabels
             youLabel="You"
-            height={28}
           />
         </div>
       )}
 
       {chips.length > 0 && (
-        <div style={{ marginTop: 'auto', display: 'flex', flexWrap: 'wrap', gap: 20, paddingTop: 48 }}>
+        <div style={{ marginTop: 'auto', display: 'flex', flexWrap: 'wrap', gap: 24, paddingTop: 56 }}>
           {chips.map((semester) => (
             <div
               key={semester.id}
               style={{
-                flex: '1 1 240px',
+                flex: '1 1 280px',
                 background: '#171B3A',
-                borderRadius: 24,
-                padding: '22px 24px',
+                borderRadius: 28,
+                padding: '28px 30px 24px',
               }}
             >
-              <div style={{ fontSize: 22, color: '#A3AAD1' }}>{semester.title}</div>
-              <div style={{ fontSize: 18, color: '#A3AAD1' }}>{formatCredits(semester.credits)} credits</div>
+              <div style={{ fontSize: 26, color: '#A3AAD1' }}>{semester.title}</div>
+              <div style={{ marginTop: 4, fontSize: 20, color: '#A3AAD1' }}>{formatCredits(semester.credits)} credits</div>
               {showNumbers && semester.gpa != null && (
-                <div style={{ marginTop: 8, fontFamily: 'Bricolage Grotesque, sans-serif', fontSize: 48, fontWeight: 700 }}>
+                <div style={{ marginTop: 12, fontFamily: 'Bricolage Grotesque, sans-serif', fontSize: 64, fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1 }}>
                   {formatGpa(semester.gpa)}
                 </div>
               )}
@@ -134,7 +138,7 @@ function Wordmark() {
           <span key={color} style={{ width: 6, height: 14 + index * 6, borderRadius: 99, background: color }} />
         ))}
       </span>
-      <span style={{ fontWeight: 700, fontSize: 32 }}>Semest</span>
+      <span style={{ fontWeight: 700, fontSize: 36 }}>Semest</span>
     </span>
   )
 }

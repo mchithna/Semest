@@ -1,6 +1,19 @@
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
+import { Document, Font, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
+import displayUrl from '@fontsource/bricolage-grotesque/files/bricolage-grotesque-latin-700-normal.woff?url'
+import sansUrl from '@fontsource/instrument-sans/files/instrument-sans-latin-400-normal.woff?url'
+import sansBoldUrl from '@fontsource/instrument-sans/files/instrument-sans-latin-600-normal.woff?url'
+
+Font.register({ family: 'SemestDisplay', src: displayUrl })
+Font.register({
+  family: 'SemestSans',
+  fonts: [
+    { src: sansUrl, fontWeight: 400 },
+    { src: sansBoldUrl, fontWeight: 600 },
+  ],
+})
+Font.registerHyphenationCallback((word) => [word])
 import { formatGpa } from '@/lib/score'
-import { BAND_PRINT, BAND_SCREEN } from '@/lib/export/palette'
+import { BAND_PRINT } from '@/lib/export/palette'
 import { disclaimer, formatCredits, type ReportModel, type ReportSemester } from '@/lib/export/reportModel'
 import { markerPercent } from '@/lib/bands'
 
@@ -38,18 +51,20 @@ const formal = StyleSheet.create({
 })
 
 const ruler = StyleSheet.create({
-  page: { padding: 36, fontFamily: 'Helvetica', fontSize: 10, color: '#14213D', backgroundColor: '#FFFFFF' },
-  kicker: { fontSize: 9, color: '#5A6483' },
-  gpa: { fontSize: 54, fontFamily: 'Helvetica-Bold', marginTop: 2 },
-  standing: { fontSize: 14, fontFamily: 'Helvetica-Bold', maxWidth: 220 },
-  muted: { fontSize: 9, color: '#5A6483', marginTop: 4 },
-  barRow: { flexDirection: 'row', height: 12, borderRadius: 6, overflow: 'hidden', marginTop: 16 },
-  ticks: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 3 },
+  page: { paddingTop: 28, paddingBottom: 40, paddingHorizontal: 40, fontFamily: 'SemestSans', fontSize: 10, color: '#14213D', backgroundColor: '#FFFFFF' },
+  stripe: { position: 'absolute', top: 0, left: 0, right: 0, height: 8, flexDirection: 'row' },
+  kicker: { fontSize: 10, color: '#5A6483' },
+  gpa: { fontSize: 78, fontFamily: 'SemestDisplay', marginTop: 2, letterSpacing: -1.5 },
+  standing: { fontSize: 16, fontFamily: 'SemestDisplay', maxWidth: 260 },
+  muted: { fontSize: 10, color: '#5A6483', marginTop: 6, maxWidth: 250 },
+  ticks: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 },
   tick: { fontSize: 8, color: '#5A6483' },
-  semester: { flexDirection: 'row', alignItems: 'center', marginTop: 10 },
-  semesterGpa: { width: 48, textAlign: 'right', fontFamily: 'Helvetica-Bold', fontSize: 12 },
+  semester: { flexDirection: 'row', alignItems: 'center', marginTop: 14 },
+  semesterGpa: { width: 64, textAlign: 'right', fontFamily: 'SemestDisplay', fontSize: 20 },
   semesterName: { width: 150 },
-  footer: { position: 'absolute', left: 36, right: 36, bottom: 22, borderTopWidth: 1, borderTopColor: '#D5D8E2', paddingTop: 6, flexDirection: 'row', justifyContent: 'space-between', fontSize: 8, color: '#5A6483' },
+  footer: { position: 'absolute', left: 40, right: 40, bottom: 22, borderTopWidth: 1, borderTopColor: '#D5D8E2', paddingTop: 6, flexDirection: 'row', justifyContent: 'space-between', fontSize: 8, color: '#5A6483' },
+  pill: { position: 'absolute', top: 0, width: 86, marginLeft: -43, backgroundColor: '#14213D', borderRadius: 8, paddingVertical: 4 },
+  pillText: { color: '#FDFCF9', fontSize: 9, textAlign: 'center', fontFamily: 'SemestSans', fontWeight: 600 },
 })
 
 function pageSize(model: ReportModel) {
@@ -179,14 +194,19 @@ export function RulerPdf({ model }: { model: ReportModel }) {
         const semesters = model.semesters.filter((semester) => page.semesterIds.includes(semester.id))
         return (
           <Page key={page.index} size={pageSize(model)} style={ruler.page}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <Text style={{ fontFamily: 'Helvetica-Bold' }}>Semest</Text>
+            <View style={ruler.stripe}>
+              {['#B9C0FF', '#9BD8E2', '#F0D488', '#F7C4B5'].map((color) => (
+                <View key={color} style={{ flexGrow: 1, backgroundColor: color, height: 8 }} />
+              ))}
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <PdfWordmark />
               <Text style={ruler.kicker}>
                 {[model.degreeTitle, model.show.degreeInstitution ? model.institution : ''].filter(Boolean).join(', ')}
               </Text>
             </View>
             {page.showIntro && model.show.summaryFigures && (
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 18 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 22 }}>
                 <View>
                   <Text style={ruler.kicker}>Cumulative GPA</Text>
                   <Text style={ruler.gpa}>{model.cgpa != null ? formatGpa(model.cgpa) : '—'}</Text>
@@ -212,7 +232,7 @@ export function RulerPdf({ model }: { model: ReportModel }) {
               semesters.map((semester) => (
                 <View key={semester.id} style={ruler.semester} wrap={false}>
                   <View style={ruler.semesterName}>
-                    <Text style={{ fontFamily: 'Helvetica-Bold' }}>{semester.title}</Text>
+                    <Text style={{ fontFamily: 'SemestSans', fontWeight: 600 }}>{semester.title}</Text>
                     <Text style={ruler.kicker}>{`${formatCredits(semester.credits)} credits`}</Text>
                   </View>
                   <View style={{ flexGrow: 1 }}>
@@ -233,33 +253,82 @@ export function RulerPdf({ model }: { model: ReportModel }) {
   )
 }
 
+const MARK_COLORS = ['#7C8BFF', '#38B6C9', '#E6B84A', '#F07A5A']
+
+function PdfWordmark() {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
+      {MARK_COLORS.map((color, index) => (
+        <View key={color} style={{ width: 3, height: 7 + index * 3, backgroundColor: color, borderRadius: 2, marginRight: 2 }} />
+      ))}
+      <Text style={{ fontFamily: 'SemestDisplay', fontSize: 13, marginLeft: 4 }}>Semest</Text>
+    </View>
+  )
+}
+
 function RulerBar({ model, value }: { model: ReportModel; value: number | null }) {
   const span = model.track.max - model.track.min
   const ticks = [...model.track.bands.map((band) => band.min), model.track.max]
+  const percent = value == null ? 0 : markerPercent(value, model.track)
   return (
-    <View style={{ marginTop: 8 }}>
-      <View style={ruler.barRow}>
+    <View style={{ marginTop: 22, position: 'relative' }}>
+      {value != null && (
+        <View style={[ruler.pill, { left: `${percent}%` }]}>
+          <Text style={ruler.pillText}>{`You ${formatGpa(value)}`}</Text>
+        </View>
+      )}
+      {value != null && (
+        <View style={{ position: 'absolute', left: `${percent}%`, top: 16, marginLeft: -0.5, width: 1.5, height: 6, backgroundColor: '#14213D' }} />
+      )}
+      <View style={{ flexDirection: 'row', height: 22, borderRadius: 11, overflow: 'hidden', marginTop: 22 }}>
         {model.track.bands.map((band) => {
           const reached = value == null || value + 0.0001 >= band.min
+          const share = span > 0 ? (band.max - band.min) / span : 1
           return (
             <View
               key={band.id}
               style={{
                 flexGrow: span > 0 ? Math.max(band.max - band.min, 0.01) : 1,
-                backgroundColor: BAND_PRINT[band.tone],
-                opacity: reached ? 1 : 0.35,
-                height: 12,
+                height: 22,
                 alignItems: 'center',
                 justifyContent: 'center',
+                position: 'relative',
               }}
             >
-              <Text style={{ fontSize: 7 }}>{band.label}</Text>
+              <View
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  right: 0,
+                  bottom: 0,
+                  left: 0,
+                  backgroundColor: BAND_PRINT[band.tone],
+                  opacity: reached ? 1 : 0.4,
+                }}
+              />
+              {band.label && share >= 0.1 ? <Text style={{ fontSize: 8, color: '#1C2438' }}>{band.label}</Text> : null}
             </View>
           )
         })}
       </View>
-      {value != null && (
-        <Text style={{ fontSize: 8, marginTop: 2 }}>{`You ${formatGpa(value)} · ${Math.round(markerPercent(value, model.track))}% along the scale`}</Text>
+      {model.semesters.map((semester) =>
+        semester.gpa == null ? null : (
+          <View
+            key={semester.id}
+            style={{
+              position: 'absolute',
+              left: `${markerPercent(semester.gpa, model.track)}%`,
+              top: 40,
+              marginLeft: -3,
+              width: 6,
+              height: 6,
+              borderRadius: 3,
+              backgroundColor: '#14213D',
+              borderWidth: 1,
+              borderColor: '#FFFFFF',
+            }}
+          />
+        ),
       )}
       <View style={ruler.ticks}>
         {ticks.map((tick, index) => (
@@ -274,19 +343,41 @@ function RulerBar({ model, value }: { model: ReportModel; value: number | null }
 
 function MiniBar({ model, value }: { model: ReportModel; value: number | null }) {
   const span = model.track.max - model.track.min
+  const percent = value == null ? 0 : markerPercent(value, model.track)
   return (
-    <View style={{ flexDirection: 'row', height: 6, borderRadius: 4, overflow: 'hidden' }}>
-      {model.track.bands.map((band) => (
+    <View style={{ position: 'relative', height: 14, justifyContent: 'center' }}>
+      <View style={{ flexDirection: 'row', height: 10, borderRadius: 5, overflow: 'hidden' }}>
+        {model.track.bands.map((band) => {
+          const reached = value == null || value + 0.0001 >= band.min
+          return (
+            <View
+              key={band.id}
+              style={{
+                flexGrow: span > 0 ? Math.max(band.max - band.min, 0.01) : 1,
+                backgroundColor: BAND_PRINT[band.tone],
+                opacity: reached ? 1 : 0.4,
+                height: 8,
+              }}
+            />
+          )
+        })}
+      </View>
+      {value != null && (
         <View
-          key={band.id}
           style={{
-            flexGrow: span > 0 ? Math.max(band.max - band.min, 0.01) : 1,
-            backgroundColor: value != null && value + 0.0001 < band.min ? BAND_SCREEN[band.tone] : BAND_PRINT[band.tone],
-            opacity: value != null && value + 0.0001 < band.min ? 0.35 : 1,
-            height: 6,
+            position: 'absolute',
+            left: `${percent}%`,
+            top: 1,
+            marginLeft: -5,
+            width: 10,
+            height: 10,
+            borderRadius: 5,
+            backgroundColor: '#14213D',
+            borderWidth: 1.5,
+            borderColor: '#FFFFFF',
           }}
         />
-      ))}
+      )}
     </View>
   )
 }
