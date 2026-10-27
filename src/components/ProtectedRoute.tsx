@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { Loader2 } from 'lucide-react'
@@ -21,34 +21,51 @@ export function ProtectedRoute({
 }) {
   const { session, loading } = useAuth()
   const [status, setStatus] = useState<OnboardingStatus>('loading')
+  const userId = session?.user.id ?? null
+  const resolvedFor = useRef<string | null>(null)
 
   useEffect(() => {
     if (loading) return
-    if (!session) return
+    if (!userId) {
+      resolvedFor.current = null
+      return
+    }
 
+    // Narrowing from the guard above does not carry into a nested function.
+    const id = userId
+
+    // A token refresh hands us a new session for the same person. Replacing
+    // the page with a spinner here unmounts the semester editor and drops
+    // anything that has not been saved yet.
     let cancelled = false
-    setStatus('loading')
-    supabase
-      .from('profiles')
-      .select('onboarded_at')
-      .eq('id', session.user.id)
-      .maybeSingle()
-      .then(({ data, error }) => {
+    if (resolvedFor.current !== id) setStatus('loading')
+
+    async function loadOnboarding() {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('onboarded_at')
+          .eq('id', id)
+          .maybeSingle()
         if (cancelled) return
-        const next = resolveOnboarding(Boolean(error), data?.onboarded_at ?? null, hasFinishedOnboarding(session.user.id))
-        if (!error && data?.onboarded_at) rememberOnboarded(session.user.id)
-        if (!error && !data?.onboarded_at) forgetOnboarded(session.user.id)
+        const next = resolveOnboarding(Boolean(error), data?.onboarded_at ?? null, hasFinishedOnboarding(id))
+        if (!error && data?.onboarded_at) rememberOnboarded(id)
+        if (!error && !data?.onboarded_at) forgetOnboarded(id)
+        resolvedFor.current = id
         setStatus(next)
-      })
-      .catch(() => {
+      } catch {
         if (cancelled) return
-        setStatus(hasFinishedOnboarding(session.user.id) ? 'yes' : 'unknown')
-      })
+        resolvedFor.current = id
+        setStatus(hasFinishedOnboarding(id) ? 'yes' : 'unknown')
+      }
+    }
+
+    void loadOnboarding()
 
     return () => {
       cancelled = true
     }
-  }, [loading, session])
+  }, [loading, userId])
 
   if (loading || (session && status === 'loading')) {
     return (
