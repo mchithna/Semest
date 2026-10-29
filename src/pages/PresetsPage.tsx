@@ -100,7 +100,7 @@ export default function PresetsPage() {
         ) : (
           <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {filteredPresets.map((preset, index) => (
-              <article key={preset.id} className="flex h-full flex-col overflow-hidden rounded-[22px] bg-card">
+              <article key={preset.id} className="flex h-full animate-card-enter flex-col overflow-hidden rounded-[22px] bg-card">
                 <div className={`h-[3px] shrink-0 ${cardAccentClass(index)}`} aria-hidden="true" />
                 <div className="flex flex-1 flex-col p-5">
                   <h2 className="text-lg font-semibold">{preset.title}</h2>

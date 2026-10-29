@@ -234,7 +234,8 @@ export function ExportReportModal({
   const showPreview = !compact || tab === 'preview'
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-3 sm:p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
+      <div className="animate-export-fade absolute inset-0 bg-black/70" />
       <div className="pointer-events-none fixed top-0 -left-[20000px]" aria-hidden="true">
         {theme === 'social' && <SocialCard ref={pngRef} model={model} />}
       </div>
@@ -244,7 +245,7 @@ export function ExportReportModal({
         aria-modal="true"
         aria-labelledby={titleId}
         className={cn(
-          'flex w-full flex-col overflow-hidden bg-[#171B3A] text-[#E6E9F7] shadow-2xl',
+          'animate-export-rise relative z-10 flex w-full flex-col overflow-hidden bg-[#171B3A] text-[#E6E9F7] shadow-2xl',
           compact ? 'fixed inset-0 h-auto rounded-none' : 'h-[min(700px,calc(100vh-48px))] max-w-[1060px] rounded-[28px]',
         )}
       >

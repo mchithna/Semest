@@ -101,7 +101,7 @@ export default function DegreesPage() {
         ) : (
           <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {degrees.map((degree) => (
-              <article key={degree.id} className="group relative flex h-full flex-col rounded-[22px] bg-card p-5">
+              <article key={degree.id} className="group relative flex h-full animate-card-enter flex-col rounded-[22px] bg-card p-5">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <h2 className="truncate text-lg font-semibold">

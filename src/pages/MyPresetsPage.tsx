@@ -71,7 +71,7 @@ export default function MyPresetsPage() {
         ) : (
           <div className="mt-10 grid gap-4 sm:grid-cols-2">
             {presets.map((preset, index) => (
-              <article key={preset.id} className="flex h-full flex-col overflow-hidden rounded-[22px] bg-card">
+              <article key={preset.id} className="flex h-full animate-card-enter flex-col overflow-hidden rounded-[22px] bg-card">
                 <div className={`h-[3px] shrink-0 ${cardAccentClass(index)}`} aria-hidden="true" />
                 <div className="flex flex-1 flex-col p-5">
                   <div className="flex items-start justify-between gap-3">
