@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { friendlyError } from '@/lib/errors'
 import {
   Dialog,
   DialogContent,
@@ -63,7 +64,7 @@ export function CreateDegreeDialog({
       })
       onOpenChange(false)
     } catch (err: any) {
-      toast.error(err.message)
+      toast.error(friendlyError(err, "Couldn't save the degree. Try again."))
     } finally {
       setIsSaving(false)
     }
@@ -71,52 +72,55 @@ export function CreateDegreeDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] bg-card border-border text-foreground">
+      <DialogContent className="rounded-[22px] border-border bg-card text-foreground sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="font-mono text-primary uppercase tracking-widest text-sm">
-            {initialData ? 'Edit Degree' : 'New Degree'}
+          <DialogTitle className="font-display text-2xl font-semibold">
+            {initialData ? 'Edit degree' : 'New degree'}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 mt-4">
+        <div className="mt-4 space-y-4">
           <div className="space-y-2">
-            <Label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Title <span className="text-destructive">*</span></Label>
+            <Label htmlFor="degree-title">Title</Label>
             <Input
+              id="degree-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. BSc Computer Science"
-              className="bg-background border-border text-foreground rounded-sm"
+              className="rounded-xl"
             />
           </div>
 
           <div className="space-y-2">
-            <Label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Institution</Label>
+            <Label htmlFor="degree-institution">Institution</Label>
             <Input
+              id="degree-institution"
               value={institution}
               onChange={(e) => setInstitution(e.target.value)}
               placeholder="e.g. University of London"
-              className="bg-background border-border text-foreground rounded-sm"
+              className="rounded-xl"
             />
           </div>
 
           <div className="space-y-2">
-            <Label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Start Year</Label>
+            <Label htmlFor="degree-start-year">Start year</Label>
             <Input
+              id="degree-start-year"
               type="number"
               value={startYear}
               onChange={(e) => setStartYear(e.target.value)}
               placeholder="e.g. 2024"
-              className="bg-background border-border text-foreground rounded-sm"
+              className="rounded-xl"
             />
           </div>
 
           <div className="space-y-2">
-            <Label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Grade Scale</Label>
+            <Label htmlFor="degree-grade-scale">Grade scale</Label>
             <Select value={gradeScaleId} onValueChange={setGradeScaleId}>
-              <SelectTrigger className="bg-background border-border text-foreground rounded-sm">
+              <SelectTrigger id="degree-grade-scale" className="w-full rounded-xl">
                 <SelectValue placeholder="Select a scale" />
               </SelectTrigger>
-              <SelectContent className="bg-background border-border text-foreground">
+              <SelectContent>
                 <SelectItem value="none">None</SelectItem>
                 {scales.map(scale => (
                   <SelectItem key={scale.id} value={scale.id}>
@@ -127,20 +131,13 @@ export function CreateDegreeDialog({
             </Select>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4">
-            <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="border-border text-muted-foreground hover:bg-muted hover:text-foreground rounded-sm font-mono text-xs uppercase tracking-widest"
-            >
+          <div className="flex justify-end gap-3 pt-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button
-              onClick={handleSave}
-              disabled={isSaving}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-sm font-mono text-xs uppercase tracking-widest"
-            >
-              {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Degree'}
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving && <Loader2 className="animate-spin" aria-hidden="true" />}
+              {isSaving ? 'Saving degree…' : 'Save degree'}
             </Button>
           </div>
         </div>

@@ -71,3 +71,20 @@ export function groupPriorModules(modules: PriorModuleOption[], currentName: str
 export function priorModuleLabel(mod: Pick<PriorModuleOption, 'name' | 'semesterTitle'>): string {
   return `${mod.name} · ${mod.semesterTitle}`
 }
+
+export function priorSemesterKey(mod: Pick<PriorModuleOption, 'semesterIndex' | 'semesterTitle'>): string {
+  return `${mod.semesterIndex}:${mod.semesterTitle}`
+}
+
+/** Semesters in chronological order, one entry each. */
+export function priorSemesters(modules: PriorModuleOption[]): { key: string; title: string }[] {
+  const seen = new Set<string>()
+  const semesters: { key: string; title: string }[] = []
+  for (const mod of modules) {
+    const key = priorSemesterKey(mod)
+    if (seen.has(key)) continue
+    seen.add(key)
+    semesters.push({ key, title: mod.semesterTitle })
+  }
+  return semesters
+}

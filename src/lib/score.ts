@@ -1,4 +1,7 @@
+import { CLASS_CUTOFFS, HONORS_MAX_POINTS } from './bands'
 import type { GradeRow } from './queries/gradeScales'
+
+export { HONORS_MAX_POINTS }
 
 export type ModuleWithGrade = {
   credits: number
@@ -24,8 +27,13 @@ export const CLASSIFICATION_META: Record<string, { label: string; badgeVariant: 
   'Unknown': { label: 'No Data', badgeVariant: 'outline', color: 'bg-slate-700 text-slate-300' },
 }
 
-/** Honors cuts assume a 4-point scale. Wider scales keep the numeric GPA only. */
-export const HONORS_MAX_POINTS = 4.5
+/** Display precision for GPA. The calculation itself keeps four decimals. */
+export const GPA_DECIMALS = 2
+
+export function formatGpa(value: number): string {
+  if (!Number.isFinite(value)) return '—'
+  return value.toFixed(GPA_DECIMALS)
+}
 
 export const UNGRADED_GRADE = 'Not graded'
 
@@ -123,10 +131,10 @@ export function hasGradedWork(modules: ModuleWithGrade[], scale: GradeRow[]): bo
 }
 
 export function classify(score: number, graded = false): keyof typeof CLASSIFICATION_META {
-  if (score >= 3.7) return 'First Class'
-  if (score >= 3.3) return 'Second Upper'
-  if (score >= 3.0) return 'Second Lower'
-  if (score >= 2.0) return 'General Pass'
+  if (score >= CLASS_CUTOFFS.first) return 'First Class'
+  if (score >= CLASS_CUTOFFS.secondUpper) return 'Second Upper'
+  if (score >= CLASS_CUTOFFS.secondLower) return 'Second Lower'
+  if (score >= CLASS_CUTOFFS.pass) return 'General Pass'
   if (score > 0 || graded) return 'Fail'
   return 'Unknown'
 }

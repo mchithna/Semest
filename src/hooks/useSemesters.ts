@@ -6,6 +6,7 @@ import {
 } from '../lib/queries/semesters'
 import type { ModuleData } from '@/components/calculator/ModuleRow'
 import { toast } from 'sonner'
+import { friendlyError } from '@/lib/errors'
 
 export function useSemesters(degreeId: string) {
   const queryClient = useQueryClient()
@@ -35,10 +36,10 @@ export function useSemesters(degreeId: string) {
     ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey })
-      toast.success('Semester saved successfully')
+      toast.success('Semester saved')
     },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to save semester')
+    onError: (error: unknown) => {
+      toast.error(friendlyError(error, "Couldn't save the semester. Try again."))
     }
   })
 
@@ -46,10 +47,10 @@ export function useSemesters(degreeId: string) {
     mutationFn: (semesterId: string) => deleteSemester(semesterId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey })
-      toast.success('Semester deleted successfully')
+      toast.success('Semester deleted')
     },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to delete semester')
+    onError: (error: unknown) => {
+      toast.error(friendlyError(error, "Couldn't delete the semester. Try again."))
     }
   })
 

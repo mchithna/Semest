@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Plus, Trash2, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { friendlyError } from '@/lib/errors'
 import {
   Dialog,
   DialogContent,
@@ -80,7 +81,7 @@ export function GradeScaleEditor({
       onOpenChange(false)
       toast.success(initialData ? 'Scale updated' : 'Scale created')
     } catch (err: any) {
-      toast.error(err.message)
+      toast.error(friendlyError(err, "Couldn't save the scale. Try again."))
     } finally {
       setIsSaving(false)
     }
@@ -88,52 +89,53 @@ export function GradeScaleEditor({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] bg-background border-border text-foreground">
+      <DialogContent className="rounded-[22px] border-border bg-card text-foreground sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="font-mono text-primary uppercase tracking-widest text-sm">
-            {isReadOnly ? 'View Grade Scale' : initialData ? 'Edit Grade Scale' : 'New Grade Scale'}
+          <DialogTitle className="font-display text-2xl font-semibold">
+            {isReadOnly ? 'View grade scale' : initialData ? 'Edit grade scale' : 'New grade scale'}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 mt-4">
+        <div className="mt-4 space-y-6">
           <div className="space-y-2">
-            <Label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Scale Name</Label>
+            <Label htmlFor="scale-name" className="text-sm text-muted-foreground">Scale name</Label>
             <Input
+              id="scale-name"
               value={label}
               onChange={(e) => setLabel(e.target.value)}
-              placeholder="e.g. My Custom Scale"
-              className="bg-card border-border text-foreground rounded-sm disabled:opacity-75 disabled:cursor-not-allowed"
+              placeholder="e.g. My custom scale"
+              className="rounded-xl"
               disabled={isReadOnly}
             />
           </div>
 
           <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <Label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Grades</Label>
+            <div className="flex items-center justify-between">
+              <Label className="text-sm text-muted-foreground">Grades</Label>
               {!isReadOnly && (
-                <Button onClick={addRow} variant="outline" size="sm" className="h-7 px-2 border-border hover:bg-muted hover:text-primary text-muted-foreground rounded-sm">
-                  <Plus className="w-4 h-4 mr-1" /> Add
+                <Button onClick={addRow} variant="outline" size="sm">
+                  <Plus /> Add
                 </Button>
               )}
             </div>
 
-            <div className="border border-border rounded-sm bg-card overflow-hidden max-h-[300px] overflow-y-auto">
+            <div className="max-h-[300px] overflow-hidden overflow-y-auto rounded-[22px] bg-background">
               <Table>
-                <TableHeader className="bg-background sticky top-0 z-10">
-                  <TableRow className="border-border hover:bg-transparent">
-                    <TableHead className="text-muted-foreground font-mono text-xs uppercase h-8">Grade</TableHead>
-                    <TableHead className="text-muted-foreground font-mono text-xs uppercase h-8">Points</TableHead>
-                    {!isReadOnly && <TableHead className="w-[50px] h-8"></TableHead>}
+                <TableHeader className="sticky top-0 z-10 bg-background">
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="h-8 text-muted-foreground">Grade</TableHead>
+                    <TableHead className="h-8 text-muted-foreground">Points</TableHead>
+                    {!isReadOnly && <TableHead className="h-8 w-[50px]"></TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {grades.map((row, index) => (
-                    <TableRow key={index} className="border-border hover:bg-muted/50">
+                    <TableRow key={index}>
                       <TableCell className="py-2">
                         <Input
                           value={row.grade}
                           onChange={(e) => updateRow(index, 'grade', e.target.value)}
-                          className="h-8 bg-background border-border text-foreground rounded-sm disabled:opacity-75 disabled:cursor-not-allowed"
+                          className="h-8 rounded-xl"
                           placeholder="A+"
                           disabled={isReadOnly}
                         />
@@ -146,7 +148,7 @@ export function GradeScaleEditor({
                           max="100"
                           value={row.points}
                           onChange={(e) => updateRow(index, 'points', parseFloat(e.target.value) || 0)}
-                          className="h-8 bg-background border-border text-foreground rounded-sm disabled:opacity-75 disabled:cursor-not-allowed"
+                          className="h-8 rounded-xl"
                           disabled={isReadOnly}
                         />
                       </TableCell>
@@ -155,10 +157,11 @@ export function GradeScaleEditor({
                           <Button
                             variant="ghost"
                             size="icon"
+                            aria-label={`Remove grade ${row.grade}`}
                             onClick={() => removeRow(index)}
-                            className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-sm"
+                            className="text-muted-foreground hover:text-destructive"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 />
                           </Button>
                         </TableCell>
                       )}
@@ -166,7 +169,7 @@ export function GradeScaleEditor({
                   ))}
                   {grades.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={3} className="text-center text-muted-foreground font-mono text-xs py-4">
+                      <TableCell colSpan={3} className="py-4 text-center text-sm text-muted-foreground">
                         No grades added yet.
                       </TableCell>
                     </TableRow>
@@ -176,21 +179,14 @@ export function GradeScaleEditor({
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4">
-            <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="border-border text-muted-foreground hover:bg-muted hover:text-foreground rounded-sm font-mono text-xs uppercase tracking-widest"
-            >
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
               {isReadOnly ? 'Close' : 'Cancel'}
             </Button>
             {!isReadOnly && (
-              <Button
-                onClick={handleSave}
-                disabled={isSaving}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-sm font-mono text-xs uppercase tracking-widest"
-              >
-                {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Scale'}
+              <Button onClick={handleSave} disabled={isSaving}>
+                {isSaving && <Loader2 className="animate-spin" aria-hidden="true" />}
+                {isSaving ? 'Saving scale…' : 'Save scale'}
               </Button>
             )}
           </div>

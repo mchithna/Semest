@@ -17,7 +17,7 @@ export function ClassificationBadge({ score, graded = false, className }: Classi
       variant={meta.badgeVariant}
       className={cn(
         meta.color,
-        'max-w-full font-mono text-[10px] uppercase tracking-widest px-2 py-0.5',
+        'max-w-full font-mono text-xs uppercase tracking-widest px-2 py-0.5',
         className,
       )}
     >

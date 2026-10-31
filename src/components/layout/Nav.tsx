@@ -1,168 +1,152 @@
-import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { GraduationCap, LogOut, Menu } from 'lucide-react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from '@/components/ui/sheet'
 import { useAuth } from '@/context/AuthContext'
-import { ModeToggle } from '@/components/mode-toggle'
+import { LOGO_BARS } from '@/lib/brand'
+import { cn } from '@/lib/utils'
+import { Logo } from './Logo'
+import { NavActionSlot } from './NavActions'
+
+/** Same order as the mark: indigo, teal, gold, coral. */
+const TAB_COLOR: Record<string, string> = {
+  '/dashboard': LOGO_BARS[0].color,
+  '/degrees': LOGO_BARS[1].color,
+  '/presets': LOGO_BARS[2].color,
+  '/settings': LOGO_BARS[3].color,
+}
+
+const linkClass = ({ isActive }: { isActive: boolean }) =>
+  cn(
+    'relative flex h-16 items-center text-sm text-muted-foreground transition-colors hover:text-foreground',
+    isActive && 'text-foreground',
+  )
+
+function placeTabBar(list: HTMLElement, bar: HTMLElement) {
+  const active = list.querySelector<HTMLElement>('[aria-current="page"]')
+  if (!active) {
+    bar.style.opacity = '0'
+    return
+  }
+  bar.style.opacity = '1'
+  bar.style.left = `${active.offsetLeft}px`
+  bar.style.width = `${active.offsetWidth}px`
+  bar.style.backgroundColor = TAB_COLOR[active.dataset.nav ?? ''] ?? LOGO_BARS[2].color
+}
 
 export function Nav() {
   const { session, signOut } = useAuth()
   const navigate = useNavigate()
-  const location = useLocation()
+  const linksRef = useRef<HTMLDivElement>(null)
+  const barRef = useRef<HTMLSpanElement>(null)
+  const barReady = useRef(false)
 
   const handleSignOut = async () => {
     await signOut()
     navigate('/auth')
   }
 
-  const navLinks = session ? [
-    { label: 'Dashboard', path: '/dashboard' },
-    { label: 'Degrees', path: '/degrees' },
-    { label: 'Presets', path: '/presets' },
-    { label: 'Settings', path: '/settings' },
-  ] : [
-    { label: 'Browse Presets', path: '/presets' },
-  ]
+  const navLinks = session
+    ? [
+        { label: 'Dashboard', path: '/dashboard' },
+        { label: 'Degrees', path: '/degrees' },
+        { label: 'Presets', path: '/presets' },
+        { label: 'Settings', path: '/settings' },
+      ]
+    : [{ label: 'Browse presets', path: '/presets' }]
+
+  useLayoutEffect(() => {
+    const list = linksRef.current
+    const bar = barRef.current
+    if (!list || !bar) return
+    placeTabBar(list, bar)
+    if (barReady.current) return
+    const frame = requestAnimationFrame(() => {
+      barReady.current = true
+      bar.dataset.ready = ''
+    })
+    return () => cancelAnimationFrame(frame)
+  })
+
+  useEffect(() => {
+    const list = linksRef.current
+    if (!list) return
+    const observer = new ResizeObserver(() => {
+      const bar = barRef.current
+      if (bar) placeTabBar(list, bar)
+    })
+    observer.observe(list)
+    return () => observer.disconnect()
+  }, [session])
+
+  const accountActions = session ? (
+    <Button variant="outline" onClick={handleSignOut}>
+      Sign out
+    </Button>
+  ) : (
+    <>
+      <Button variant="outline" onClick={() => navigate('/auth')}>
+        Log in
+      </Button>
+      <Button onClick={() => navigate('/auth')}>Get started</Button>
+    </>
+  )
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        
-        {/* Logo */}
-        <div className="flex items-center gap-2">
-          <Link to="/" className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors">
-            <GraduationCap className="h-6 w-6" />
-            <span className="font-mono text-xl font-bold tracking-widest uppercase hidden sm:inline-block">
-              UniScore Track
-            </span>
+    <nav className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/90 backdrop-blur-md">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 px-4 sm:px-6">
+        <div className="flex min-w-0 items-center gap-8">
+          <Link to={session ? '/dashboard' : '/'} aria-label="Semest home" className="shrink-0">
+            <Logo />
           </Link>
-        </div>
-
-        {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-6">
-          <div className="flex items-center gap-4">
-            {navLinks.map(link => (
-              <Link 
-                key={link.path} 
-                to={link.path}
-                className={`text-sm font-mono tracking-wider uppercase transition-colors ${
-                  location.pathname.startsWith(link.path) 
-                    ? 'text-primary font-bold' 
-                    : 'text-muted-foreground hover:text-primary'
-                }`}
-              >
+          <div ref={linksRef} className="relative hidden h-16 items-center gap-6 md:flex">
+            {navLinks.map((link) => (
+              <NavLink key={link.path} to={link.path} data-nav={link.path} className={linkClass}>
                 {link.label}
-              </Link>
+              </NavLink>
             ))}
+            <span ref={barRef} aria-hidden className="nav-tab-bar pointer-events-none absolute bottom-0 h-0.5 opacity-0" />
           </div>
-
-          <div className="h-6 w-px bg-border"></div>
-          
-          <ModeToggle />
-
-          {session ? (
-            <div className="flex items-center gap-4">
-              <span className="text-xs font-mono text-muted-foreground hidden lg:inline-block">
-                {session.user.email}
-              </span>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleSignOut}
-                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 font-mono text-xs uppercase tracking-widest"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
-              </Button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                onClick={() => navigate('/auth')}
-                className="text-muted-foreground hover:text-primary hover:bg-transparent font-mono text-sm uppercase tracking-widest"
-              >
-                Log in
-              </Button>
-              <Button 
-                onClick={() => navigate('/auth')}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold font-mono text-sm uppercase tracking-widest"
-              >
-                Get Started
-              </Button>
-            </div>
-          )}
         </div>
 
-        {/* Mobile Nav Toggle */}
-        <div className="md:hidden flex items-center gap-2">
-          <ModeToggle />
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
-                <Menu className="h-6 w-6" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="bg-background border-border p-6 w-[300px]">
-              <SheetHeader className="text-left mb-8 hidden">
-                <SheetTitle className="text-emerald-400 font-mono tracking-widest uppercase">Navigation</SheetTitle>
-              </SheetHeader>
-              
-              <div className="flex flex-col gap-6">
-                <div className="flex flex-col gap-4">
-                  {navLinks.map(link => (
-                    <Link 
-                      key={link.path} 
+        <div className="flex items-center gap-2">
+          <NavActionSlot className="flex items-center gap-2 empty:hidden" />
+          <div className="hidden items-center gap-2 md:flex">{accountActions}</div>
+
+          <div className="md:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="Open menu">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[280px] border-border bg-background p-6">
+                <SheetHeader className="sr-only">
+                  <SheetTitle>Navigation</SheetTitle>
+                </SheetHeader>
+                <div className="flex flex-col gap-1">
+                  {navLinks.map((link) => (
+                    <NavLink
+                      key={link.path}
                       to={link.path}
-                      className={`text-lg font-mono tracking-wider uppercase transition-colors ${
-                        location.pathname.startsWith(link.path) 
-                          ? 'text-primary font-bold' 
-                          : 'text-muted-foreground hover:text-primary'
-                      }`}
+                      className={({ isActive }) =>
+                        cn(
+                          'border-b-2 border-transparent py-3 text-base text-muted-foreground transition-colors',
+                          isActive && 'text-foreground',
+                        )
+                      }
+                      style={({ isActive }) => (isActive ? { borderBottomColor: TAB_COLOR[link.path] } : undefined)}
                     >
                       {link.label}
-                    </Link>
+                    </NavLink>
                   ))}
+                  <div className="mt-6 flex flex-col gap-2">{accountActions}</div>
                 </div>
-
-                <div className="h-px w-full bg-border"></div>
-
-                {session ? (
-                  <div className="flex flex-col gap-4">
-                    <span className="text-sm font-mono text-muted-foreground truncate">
-                      {session.user.email}
-                    </span>
-                    <Button 
-                      variant="outline" 
-                      onClick={handleSignOut}
-                      className="w-full justify-start border-border text-muted-foreground hover:text-destructive hover:bg-destructive/10 font-mono uppercase tracking-widest"
-                    >
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Sign Out
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-4">
-                    <Button 
-                      variant="outline" 
-                      onClick={() => navigate('/auth')}
-                      className="w-full justify-center border-border text-muted-foreground hover:text-primary font-mono uppercase tracking-widest"
-                    >
-                      Log in
-                    </Button>
-                    <Button 
-                      onClick={() => navigate('/auth')}
-                      className="w-full justify-center bg-primary hover:bg-primary/90 text-primary-foreground font-bold font-mono uppercase tracking-widest"
-                    >
-                      Get Started
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </SheetContent>
-          </Sheet>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
-
       </div>
     </nav>
   )

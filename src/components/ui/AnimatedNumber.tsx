@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
+import { prefersReducedMotion } from '@/lib/motion'
 
 interface AnimatedNumberProps {
   value: number
@@ -14,6 +15,12 @@ export function AnimatedNumber({ value, decimals = 4, duration = 500, className 
   const rafId = useRef<number | null>(null)
 
   useEffect(() => {
+    if (prefersReducedMotion()) {
+      setDisplayValue(value)
+      startValue.current = value
+      return
+    }
+
     // If the value hasn't changed or it's the initial render
     if (value === displayValue && startValue.current === value) return
 
@@ -52,7 +59,7 @@ export function AnimatedNumber({ value, decimals = 4, duration = 500, className 
   }, [value, duration])
 
   return (
-    <span className={className}>
+    <span className={className ? `tabular-nums ${className}` : 'tabular-nums'}>
       {displayValue.toFixed(decimals)}
     </span>
   )

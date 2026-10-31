@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { earlierModuleOptions, groupPriorModules } from './priorModules'
+import { earlierModuleOptions, groupPriorModules, priorSemesters } from './priorModules'
 
 const semesters = [
   {
@@ -29,6 +29,17 @@ describe('earlierModuleOptions', () => {
 
   it('includes every saved semester when the new one is appended', () => {
     expect(earlierModuleOptions(semesters, null).map((mod) => mod.id)).toEqual(['b', 'a', 'c', 'd'])
+  })
+})
+
+describe('priorSemesters', () => {
+  it('lists each earlier semester once, in order', () => {
+    const options = earlierModuleOptions(semesters, null)
+    expect(priorSemesters(options)).toEqual([
+      { key: '0:Year 1, Semester 1', title: 'Year 1, Semester 1' },
+      { key: '1:Year 1, Semester 2', title: 'Year 1, Semester 2' },
+      { key: '2:Year 2, Semester 1', title: 'Year 2, Semester 1' },
+    ])
   })
 })
 
