@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { SRI_LANKAN_HONORS_BANDS } from '@/lib/classBands.fixture'
 import type { DegreeWithScale } from '@/lib/queries/degrees'
 import type { GradeRow } from '@/lib/queries/gradeScales'
 import type { SemesterWithModules } from '@/lib/queries/semesters'
@@ -34,6 +35,16 @@ function degree(): DegreeWithScale {
       label: 'Honours',
       is_system: true,
       grades: scale,
+      classification_scheme_id: 'scheme',
+      classification_scheme: {
+        id: 'scheme',
+        user_id: null,
+        label: 'Sri Lankan honors',
+        is_system: true,
+        applies_up_to: 4.5,
+        bands: SRI_LANKAN_HONORS_BANDS,
+        created_at: '2025-01-01',
+      },
       created_at: '2025-01-01',
     },
   }
@@ -236,7 +247,15 @@ describe('export report model', () => {
     expect(resolved.disabled).toContain('classificationRuler')
     expect(resolved.values.classificationRuler).toBe(false)
     const report = buildReport({
-      degree: { ...degree(), grade_scale: { ...degree().grade_scale!, grades: wide } },
+      degree: {
+        ...degree(),
+        grade_scale: {
+          ...degree().grade_scale!,
+          grades: wide,
+          classification_scheme_id: null,
+          classification_scheme: null,
+        },
+      },
       semesters: [semester('s1', 'Year 1', [module('a', 'Algorithms', 3, 'A')])],
       theme: 'ruler',
       toggles: resolved.values,

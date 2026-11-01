@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { MiniRuler } from '@/components/ruler/MiniRuler'
-import { bandsForScale } from '@/lib/bands'
+import { bandsForScale, classBandsOf } from '@/lib/bands'
 import { loadGuestDraft, sameGradeScale } from '@/lib/guestDraft'
 import { toast } from 'sonner'
 
@@ -99,6 +99,7 @@ export default function NewSemesterPage() {
           key={initialModules.length ? 'loaded' : 'empty'}
           initialModules={initialModules}
           gradeScale={degree.grade_scale?.grades || []}
+          classBands={classBandsOf(degree.grade_scale)}
           priorModules={earlierModuleOptions(semesters, null)}
           savedElsewhere={semesters.flatMap((semester) => semester.modules)}
           detailsChanged={detailsChanged}

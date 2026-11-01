@@ -6,7 +6,7 @@ import { useSemesters } from '@/hooks/useSemesters'
 import { useAuth } from '@/context/AuthContext'
 import { getCumulativeMetrics } from '@/lib/analytics'
 import { computeScore, formatGpa, hasGradedWork, totalCredits } from '@/lib/score'
-import { bandsForScale, nextBandSentence, standingSentence, type RulerMarker } from '@/lib/bands'
+import { bandsForScale, classBandsOf, nextBandSentence, standingSentence, type RulerMarker } from '@/lib/bands'
 import { MiniRuler } from '@/components/ruler/MiniRuler'
 import { Ruler } from '@/components/ruler/Ruler'
 import { TargetPredictor } from '@/components/dashboard/TargetPredictor'
@@ -57,7 +57,19 @@ export default function DashboardPage() {
   const { semesters, isLoading: isSemestersLoading } = useSemesters(activeDegreeId)
   const degreeParam = searchParams.get('degree')
   const scale = activeDegree?.grade_scale?.grades || []
-  const track = bandsForScale(scale)
+  const classBands = classBandsOf(activeDegree?.grade_scale)
+  const track = bandsForScale(scale, classBands)
+  const targetScope = [
+    activeDegreeId,
+    activeDegree?.grade_scale?.id ?? '',
+    activeDegree?.grade_scale?.classification_scheme_id ?? '',
+  ].join(':')
+  const defaultTarget = track.bands.filter((band) => band.tone !== 'plain' && band.label).at(-1)?.min ?? null
+  const [appliedTargetScope, setAppliedTargetScope] = useState<string | null>(null)
+  if (appliedTargetScope !== targetScope) {
+    setAppliedTargetScope(targetScope)
+    setTarget(defaultTarget)
+  }
 
   useEffect(() => {
     if (degrees.length === 0) return
@@ -68,11 +80,6 @@ export default function DashboardPage() {
     localStorage.setItem(DEGREE_STORAGE_KEY, next)
     if (degreeParam !== next) setSearchParams({ degree: next }, { replace: true })
   }, [degrees, degreeParam, activeDegreeId, setSearchParams])
-
-  useEffect(() => {
-    const bands = bandsForScale(scale).bands.filter((band) => band.tone !== 'plain' && band.label)
-    setTarget(bands.at(-1)?.min ?? null)
-  }, [activeDegreeId, activeDegree?.grade_scale?.id])
 
   const chooseDegree = (id: string) => {
     setActiveDegreeId(id)
@@ -106,7 +113,7 @@ export default function DashboardPage() {
     )
   }
 
-  const metrics = getCumulativeMetrics(semesters, scale)
+  const metrics = getCumulativeMetrics(semesters, scale, classBands)
   const graded = metrics.attemptedCredits > 0
   const standing = standingSentence(metrics.cgpa, graded, track)
   const next = graded ? nextBandSentence(metrics.cgpa, track) : null
@@ -221,6 +228,7 @@ export default function DashboardPage() {
                 gradedCredits={metrics.attemptedCredits}
                 highestGpa={metrics.highestGpa}
                 gradeScale={scale}
+                classBands={classBands}
                 initialRemaining={metrics.ungradedCredits}
                 target={target}
                 onTargetChange={setTarget}

@@ -8,7 +8,7 @@ import { computeScore, formatGpa, hasGradedWork, isUngradedGrade, totalCredits, 
 import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
 import { prefersReducedMotion } from '@/lib/motion'
 import { isUntouchedDraft, modulesMatch } from '@/lib/semesterDraft'
-import { CLASS_CUTOFFS, bandAt, bandsForScale, standingSentence } from '@/lib/bands'
+import { bandAt, bandsForScale, standingSentence, type Band } from '@/lib/bands'
 import { MiniRuler } from '@/components/ruler/MiniRuler'
 import { BAND_TEXT_CLASS } from '@/components/ruler/tone'
 import { projectCumulative } from '@/lib/semesterProjection'
@@ -20,6 +20,7 @@ const CONFETTI_COLORS = ['#5B6CFF', '#38B6C9', '#E6B84A', '#F07A5A']
 type CalculatorProps = {
   initialModules?: ModuleData[]
   gradeScale: GradeRow[]
+  classBands?: Band[]
   priorModules?: PriorModuleOption[]
   onSave?: (modules: ModuleData[]) => void | Promise<void>
   /** Runs after a successful save, once the brief confirmation has shown. */
@@ -42,6 +43,7 @@ type CalculatorProps = {
 export function Calculator({
   initialModules = [],
   gradeScale,
+  classBands = [],
   priorModules = [],
   onSave,
   onComplete,
@@ -67,7 +69,8 @@ export function Calculator({
   const credits = totalCredits(modules)
   const graded = hasGradedWork(modules, gradeScale)
   const previousScore = useRef<{ score: number; credits: number } | null>(null)
-  const track = bandsForScale(gradeScale)
+  const track = bandsForScale(gradeScale, classBands)
+  const firstMin = track.bands.find((item) => item.tone === 'first')?.min
   const band = graded ? bandAt(score, track) : null
   const sentence = standingSentence(score, graded, track)
   const showCumulative = savedElsewhere !== undefined
@@ -80,8 +83,8 @@ export function Calculator({
 
   useEffect(() => {
     const previous = previousScore.current
-    const isFirst = score >= CLASS_CUTOFFS.first && credits >= 12
-    const wasFirst = previous !== null && previous.score >= CLASS_CUTOFFS.first && previous.credits >= 12
+    const isFirst = firstMin != null && score >= firstMin && credits >= 12
+    const wasFirst = previous !== null && firstMin != null && previous.score >= firstMin && previous.credits >= 12
     if (previous && isFirst && !wasFirst && !prefersReducedMotion()) {
       confetti({
         particleCount: 100,
@@ -91,7 +94,7 @@ export function Calculator({
       })
     }
     previousScore.current = { score, credits }
-  }, [score, credits])
+  }, [score, credits, firstMin])
 
   const savedTimer = useRef<number | null>(null)
   const [saved, setSaved] = useState(false)

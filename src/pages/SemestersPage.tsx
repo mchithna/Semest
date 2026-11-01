@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { useDegrees } from '@/hooks/useDegrees'
 import { useSemesters } from '@/hooks/useSemesters'
 import { computeScore, formatGpa, hasGradedWork, totalCredits } from '@/lib/score'
-import { bandAt, bandsForScale, standingSentence, type RulerMarker } from '@/lib/bands'
+import { bandAt, bandsForScale, classBandsOf, standingSentence, type RulerMarker } from '@/lib/bands'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { MiniRuler } from '@/components/ruler/MiniRuler'
 import { Ruler } from '@/components/ruler/Ruler'
@@ -309,7 +309,7 @@ export default function SemestersPage() {
   }
 
   const scale = degree.grade_scale?.grades || []
-  const track = bandsForScale(scale)
+  const track = bandsForScale(scale, classBandsOf(degree.grade_scale))
 
   return (
     <div className="min-h-screen bg-background text-foreground">

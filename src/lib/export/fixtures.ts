@@ -1,4 +1,6 @@
+import { SRI_LANKAN_HONORS_BANDS } from '@/lib/classBands.fixture'
 import type { DegreeWithScale } from '@/lib/queries/degrees'
+import type { ClassificationScheme } from '@/lib/queries/classificationSchemes'
 import type { GradeRow } from '@/lib/queries/gradeScales'
 import type { SemesterWithModules } from '@/lib/queries/semesters'
 import type { OptionKey } from './themes'
@@ -39,7 +41,22 @@ const SCALE_PERCENT: GradeRow[] = [
   { grade: 'Fail', points: 0 },
 ]
 
-function degree(title: string, institution: string, grades: GradeRow[]): DegreeWithScale {
+const HONORS_SCHEME: ClassificationScheme = {
+  id: 'scheme',
+  user_id: null,
+  label: 'Sri Lankan honors',
+  is_system: true,
+  applies_up_to: 4.5,
+  bands: SRI_LANKAN_HONORS_BANDS,
+  created_at: '2026-01-01',
+}
+
+function degree(
+  title: string,
+  institution: string,
+  grades: GradeRow[],
+  scheme: ClassificationScheme | null = HONORS_SCHEME,
+): DegreeWithScale {
   return {
     id: 'deg',
     user_id: 'user',
@@ -48,7 +65,16 @@ function degree(title: string, institution: string, grades: GradeRow[]): DegreeW
     started_year: 2026,
     grade_scale_id: 'scale',
     created_at: '2026-01-01',
-    grade_scale: { id: 'scale', user_id: null, label: 'Scale', is_system: false, grades, created_at: '2026-01-01' },
+    grade_scale: {
+      id: 'scale',
+      user_id: null,
+      label: 'Scale',
+      is_system: false,
+      grades,
+      classification_scheme_id: scheme?.id ?? null,
+      classification_scheme: scheme,
+      created_at: '2026-01-01',
+    },
   }
 }
 
@@ -180,7 +206,7 @@ export const FIXTURES: QaFixture[] = [
   {
     id: 'nobands',
     label: 'No classification bands',
-    degree: degree('MBA Part Time', 'Colombo Business School', SCALE_PERCENT),
+    degree: degree('MBA Part Time', 'Colombo Business School', SCALE_PERCENT, null),
     semesters: [
       semester(1, 'Semester 1', [
         ['Strategic Management', 3, 'Distinction'],

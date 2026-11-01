@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 import { useDegrees } from '@/hooks/useDegrees'
 import { useSemesters } from '@/hooks/useSemesters'
 import { getCumulativeMetrics } from '@/lib/analytics'
-import { bandsForScale } from '@/lib/bands'
+import { bandsForScale, classBandsOf, type Band } from '@/lib/bands'
 import { friendlyError } from '@/lib/errors'
 import type { DegreeWithScale } from '@/lib/queries/degrees'
 import type { GradeRow } from '@/lib/queries/gradeScales'
@@ -13,11 +13,11 @@ import { CreateDegreeDialog } from '@/components/degrees/CreateDegreeDialog'
 import { MiniRuler } from '@/components/ruler/MiniRuler'
 import { Button } from '@/components/ui/button'
 
-function DegreeTrack({ degreeId, grades }: { degreeId: string; grades: GradeRow[] }) {
+function DegreeTrack({ degreeId, grades, classBands }: { degreeId: string; grades: GradeRow[]; classBands: Band[] }) {
   const { semesters, isLoading } = useSemesters(degreeId)
-  const track = bandsForScale(grades)
+  const track = bandsForScale(grades, classBands)
   if (isLoading) return <div className="h-1.5 animate-pulse rounded-full bg-muted" />
-  const metrics = getCumulativeMetrics(semesters, grades)
+  const metrics = getCumulativeMetrics(semesters, grades, classBands)
   return <MiniRuler track={track} value={metrics.attemptedCredits > 0 ? metrics.cgpa : null} />
 }
 
@@ -130,7 +130,7 @@ export default function DegreesPage() {
                   </div>
                 </div>
                 <div className="mt-6">
-                  <DegreeTrack degreeId={degree.id} grades={degree.grade_scale?.grades || []} />
+                  <DegreeTrack degreeId={degree.id} grades={degree.grade_scale?.grades || []} classBands={classBandsOf(degree.grade_scale)} />
                 </div>
               </article>
             ))}

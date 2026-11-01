@@ -1,5 +1,5 @@
 import { supabase } from '../supabase'
-import type { GradeScale } from './gradeScales'
+import { GRADE_SCALE_SELECT, type GradeScale } from './gradeScales'
 
 export type Degree = {
   id: string
@@ -20,7 +20,7 @@ export async function getDegrees(): Promise<DegreeWithScale[]> {
     .from('degrees')
     .select(`
       *,
-      grade_scale:grade_scales(*)
+      grade_scale:grade_scales(${GRADE_SCALE_SELECT})
     `)
     .order('created_at', { ascending: false })
 

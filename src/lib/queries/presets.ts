@@ -1,5 +1,5 @@
 import { supabase } from '../supabase'
-import type { GradeScale } from './gradeScales'
+import { GRADE_SCALE_SELECT, type GradeScale } from './gradeScales'
 
 export type Preset = {
   id: string
@@ -50,7 +50,7 @@ export async function getPublicPresets(page = 0, search = ''): Promise<{ presets
     .from('presets')
     .select(`
       *,
-      grade_scale:grade_scales(*)
+      grade_scale:grade_scales(${GRADE_SCALE_SELECT})
     `, { count: 'exact' })
     .eq('is_public', true)
     .order('use_count', { ascending: false })
@@ -82,7 +82,7 @@ export async function getMyPresets(): Promise<PresetWithScale[]> {
     .from('presets')
     .select(`
       *,
-      grade_scale:grade_scales(*)
+      grade_scale:grade_scales(${GRADE_SCALE_SELECT})
     `)
     .eq('creator_id', authData.user.id)
     .order('created_at', { ascending: false })

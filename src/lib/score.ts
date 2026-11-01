@@ -1,7 +1,5 @@
-import { CLASS_CUTOFFS, HONORS_MAX_POINTS } from './bands'
+import type { Band } from './bands'
 import type { GradeRow } from './queries/gradeScales'
-
-export { HONORS_MAX_POINTS }
 
 export type ModuleWithGrade = {
   credits: number
@@ -36,12 +34,6 @@ export function formatGpa(value: number): string {
 }
 
 export const UNGRADED_GRADE = 'Not graded'
-
-export function honorsApply(scale: GradeRow[]): boolean {
-  if (scale.length === 0) return false
-  const max = Math.max(...scale.map((row) => Number(row.points)))
-  return Number.isFinite(max) && max <= HONORS_MAX_POINTS
-}
 
 export function isUngradedGrade(grade: string): boolean {
   const normalized = grade.trim().toUpperCase()
@@ -130,16 +122,26 @@ export function hasGradedWork(modules: ModuleWithGrade[], scale: GradeRow[]): bo
   return attemptedCredits(modules, scale) > 0
 }
 
-export function classify(score: number, graded = false): keyof typeof CLASSIFICATION_META {
-  if (score >= CLASS_CUTOFFS.first) return 'First Class'
-  if (score >= CLASS_CUTOFFS.secondUpper) return 'Second Upper'
-  if (score >= CLASS_CUTOFFS.secondLower) return 'Second Lower'
-  if (score >= CLASS_CUTOFFS.pass) return 'General Pass'
+const CLASS_BY_TONE = {
+  pass: 'General Pass',
+  'second-lower': 'Second Lower',
+  'second-upper': 'Second Upper',
+  first: 'First Class',
+} as const
+
+export function classify(score: number, graded = false, classBands: Band[] = []): keyof typeof CLASSIFICATION_META {
+  const bands = classBands
+    .filter((band): band is Band & { tone: keyof typeof CLASS_BY_TONE } => band.tone !== 'plain')
+    .sort((a, b) => b.min - a.min)
+  if (bands.length === 0) return 'Unknown'
+  for (const band of bands) {
+    if (score >= band.min) return CLASS_BY_TONE[band.tone]
+  }
   if (score > 0 || graded) return 'Fail'
   return 'Unknown'
 }
 
-export function standingLabel(score: number, graded: boolean, scale: GradeRow[] = []): string {
-  if (scale.length > 0 && !honorsApply(scale)) return ''
-  return CLASSIFICATION_META[classify(score, graded)].label
+export function standingLabel(score: number, graded: boolean, classBands: Band[] = []): string {
+  if (!classBands.some((band) => band.tone !== 'plain')) return ''
+  return CLASSIFICATION_META[classify(score, graded, classBands)].label
 }
