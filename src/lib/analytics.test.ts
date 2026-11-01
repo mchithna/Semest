@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest'
+import { SRI_LANKAN_HONORS_BANDS } from './classBands.fixture'
 import { getCumulativeMetrics } from './analytics'
 import type { SemesterWithModules } from './queries/semesters'
 import type { GradeRow } from './queries/gradeScales'
@@ -13,7 +14,7 @@ describe('Analytics Utility', () => {
   ]
 
   it('returns No Data standing for empty semesters array', () => {
-    const metrics = getCumulativeMetrics([], gradeScale)
+    const metrics = getCumulativeMetrics([], gradeScale, SRI_LANKAN_HONORS_BANDS)
     expect(metrics.cgpa).toBe(0)
     expect(metrics.earnedCredits).toBe(0)
     expect(metrics.highestGpa).toBe(0)
@@ -55,7 +56,7 @@ describe('Analytics Utility', () => {
     // Sem 1: (3*4.0 + 4*3.0) / 7 = 24 / 7 ≈ 3.4286
     // Sem 2: (3*4.2 + 3*4.0) / 6 = 24.6 / 6 = 4.10
     // Total CGPA: (12 + 12 + 12.6 + 12) / 13 = 48.6 / 13 ≈ 3.7385
-    const metrics = getCumulativeMetrics(semesters, gradeScale)
+    const metrics = getCumulativeMetrics(semesters, gradeScale, SRI_LANKAN_HONORS_BANDS)
     expect(metrics.earnedCredits).toBe(13)
     expect(metrics.highestGpa).toBe(4.1)
     expect(metrics.cgpa).toBeCloseTo(3.7385, 3)
@@ -80,7 +81,7 @@ describe('Analytics Utility', () => {
       },
     ]
 
-    const metrics = getCumulativeMetrics(semesters, gradeScale)
+    const metrics = getCumulativeMetrics(semesters, gradeScale, SRI_LANKAN_HONORS_BANDS)
     expect(metrics.earnedCredits).toBe(7)
     expect(metrics.cgpa).toBeCloseTo(3.4286, 3)
   })
@@ -103,7 +104,7 @@ describe('Analytics Utility', () => {
       },
     ]
     // GPA = 6 / 6 = 1.0
-    const metrics = getCumulativeMetrics(semesters, gradeScale)
+    const metrics = getCumulativeMetrics(semesters, gradeScale, SRI_LANKAN_HONORS_BANDS)
     expect(metrics.cgpa).toBe(1.0)
     expect(metrics.standing).toBe('Fail')
   })
@@ -124,8 +125,8 @@ describe('Analytics Utility', () => {
         ],
       },
     ]
-    expect(getCumulativeMetrics(failed, gradeScale).cgpa).toBe(0)
-    expect(getCumulativeMetrics(failed, gradeScale).standing).toBe('Fail')
+    expect(getCumulativeMetrics(failed, gradeScale, SRI_LANKAN_HONORS_BANDS).cgpa).toBe(0)
+    expect(getCumulativeMetrics(failed, gradeScale, SRI_LANKAN_HONORS_BANDS).standing).toBe('Fail')
 
     const ungraded: SemesterWithModules[] = [
       {
@@ -142,10 +143,10 @@ describe('Analytics Utility', () => {
         ],
       },
     ]
-    expect(getCumulativeMetrics(ungraded, gradeScale).standing).toBe('No Data')
+    expect(getCumulativeMetrics(ungraded, gradeScale, SRI_LANKAN_HONORS_BANDS).standing).toBe('No Data')
 
     const wideScale = [{ grade: 'A', points: 10 }]
-    const wide = getCumulativeMetrics(failed, wideScale)
+    const wide = getCumulativeMetrics(failed, wideScale, [])
     expect(wide.standing).toBe('')
   })
 
@@ -167,7 +168,7 @@ describe('Analytics Utility', () => {
       },
     ]
     // GPA = (3*3.0 + 3*4.0) / 6 = 21 / 6 = 3.5
-    const metrics = getCumulativeMetrics(semesters, gradeScale)
+    const metrics = getCumulativeMetrics(semesters, gradeScale, SRI_LANKAN_HONORS_BANDS)
     expect(metrics.cgpa).toBe(3.5)
     expect(metrics.standing).toBe('Second Class (Upper)')
 
@@ -180,6 +181,7 @@ describe('Analytics Utility', () => {
         ],
       }],
       gradeScale,
+      SRI_LANKAN_HONORS_BANDS,
     )
     // GPA = (3*3.0 + 3*2.0) / 6 = 2.5 is a pass. 3.0 exactly is the lower cut.
     expect(lower.cgpa).toBe(2.5)

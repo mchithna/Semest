@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { MiniRuler } from '@/components/ruler/MiniRuler'
-import { bandsForScale } from '@/lib/bands'
+import { bandsForScale, classBandsOf } from '@/lib/bands'
 
 export default function EditSemesterPage() {
   const { degreeId, id: semesterId } = useParams()
@@ -96,6 +96,7 @@ export default function EditSemesterPage() {
           key={semester.id}
           initialModules={initialModules}
           gradeScale={degree.grade_scale?.grades || []}
+          classBands={classBandsOf(degree.grade_scale)}
           priorModules={priorModules}
           baselineModules={initialModules}
           savedElsewhere={semesters.filter((item) => item.id !== semester.id).flatMap((item) => item.modules)}

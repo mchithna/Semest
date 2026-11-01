@@ -348,10 +348,16 @@ begin
     raise exception 'Access denied';
   end if;
 
-  select d.grade_scale_id, jsonb_build_object('label', gs.label, 'grades', gs.grades)
+  select d.grade_scale_id, jsonb_build_object(
+    'label', gs.label,
+    'grades', gs.grades,
+    'classification_scheme_id', gs.classification_scheme_id,
+    'classification_bands', cs.bands
+  )
   into v_scale_id, v_scale_snap
   from degrees d
   left join grade_scales gs on gs.id = d.grade_scale_id
+  left join classification_schemes cs on cs.id = gs.classification_scheme_id
   where d.id = p_degree_id;
 
   v_code := generate_preset_code();
@@ -393,6 +399,7 @@ declare
   v_preset          record;
   v_degree_id       uuid;
   v_scale_id        uuid;
+  v_scheme_id       uuid;
   v_next_sem_index  int;
   v_sem_record      record;
   v_new_sem_id      uuid;
@@ -409,12 +416,35 @@ begin
   ) then
     v_scale_id := v_preset.grade_scale_id;
   elsif v_preset.scale_snapshot is not null then
-    insert into grade_scales (user_id, label, is_system, grades)
+    v_scheme_id := null;
+    if coalesce(v_preset.scale_snapshot->>'classification_scheme_id', '') ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then
+      select cs.id into v_scheme_id
+      from classification_schemes cs
+      where cs.id = (v_preset.scale_snapshot->>'classification_scheme_id')::uuid
+        and cs.is_system = true;
+    end if;
+
+    if v_scheme_id is null
+       and jsonb_typeof(v_preset.scale_snapshot->'classification_bands') = 'array'
+       and jsonb_array_length(v_preset.scale_snapshot->'classification_bands') > 0 then
+      insert into classification_schemes (user_id, label, is_system, applies_up_to, bands)
+      values (
+        auth.uid(),
+        coalesce(nullif(v_preset.scale_snapshot->>'label', ''), 'Custom') || ' classes',
+        false,
+        null,
+        v_preset.scale_snapshot->'classification_bands'
+      )
+      returning id into v_scheme_id;
+    end if;
+
+    insert into grade_scales (user_id, label, is_system, grades, classification_scheme_id)
     values (
       auth.uid(),
       (v_preset.scale_snapshot->>'label') || ' (from preset ' || p_preset_code || ')',
       false,
-      v_preset.scale_snapshot->'grades'
+      v_preset.scale_snapshot->'grades',
+      v_scheme_id
     )
     returning id into v_scale_id;
   else
@@ -477,10 +507,16 @@ begin
     raise exception 'Degree access denied';
   end if;
 
-  select d.grade_scale_id, jsonb_build_object('label', gs.label, 'grades', gs.grades)
+  select d.grade_scale_id, jsonb_build_object(
+    'label', gs.label,
+    'grades', gs.grades,
+    'classification_scheme_id', gs.classification_scheme_id,
+    'classification_bands', cs.bands
+  )
   into v_scale_id, v_scale_snap
   from degrees d
   left join grade_scales gs on gs.id = d.grade_scale_id
+  left join classification_schemes cs on cs.id = gs.classification_scheme_id
   where d.id = p_degree_id;
 
   delete from preset_semesters where preset_id = p_preset_id;
@@ -513,8 +549,15 @@ begin
   select jsonb_build_object(
     'preset',   row_to_json(p),
     'scale',    coalesce(
-                  (select jsonb_build_object('label', gs.label, 'grades', gs.grades)
-                   from grade_scales gs where gs.id = p.grade_scale_id),
+                  (select jsonb_build_object(
+                     'label', gs.label,
+                     'grades', gs.grades,
+                     'classification_scheme_id', gs.classification_scheme_id,
+                     'classification_bands', cs.bands
+                   )
+                   from grade_scales gs
+                   left join classification_schemes cs on cs.id = gs.classification_scheme_id
+                   where gs.id = p.grade_scale_id),
                   p.scale_snapshot
                 ),
     'semesters', coalesce((
@@ -783,3 +826,91 @@ revoke all on function public.get_preset_with_scale(text) from public;
 grant execute on function public.get_preset_with_scale(text) to anon, authenticated;
 
 alter table modules add column if not exists retakes_module_id uuid references modules(id) on delete set null;
+
+-- ─────────────────────────────────────────────────
+-- CLASSIFICATION SCHEMES
+-- Class cuts live here, separate from letter-grade points.
+-- Existing databases: this block is safe to re-run.
+-- It does not rewrite module rows. A scale is linked only
+-- while its classification_scheme_id is still empty.
+-- ─────────────────────────────────────────────────
+create table if not exists classification_schemes (
+  id            uuid primary key default gen_random_uuid(),
+  user_id       uuid references auth.users(id) on delete cascade,
+  label         text not null,
+  is_system     boolean not null default false,
+  applies_up_to numeric,
+  bands         jsonb not null,
+  created_at    timestamptz not null default now(),
+  constraint classification_schemes_owner
+    check ((is_system = true and user_id is null) or (is_system = false and user_id is not null)),
+  constraint classification_schemes_bands_array
+    check (jsonb_typeof(bands) = 'array' and jsonb_array_length(bands) > 0),
+  constraint classification_schemes_applies_up_to
+    check (applies_up_to is null or applies_up_to > 0)
+);
+
+create unique index if not exists unique_system_classification_label
+  on classification_schemes (label) where is_system = true;
+
+create index if not exists classification_schemes_user_id_idx
+  on classification_schemes (user_id);
+
+alter table classification_schemes enable row level security;
+
+drop policy if exists "Anyone can read system classifications" on classification_schemes;
+create policy "Anyone can read system classifications"
+  on classification_schemes for select
+  using (is_system = true);
+
+drop policy if exists "Users manage own classifications" on classification_schemes;
+create policy "Users manage own classifications"
+  on classification_schemes for all
+  using ((select auth.uid()) = user_id and is_system = false)
+  with check ((select auth.uid()) = user_id and is_system = false);
+
+insert into classification_schemes (user_id, label, is_system, applies_up_to, bands)
+values (
+  null,
+  'Sri Lankan honors',
+  true,
+  4.5,
+  '[
+    {"id":"pass","label":"Pass","min":2,"max":3,"tone":"pass"},
+    {"id":"second-lower","label":"Second lower","min":3,"max":3.3,"tone":"second-lower"},
+    {"id":"second-upper","label":"Second upper","min":3.3,"max":3.7,"tone":"second-upper"},
+    {"id":"first","label":"First","min":3.7,"max":4,"tone":"first"}
+  ]'::jsonb
+)
+on conflict (label) where is_system = true do nothing;
+
+alter table grade_scales
+  add column if not exists classification_scheme_id uuid references classification_schemes(id) on delete set null;
+
+create index if not exists grade_scales_classification_scheme_id_idx
+  on grade_scales (classification_scheme_id);
+
+update grade_scales gs
+set classification_scheme_id = scheme.id
+from classification_schemes scheme
+where scheme.is_system = true
+  and scheme.label = 'Sri Lankan honors'
+  and gs.classification_scheme_id is null
+  and scheme.applies_up_to is not null
+  and jsonb_typeof(gs.grades) = 'array'
+  and jsonb_array_length(gs.grades) > 0
+  and (
+    select coalesce(max((elem->>'points')::numeric), 0)
+    from jsonb_array_elements(gs.grades) elem
+  ) <= scheme.applies_up_to;
+
+update presets p
+set scale_snapshot = p.scale_snapshot || jsonb_build_object(
+  'classification_scheme_id', gs.classification_scheme_id,
+  'classification_bands', cs.bands
+)
+from grade_scales gs
+left join classification_schemes cs on cs.id = gs.classification_scheme_id
+where p.grade_scale_id = gs.id
+  and p.scale_snapshot is not null
+  and not (p.scale_snapshot ? 'classification_bands');

@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import type { GradeRow } from '@/lib/queries/gradeScales'
-import { bandsForScale } from '@/lib/bands'
+import { bandsForScale, type Band } from '@/lib/bands'
 import { formatGpa, GPA_DECIMALS } from '@/lib/score'
 import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
 
@@ -13,6 +13,7 @@ type TargetPredictorProps = {
   gradedCredits: number
   highestGpa: number
   gradeScale: GradeRow[]
+  classBands?: Band[]
   initialRemaining?: number
   target: number | null
   onTargetChange: (value: number | null) => void
@@ -23,6 +24,7 @@ export function TargetPredictor({
   gradedCredits,
   highestGpa,
   gradeScale,
+  classBands = [],
   initialRemaining = 0,
   target,
   onTargetChange,
@@ -30,8 +32,8 @@ export function TargetPredictor({
   const [remainingCredits, setRemainingCredits] = useState(
     initialRemaining > 0 ? String(initialRemaining) : '',
   )
-  const track = bandsForScale(gradeScale)
-  const classBands = track.bands.filter((band) => band.tone !== 'plain' && band.label)
+  const track = bandsForScale(gradeScale, classBands)
+  const labeledBands = track.bands.filter((band) => band.tone !== 'plain' && band.label)
   const maxPoints = gradeScale.length > 0 ? Math.max(...gradeScale.map((grade) => Number(grade.points))) : track.max
 
   useEffect(() => {
@@ -84,9 +86,9 @@ export function TargetPredictor({
         </p>
       </div>
 
-      {classBands.length > 0 ? (
+      {labeledBands.length > 0 ? (
         <div className="flex flex-wrap gap-2" role="group" aria-label="Target class">
-          {classBands.map((band) => {
+          {labeledBands.map((band) => {
             const selected = target === band.min
             return (
               <Button

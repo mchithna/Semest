@@ -5,13 +5,16 @@ import type { ModuleData } from '@/components/calculator/ModuleRow'
 import { Button } from '@/components/ui/button'
 import { GraduationCap, ArrowRight, LineChart, Library, Loader2 } from 'lucide-react'
 import { BAND_TEXT_CLASS, cardAccentClass } from '@/components/ruler/tone'
+import { classBandsOf, type Band } from '@/lib/bands'
 import { GUEST_SCALE, loadGuestDraft, saveGuestDraft } from '@/lib/guestDraft'
+import { getSystemClassificationSchemes, matchingScheme } from '@/lib/queries/classificationSchemes'
 import { useAuth } from '@/context/AuthContext'
 
 export default function LandingPage() {
   const { session, loading } = useAuth()
   const navigate = useNavigate()
   const [initialModules, setInitialModules] = useState<ModuleData[]>([])
+  const [classBands, setClassBands] = useState<Band[]>([])
 
   // Load from session storage if exists
   useEffect(() => {
@@ -22,6 +25,22 @@ export default function LandingPage() {
       } catch (e) {
         // ignore
       }
+    }
+  }, [])
+
+  useEffect(() => {
+    let active = true
+    getSystemClassificationSchemes()
+      .then((schemes) => {
+        if (!active) return
+        const match = matchingScheme(schemes, GUEST_SCALE)
+        setClassBands(match ? classBandsOf({ classification_scheme: match }) : [])
+      })
+      .catch(() => {
+        if (active) setClassBands([])
+      })
+    return () => {
+      active = false
     }
   }, [])
 
@@ -97,6 +116,7 @@ export default function LandingPage() {
             key={initialModules.length ? 'loaded' : 'empty'}
             initialModules={initialModules}
             gradeScale={GUEST_SCALE}
+            classBands={classBands}
             onSave={handleGuestSave}
             onComplete={() => navigate('/auth')}
           />

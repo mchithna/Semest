@@ -1,6 +1,4 @@
-/** Sri Lankan 4.0 class cuts. Pages read this module instead of embedding 3.30 or 3.70. */
-export const HONORS_MAX_POINTS = 4.5
-
+/** Class cuts come from `classification_schemes`. This module only turns those rows into a ruler track. */
 export type BandTone = 'pass' | 'second-lower' | 'second-upper' | 'first' | 'plain'
 
 export type Band = {
@@ -17,19 +15,7 @@ export type BandTrack = {
   bands: Band[]
 }
 
-export const CLASS_BANDS: Band[] = [
-  { id: 'pass', label: 'Pass', min: 2, max: 3, tone: 'pass' },
-  { id: 'second-lower', label: 'Second lower', min: 3, max: 3.3, tone: 'second-lower' },
-  { id: 'second-upper', label: 'Second upper', min: 3.3, max: 3.7, tone: 'second-upper' },
-  { id: 'first', label: 'First', min: 3.7, max: 4, tone: 'first' },
-]
-
-export const CLASS_CUTOFFS = {
-  pass: CLASS_BANDS[0].min,
-  secondLower: CLASS_BANDS[1].min,
-  secondUpper: CLASS_BANDS[2].min,
-  first: CLASS_BANDS[3].min,
-} as const
+const BAND_TONES = new Set<BandTone>(['pass', 'second-lower', 'second-upper', 'first', 'plain'])
 
 const CLASS_PHRASE: Record<Exclude<BandTone, 'plain'>, string> = {
   pass: 'Pass',
@@ -40,31 +26,53 @@ const CLASS_PHRASE: Record<Exclude<BandTone, 'plain'>, string> = {
 
 type ScalePoints = { points: number }
 
-export function bandsForScale(scale: ScalePoints[] = [], overrides?: Band[]): BandTrack {
-  if (overrides && overrides.length > 0) {
-    return trackFromBands(overrides)
-  }
+type ScaleWithClasses = {
+  classification_scheme?: { bands?: unknown } | null
+  classification_bands?: unknown
+}
 
+/** Bands saved on a grade scale, either as a joined scheme or a preset snapshot. */
+export function classBandsOf(scale?: ScaleWithClasses | null): Band[] {
+  if (!scale) return []
+  const fromScheme = parseClassBands(scale.classification_scheme?.bands)
+  if (fromScheme.length > 0) return fromScheme
+  return parseClassBands(scale.classification_bands)
+}
+
+/** Keeps only rows that match the band shape stored in `classification_schemes.bands`. */
+export function parseClassBands(value: unknown): Band[] {
+  if (!Array.isArray(value)) return []
+  const bands: Band[] = []
+  for (const row of value) {
+    if (!row || typeof row !== 'object') continue
+    const item = row as Record<string, unknown>
+    const id = typeof item.id === 'string' ? item.id.trim() : ''
+    const label = typeof item.label === 'string' ? item.label : ''
+    const tone = item.tone
+    const min = Number(item.min)
+    const max = Number(item.max)
+    if (!id || typeof tone !== 'string' || !BAND_TONES.has(tone as BandTone)) continue
+    if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min) continue
+    bands.push({ id, label, min, max, tone: tone as BandTone })
+  }
+  return bands.sort((a, b) => a.min - b.min || a.max - b.max)
+}
+
+export function bandsForScale(scale: ScalePoints[] = [], classBands?: Band[] | null): BandTrack {
   const points = scale
     .map((row) => Number(row.points))
     .filter((value) => Number.isFinite(value))
+  const scaleMax = points.length > 0 ? Math.max(...points) : 0
+  const bands = parseClassBands(classBands)
 
-  if (points.length > 0 && !honorsScale(points)) {
-    const top = Math.max(...points)
-    const max = top > 0 ? top : 1
-    return {
-      min: 0,
-      max,
-      bands: [{ id: 'scale', label: '', min: 0, max, tone: 'plain' }],
-    }
-  }
+  if (bands.length === 0) return plainTrack(scaleMax)
 
-  const scaleMax = points.length > 0 ? Math.max(...points) : 4
-  const top = scaleMax > CLASS_BANDS[CLASS_BANDS.length - 1].max ? scaleMax : CLASS_BANDS[CLASS_BANDS.length - 1].max
-  const bands = CLASS_BANDS.map((band, index) =>
-    index === CLASS_BANDS.length - 1 ? { ...band, max: top } : { ...band },
+  const topBand = bands[bands.length - 1]
+  const top = scaleMax > topBand.max ? scaleMax : topBand.max
+  const stretched = bands.map((band, index) =>
+    index === bands.length - 1 ? { ...band, max: top } : { ...band },
   )
-  return { min: bands[0].min, max: top, bands }
+  return { min: stretched[0].min, max: top, bands: stretched }
 }
 
 export function markerPercent(value: number, track: BandTrack): number {
@@ -159,16 +167,12 @@ export function placeMarkers(
   return placed
 }
 
-function honorsScale(points: number[]): boolean {
-  const max = Math.max(...points)
-  return Number.isFinite(max) && max <= HONORS_MAX_POINTS
-}
-
-function trackFromBands(bands: Band[]): BandTrack {
+function plainTrack(scaleMax: number): BandTrack {
+  const max = scaleMax > 0 ? scaleMax : 1
   return {
-    min: Math.min(...bands.map((band) => band.min)),
-    max: Math.max(...bands.map((band) => band.max)),
-    bands,
+    min: 0,
+    max,
+    bands: [{ id: 'scale', label: '', min: 0, max, tone: 'plain' }],
   }
 }
 

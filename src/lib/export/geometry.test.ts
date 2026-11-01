@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { SRI_LANKAN_HONORS_BANDS } from '@/lib/classBands.fixture'
 import { bandsForScale } from '@/lib/bands'
 import { clampPill, fitBandLabel, pillWidth, rulerGeometry } from './geometry'
 
@@ -7,8 +8,8 @@ const scale400 = [{ points: 4 }, { points: 3.7 }, { points: 0 }]
 
 describe('ruler geometry', () => {
   it('uses the degree scale maximum, not a hardcoded 4.0', () => {
-    const wide = rulerGeometry(bandsForScale(scale420))
-    const narrow = rulerGeometry(bandsForScale(scale400))
+    const wide = rulerGeometry(bandsForScale(scale420, SRI_LANKAN_HONORS_BANDS))
+    const narrow = rulerGeometry(bandsForScale(scale400, SRI_LANKAN_HONORS_BANDS))
     expect(wide.max).toBe(4.2)
     expect(narrow.max).toBe(4)
     expect(wide.pos(3.3)).toBeCloseTo((3.3 - 2) / 2.2, 6)
@@ -16,7 +17,7 @@ describe('ruler geometry', () => {
   })
 
   it('clamps positions to the bar', () => {
-    const geo = rulerGeometry(bandsForScale(scale420))
+    const geo = rulerGeometry(bandsForScale(scale420, SRI_LANKAN_HONORS_BANDS))
     expect(geo.pos(0)).toBe(0)
     expect(geo.pos(9)).toBe(1)
     expect(geo.pct(2)).toBe(0)
@@ -24,7 +25,7 @@ describe('ruler geometry', () => {
 
   it('builds band widths from pos(end) - pos(start) so they tile the bar', () => {
     for (const scale of [scale420, scale400]) {
-      const geo = rulerGeometry(bandsForScale(scale))
+      const geo = rulerGeometry(bandsForScale(scale, SRI_LANKAN_HONORS_BANDS))
       expect(geo.bands.reduce((sum, band) => sum + band.width, 0)).toBeCloseTo(100, 6)
       geo.bands.forEach((band, index) => {
         expect(band.width).toBeCloseTo((geo.pos(band.max) - geo.pos(band.min)) * 100, 9)
@@ -34,7 +35,7 @@ describe('ruler geometry', () => {
   })
 
   it('puts every tick on a band boundary, never evenly spaced', () => {
-    const geo = rulerGeometry(bandsForScale(scale420))
+    const geo = rulerGeometry(bandsForScale(scale420, SRI_LANKAN_HONORS_BANDS))
     expect(geo.ticks.map((tick) => tick.value)).toEqual([2, 3, 3.3, 3.7, 4.2])
     const edges = [...geo.bands.map((band) => band.left), 100]
     for (const tick of geo.ticks) expect(edges.some((edge) => Math.abs(edge - tick.left) < 1e-9)).toBe(true)

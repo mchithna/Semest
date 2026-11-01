@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest'
+import { SRI_LANKAN_HONORS_BANDS } from './classBands.fixture'
 import { attemptedCredits, computeScore, totalCredits, earnedCredits, ungradedCredits, classify, toCredits, formatGpa, type ModuleWithGrade } from './score'
 import type { GradeRow } from './queries/gradeScales'
 
@@ -96,13 +97,15 @@ describe('Score Logic', () => {
   })
 
   it('classifies scores correctly', () => {
-    expect(classify(3.8)).toBe('First Class')
-    expect(classify(3.5)).toBe('Second Upper')
-    expect(classify(3.1)).toBe('Second Lower')
-    expect(classify(2.5)).toBe('General Pass')
-    expect(classify(1.5)).toBe('Fail')
-    expect(classify(0)).toBe('Unknown')
-    expect(classify(0, true)).toBe('Fail')
+    const bands = SRI_LANKAN_HONORS_BANDS
+    expect(classify(3.8, false, bands)).toBe('First Class')
+    expect(classify(3.5, false, bands)).toBe('Second Upper')
+    expect(classify(3.1, false, bands)).toBe('Second Lower')
+    expect(classify(2.5, false, bands)).toBe('General Pass')
+    expect(classify(1.5, false, bands)).toBe('Fail')
+    expect(classify(0, false, bands)).toBe('Unknown')
+    expect(classify(0, true, bands)).toBe('Fail')
+    expect(classify(3.8)).toBe('Unknown')
   })
 
   it('formats GPA to two decimals', () => {

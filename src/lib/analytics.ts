@@ -1,8 +1,9 @@
+import type { Band } from './bands'
 import type { SemesterWithModules } from './queries/semesters'
 import type { GradeRow } from './queries/gradeScales'
 import { attemptedCredits, computeScore, earnedCredits, hasGradedWork, standingLabel, ungradedCredits, withoutReplacedAttempts } from './score'
 
-export function getCumulativeMetrics(semesters: SemesterWithModules[], gradeScale: GradeRow[]) {
+export function getCumulativeMetrics(semesters: SemesterWithModules[], gradeScale: GradeRow[], classBands: Band[] = []) {
   const allModules = withoutReplacedAttempts(semesters.flatMap(sem => sem.modules))
   
   const cgpa = computeScore(allModules, gradeScale)
@@ -18,7 +19,7 @@ export function getCumulativeMetrics(semesters: SemesterWithModules[], gradeScal
     }
   })
 
-  const standing = standingLabel(cgpa, hasGradedWork(allModules, gradeScale), gradeScale)
+  const standing = standingLabel(cgpa, hasGradedWork(allModules, gradeScale), classBands)
 
   return {
     cgpa,

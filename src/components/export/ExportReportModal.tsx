@@ -3,7 +3,7 @@ import { Download, Loader2, Lock, X } from 'lucide-react'
 import { pdf } from '@react-pdf/renderer'
 import { toPng } from 'html-to-image'
 import { toast } from 'sonner'
-import { bandsForScale } from '@/lib/bands'
+import { bandsForScale, classBandsOf } from '@/lib/bands'
 import { friendlyError } from '@/lib/errors'
 import { NIGHT, SOCIAL_PX } from '@/lib/export/palette'
 import { PAGE_PT } from '@/lib/export/layout'
@@ -139,7 +139,7 @@ export function ExportReportModal({
     saveOverrides(overrides)
   }, [overrides])
 
-  const hasClassBands = bandsForScale(degree?.grade_scale?.grades ?? []).bands.some((band) => band.tone !== 'plain')
+  const hasClassBands = bandsForScale(degree?.grade_scale?.grades ?? [], classBandsOf(degree?.grade_scale)).bands.some((band) => band.tone !== 'plain')
   const resolved = resolveToggles(theme, overrides[theme], hasClassBands)
   const model =
     degree == null
