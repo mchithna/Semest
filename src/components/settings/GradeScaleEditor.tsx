@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Plus, Trash2, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { friendlyError } from '@/lib/errors'
+import { LIMITS } from '@/lib/limits'
 import {
   Dialog,
   DialogContent,
@@ -49,6 +50,10 @@ export function GradeScaleEditor({
   }, [open, initialData])
 
   const addRow = () => {
+    if (grades.length >= LIMITS.gradesPerScale) {
+      toast.error(`A scale can have at most ${LIMITS.gradesPerScale} grades`)
+      return
+    }
     setGrades([...grades, { grade: '', points: 0 }])
   }
 
@@ -65,13 +70,16 @@ export function GradeScaleEditor({
   const handleSave = async () => {
     // Validation
     if (!label.trim()) return toast.error('Label is required')
+    if (label.length > LIMITS.scaleLabel) return toast.error(`Scale name must be ${LIMITS.scaleLabel} characters or fewer`)
     if (grades.length === 0) return toast.error('At least one grade is required')
+    if (grades.length > LIMITS.gradesPerScale) return toast.error(`A scale can have at most ${LIMITS.gradesPerScale} grades`)
     
     const uniqueGrades = new Set(grades.map(g => g.grade.trim()))
     if (uniqueGrades.size !== grades.length) return toast.error('Grade names must be unique')
     
     for (const g of grades) {
       if (!g.grade.trim()) return toast.error('Grade names cannot be empty')
+      if (g.grade.length > LIMITS.scaleGrade) return toast.error(`Grade must be ${LIMITS.scaleGrade} characters or fewer`)
       if (g.points < 0 || g.points > 100) return toast.error('Points must be between 0 and 100')
     }
 
@@ -104,6 +112,7 @@ export function GradeScaleEditor({
               value={label}
               onChange={(e) => setLabel(e.target.value)}
               placeholder="e.g. My custom scale"
+              maxLength={LIMITS.scaleLabel}
               className="rounded-xl"
               disabled={isReadOnly}
             />
@@ -137,6 +146,7 @@ export function GradeScaleEditor({
                           onChange={(e) => updateRow(index, 'grade', e.target.value)}
                           className="h-8 rounded-xl"
                           placeholder="A+"
+                          maxLength={LIMITS.scaleGrade}
                           disabled={isReadOnly}
                         />
                       </TableCell>

@@ -1,3 +1,4 @@
+import { assertText, LIMITS } from '../limits'
 import { supabase } from '../supabase'
 import { rememberOnboarded } from '../onboardingMemory'
 
@@ -22,11 +23,13 @@ export async function getProfile(): Promise<Profile | null> {
 }
 
 export async function updateDisplayName(displayName: string): Promise<void> {
+  const name = displayName.trim()
+  assertText(name, LIMITS.displayName, 'Name')
   const { data: userData, error: authError } = await supabase.auth.getUser()
   if (authError) throw authError
   const { error } = await supabase
     .from('profiles')
-    .update({ display_name: displayName.trim() })
+    .update({ display_name: name })
     .eq('id', userData.user.id)
   if (error) throw error
 }

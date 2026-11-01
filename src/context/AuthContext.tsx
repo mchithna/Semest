@@ -6,6 +6,7 @@ import {
   type ReactNode,
 } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
+import { LIMITS } from '@/lib/limits'
 import { supabase } from '@/lib/supabase'
 import { queryClient } from '@/lib/queryClient'
 
@@ -69,17 +70,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const signUp = async (email: string, password: string, displayName: string) => {
+    const name = displayName.trim()
+    if (password.length < LIMITS.passwordMin) {
+      return { error: new Error('Password must be at least 8 characters'), needsConfirmation: false }
+    }
+    if (password.length > LIMITS.passwordMax) {
+      return { error: new Error('Password must be 72 characters or fewer'), needsConfirmation: false }
+    }
+    if (name.length > LIMITS.displayName) {
+      return { error: new Error('Name must be 80 characters or fewer'), needsConfirmation: false }
+    }
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { display_name: displayName.trim() },
+        data: { display_name: name },
       },
     })
-    if (!error && data.user && displayName.trim()) {
+    if (!error && data.user && name) {
       await supabase
         .from('profiles')
-        .update({ display_name: displayName.trim() })
+        .update({ display_name: name })
         .eq('id', data.user.id)
     }
     return { error, needsConfirmation: !error && !data.session }

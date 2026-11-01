@@ -7,6 +7,7 @@ import { useDegrees } from '@/hooks/useDegrees'
 import { useAuth } from '@/context/AuthContext'
 import { toast } from 'sonner'
 import { friendlyError } from '@/lib/errors'
+import { LIMITS } from '@/lib/limits'
 import { Input } from '@/components/ui/input'
 import { cardAccentClass } from '@/components/ruler/tone'
 
@@ -216,6 +217,7 @@ export default function PresetDetailPage() {
                     value={degreeTitle}
                     onChange={e => setDegreeTitle(e.target.value)}
                     placeholder={`Name your new degree (defaults to "${preset.title}")`}
+                    maxLength={LIMITS.degreeTitle}
                     className="h-10 w-full rounded-full md:max-w-md"
                   />
                 ) : (

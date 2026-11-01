@@ -8,6 +8,7 @@ import { useDeletePreset, useMyPresets, useSyncPreset, useUpdatePreset } from '@
 import { useDegrees } from '@/hooks/useDegrees'
 import { toast } from 'sonner'
 import { friendlyError } from '@/lib/errors'
+import { LIMITS } from '@/lib/limits'
 
 export default function MyPresetsPage() {
   const navigate = useNavigate()
@@ -197,12 +198,13 @@ export default function MyPresetsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-xs">
           <div className="w-full max-w-md space-y-4 rounded-[22px] bg-card p-6 shadow-2xl">
             <h2 className="font-display text-2xl font-semibold">Edit preset</h2>
-            <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} placeholder="Title" className="rounded-xl" />
-            <Input value={editInstitution} onChange={(e) => setEditInstitution(e.target.value)} placeholder="Institution" className="rounded-xl" />
+            <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} placeholder="Title" maxLength={LIMITS.presetTitle} className="rounded-xl" />
+            <Input value={editInstitution} onChange={(e) => setEditInstitution(e.target.value)} placeholder="Institution" maxLength={LIMITS.institution} className="rounded-xl" />
             <textarea
               value={editDescription}
               onChange={(e) => setEditDescription(e.target.value)}
               placeholder="Description"
+              maxLength={LIMITS.presetDescription}
               className="min-h-[80px] w-full rounded-xl border border-input bg-transparent px-3 py-2 text-sm"
             />
             <label className="flex items-center gap-2 text-sm text-muted-foreground">

@@ -1,3 +1,4 @@
+import { assertText, LIMITS } from '../limits'
 import { supabase } from '../supabase'
 import { GRADE_SCALE_SELECT, type GradeScale } from './gradeScales'
 
@@ -118,6 +119,9 @@ export async function publishPreset(
   institution?: string,
   isPublic = true
 ): Promise<string> {
+  assertText(title, LIMITS.presetTitle, 'Preset title')
+  assertText(description, LIMITS.presetDescription, 'Description')
+  assertText(institution, LIMITS.institution, 'Institution')
   const { data, error } = await supabase.rpc('publish_preset', {
     p_degree_id:   degreeId,
     p_title:       title,
@@ -134,6 +138,7 @@ export async function clonePreset(
   targetDegreeId?: string,
   degreeTitle?: string
 ): Promise<string> {
+  assertText(degreeTitle, LIMITS.degreeTitle, 'Degree title')
   const { data, error } = await supabase.rpc('clone_preset', {
     p_preset_code:      code,
     p_target_degree_id: targetDegreeId ?? null,
@@ -147,6 +152,9 @@ export async function updatePreset(
   presetId: string,
   fields: { title: string; description?: string; institution?: string; isPublic: boolean }
 ): Promise<void> {
+  assertText(fields.title, LIMITS.presetTitle, 'Preset title')
+  assertText(fields.description, LIMITS.presetDescription, 'Description')
+  assertText(fields.institution, LIMITS.institution, 'Institution')
   const { error } = await supabase
     .from('presets')
     .update({

@@ -1,3 +1,4 @@
+import { assertSemester } from '../limits'
 import { supabase } from '../supabase'
 import type { ModuleData } from '@/components/calculator/ModuleRow'
 import { toCredits } from '@/lib/score'
@@ -61,16 +62,19 @@ export async function saveSemester(
   semIndex?: number,
   semesterId?: string
 ): Promise<SemesterWithModules> {
+  const payload = modules.map((mod) => ({
+    id: mod.id,
+    name: mod.name || 'Untitled Module',
+    credits: mod.credits,
+    grade: mod.grade,
+    retakesModuleId: mod.retakesModuleId || null,
+  }))
+  assertSemester(title, term, payload)
+
   const { data, error } = await supabase.rpc('save_semester', {
     p_degree_id: degreeId,
     p_title: title,
-    p_modules: modules.map((mod) => ({
-      id: mod.id,
-      name: mod.name || 'Untitled Module',
-      credits: mod.credits,
-      grade: mod.grade,
-      retakesModuleId: mod.retakesModuleId || null,
-    })),
+    p_modules: payload,
     p_term: term,
     p_sem_index: semIndex ?? null,
     p_semester_id: semesterId ?? null,

@@ -12,6 +12,7 @@ import { X } from "lucide-react"
 import type { GradeRow } from "@/lib/queries/gradeScales"
 import { isUngradedGrade, UNGRADED_GRADE } from "@/lib/score"
 import { priorSemesterKey, priorSemesters, type PriorModuleOption } from "@/lib/priorModules"
+import { LIMITS } from "@/lib/limits"
 import { prefersReducedMotion } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 
@@ -102,6 +103,7 @@ export function ModuleRow({ module, gradeScale, priorModules = [], onChange, onR
             onChange={(e) => onChange(module.id, 'name', e.target.value)}
             placeholder="Module name"
             aria-label="Module name"
+            maxLength={LIMITS.moduleName}
             className="min-w-0 flex-1 rounded-xl"
           />
           <Button
@@ -123,6 +125,7 @@ export function ModuleRow({ module, gradeScale, priorModules = [], onChange, onR
             aria-label="Credits"
             className="w-24 rounded-xl sm:w-auto"
             min={0.5}
+            max={LIMITS.creditsMax}
             step={0.5}
           />
           <Select

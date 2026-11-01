@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { friendlyError } from '@/lib/errors'
+import { LIMITS } from '@/lib/limits'
 import { useGradeScales } from '@/hooks/useGradeScales'
 import type { GradeScale } from '@/lib/queries/gradeScales'
 import { GradeScaleEditor } from '@/components/settings/GradeScaleEditor'
@@ -252,6 +253,7 @@ export default function ScalesPage() {
                     id="display-name"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
+                    maxLength={LIMITS.displayName}
                     className="rounded-xl"
                   />
                 </div>

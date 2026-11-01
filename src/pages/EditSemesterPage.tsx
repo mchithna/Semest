@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { MiniRuler } from '@/components/ruler/MiniRuler'
 import { bandsForScale, classBandsOf } from '@/lib/bands'
+import { LIMITS } from '@/lib/limits'
 
 export default function EditSemesterPage() {
   const { degreeId, id: semesterId } = useParams()
@@ -113,6 +114,7 @@ export default function EditSemesterPage() {
                   value={title}
                   onChange={(event) => setForm({ id: semester.id, title: event.target.value, term })}
                   placeholder="e.g. Year 1, Semester 1"
+                  maxLength={LIMITS.semesterTitle}
                   className="rounded-xl"
                 />
               </div>
@@ -123,6 +125,7 @@ export default function EditSemesterPage() {
                   value={term}
                   onChange={(event) => setForm({ id: semester.id, title, term: event.target.value })}
                   placeholder="e.g. Fall 2026"
+                  maxLength={LIMITS.term}
                   className="rounded-xl"
                 />
               </div>

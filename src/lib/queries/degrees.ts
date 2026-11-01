@@ -1,3 +1,4 @@
+import { assertText, LIMITS } from '../limits'
 import { supabase } from '../supabase'
 import { GRADE_SCALE_SELECT, type GradeScale } from './gradeScales'
 
@@ -34,6 +35,8 @@ export async function getDegrees(): Promise<DegreeWithScale[]> {
 }
 
 export async function createDegree(degree: Omit<Degree, 'id' | 'user_id' | 'created_at'>): Promise<Degree> {
+  assertText(degree.title, LIMITS.degreeTitle, 'Degree title')
+  assertText(degree.institution, LIMITS.institution, 'Institution')
   const { data: userData, error: authError } = await supabase.auth.getUser()
   if (authError) throw authError
 
@@ -51,6 +54,8 @@ export async function createDegree(degree: Omit<Degree, 'id' | 'user_id' | 'crea
 }
 
 export async function updateDegree(id: string, degree: Partial<Omit<Degree, 'id' | 'user_id' | 'created_at'>>): Promise<Degree> {
+  if (degree.title !== undefined) assertText(degree.title, LIMITS.degreeTitle, 'Degree title')
+  if (degree.institution !== undefined) assertText(degree.institution, LIMITS.institution, 'Institution')
   const { data, error } = await supabase
     .from('degrees')
     .update(degree)

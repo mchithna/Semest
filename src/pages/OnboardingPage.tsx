@@ -9,6 +9,7 @@ import { completeOnboarding, getProfile, hasFinishedOnboarding, rememberOnboarde
 import { useAuth } from '@/context/AuthContext'
 import { prefersReducedMotion } from '@/lib/motion'
 import { friendlyError } from '@/lib/errors'
+import { LIMITS } from '@/lib/limits'
 import { cardAccentClass } from '@/components/ruler/tone'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -185,6 +186,7 @@ export default function OnboardingPage() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. BSc Computer Science"
+                  maxLength={LIMITS.degreeTitle}
                   className="h-12 rounded-xl"
                 />
               </div>
@@ -196,6 +198,7 @@ export default function OnboardingPage() {
                   value={institution}
                   onChange={(e) => setInstitution(e.target.value)}
                   placeholder="e.g. University of London"
+                  maxLength={LIMITS.institution}
                   className="h-12 rounded-xl"
                 />
               </div>

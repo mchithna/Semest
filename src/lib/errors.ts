@@ -20,7 +20,17 @@ function isNetworkError(text: string): boolean {
 /** Turns a Supabase or network error into a sentence a student can act on. */
 export function friendlyError(err: unknown, fallback: string): string {
   console.error(err)
-  const text = rawMessage(err).toLowerCase()
+  const original = rawMessage(err)
+  const text = original.toLowerCase()
+
+  if (
+    text.includes('characters or fewer') ||
+    text.includes('at most') ||
+    text.includes('credits must be greater than 0') ||
+    text.includes('password must be at least')
+  ) {
+    return original
+  }
 
   if (text.includes('invalid login credentials')) {
     return 'Wrong email or password. Try again or reset your password.'

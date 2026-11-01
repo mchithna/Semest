@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { friendlyError } from '@/lib/errors'
+import { LIMITS } from '@/lib/limits'
 import {
   Dialog,
   DialogContent,
@@ -87,6 +88,7 @@ export function CreateDegreeDialog({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. BSc Computer Science"
+              maxLength={LIMITS.degreeTitle}
               className="rounded-xl"
             />
           </div>
@@ -98,6 +100,7 @@ export function CreateDegreeDialog({
               value={institution}
               onChange={(e) => setInstitution(e.target.value)}
               placeholder="e.g. University of London"
+              maxLength={LIMITS.institution}
               className="rounded-xl"
             />
           </div>

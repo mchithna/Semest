@@ -12,6 +12,7 @@ import { bandAt, bandsForScale, standingSentence, type Band } from '@/lib/bands'
 import { MiniRuler } from '@/components/ruler/MiniRuler'
 import { BAND_TEXT_CLASS } from '@/components/ruler/tone'
 import { projectCumulative } from '@/lib/semesterProjection'
+import { LIMITS } from '@/lib/limits'
 import { useAuth } from '@/context/AuthContext'
 import { cn } from '@/lib/utils'
 
@@ -101,6 +102,7 @@ export function Calculator({
   const [enteredIds, setEnteredIds] = useState<string[]>([])
 
   const handleAddModule = () => {
+    if (modules.length >= LIMITS.modulesPerSemester) return
     const id = crypto.randomUUID()
     setEnteredIds((ids) => [...ids, id])
     setModules([
@@ -171,9 +173,10 @@ export function Calculator({
         <button
           type="button"
           onClick={handleAddModule}
-          className="mt-4 flex h-11 w-full items-center justify-center rounded-full border border-dashed border-foreground/25 text-sm text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
+          disabled={modules.length >= LIMITS.modulesPerSemester}
+          className="mt-4 flex h-11 w-full items-center justify-center rounded-full border border-dashed border-foreground/25 text-sm text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Add module
+          {modules.length >= LIMITS.modulesPerSemester ? `${LIMITS.modulesPerSemester} modules is the limit` : 'Add module'}
         </button>
       </div>
 

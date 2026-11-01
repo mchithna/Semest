@@ -348,6 +348,16 @@ begin
     raise exception 'Access denied';
   end if;
 
+  if char_length(coalesce(p_title, '')) > 120 then
+    raise exception 'Preset title must be 120 characters or fewer';
+  end if;
+  if char_length(coalesce(p_description, '')) > 500 then
+    raise exception 'Description must be 500 characters or fewer';
+  end if;
+  if char_length(coalesce(p_institution, '')) > 120 then
+    raise exception 'Institution must be 120 characters or fewer';
+  end if;
+
   select d.grade_scale_id, jsonb_build_object(
     'label', gs.label,
     'grades', gs.grades,
@@ -411,6 +421,10 @@ begin
     raise exception 'Preset not found or not accessible';
   end if;
 
+  if char_length(coalesce(p_degree_title, '')) > 120 then
+    raise exception 'Degree title must be 120 characters or fewer';
+  end if;
+
   if v_preset.grade_scale_id is not null and exists (
     select 1 from grade_scales where id = v_preset.grade_scale_id and is_system = true
   ) then
@@ -441,7 +455,7 @@ begin
     insert into grade_scales (user_id, label, is_system, grades, classification_scheme_id)
     values (
       auth.uid(),
-      (v_preset.scale_snapshot->>'label') || ' (from preset ' || p_preset_code || ')',
+      left((v_preset.scale_snapshot->>'label') || ' (from preset ' || p_preset_code || ')', 80),
       false,
       v_preset.scale_snapshot->'grades',
       v_scheme_id
@@ -618,6 +632,24 @@ begin
     raise exception 'Modules must be an array';
   end if;
 
+  if char_length(coalesce(p_title, '')) > 80 then
+    raise exception 'Semester title must be 80 characters or fewer';
+  end if;
+  if char_length(coalesce(p_term, '')) > 40 then
+    raise exception 'Term must be 40 characters or fewer';
+  end if;
+  if jsonb_array_length(coalesce(p_modules, '[]'::jsonb)) > 60 then
+    raise exception 'A semester can have at most 60 modules';
+  end if;
+  if exists (
+    select 1
+    from jsonb_array_elements(coalesce(p_modules, '[]'::jsonb)) elem
+    where char_length(coalesce(elem->>'name', '')) > 120
+       or char_length(coalesce(elem->>'grade', '')) > 32
+  ) then
+    raise exception 'Module name must be 120 characters or fewer and grade must be 32 characters or fewer';
+  end if;
+
   if not exists (
     select 1 from degrees
     where id = p_degree_id and user_id = auth.uid()
@@ -661,8 +693,9 @@ begin
     select 1
     from jsonb_array_elements(coalesce(p_modules, '[]'::jsonb)) elem
     where coalesce((elem->>'credits')::numeric, 0) <= 0
+       or (elem->>'credits')::numeric > 999.9
   ) then
-    raise exception 'Credits must be greater than 0';
+    raise exception 'Credits must be greater than 0 and at most 999.9';
   end if;
 
   declare
@@ -672,6 +705,14 @@ begin
     v_elem jsonb;
     v_ord int;
   begin
+    delete from modules
+    where semester_id = v_semester_id
+      and id not in (
+        select (elem->>'id')::uuid
+        from jsonb_array_elements(coalesce(p_modules, '[]'::jsonb)) elem
+        where coalesce(elem->>'id', '') ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+      );
+
     for v_elem, v_ord in
       select elem, ord
       from jsonb_array_elements(coalesce(p_modules, '[]'::jsonb)) with ordinality as t(elem, ord)
@@ -914,3 +955,108 @@ left join classification_schemes cs on cs.id = gs.classification_scheme_id
 where p.grade_scale_id = gs.id
   and p.scale_snapshot is not null
   and not (p.scale_snapshot ? 'classification_bands');
+
+-- ─────────────────────────────────────────────────
+-- INPUT LENGTH LIMITS
+-- Numbers match src/lib/limits.ts. Existing projects: run supabase/input_limits.sql.
+-- Caps are maxima only, so empty descriptions and short existing rows stay valid.
+-- ─────────────────────────────────────────────────
+create or replace function grade_list_within_limits(grades jsonb)
+returns boolean
+language sql
+immutable
+set search_path = public
+as $$
+  select
+    jsonb_typeof(grades) = 'array'
+    and jsonb_array_length(grades) between 1 and 40
+    and not exists (
+      select 1
+      from jsonb_array_elements(grades) elem
+      where char_length(coalesce(elem->>'grade', '')) < 1
+         or char_length(coalesce(elem->>'grade', '')) > 32
+         or (elem->>'points') is null
+         or (elem->>'points')::numeric < 0
+         or (elem->>'points')::numeric > 100
+    );
+$$;
+
+alter table profiles drop constraint if exists profiles_display_name_length;
+alter table profiles add constraint profiles_display_name_length
+  check (display_name is null or char_length(display_name) <= 80);
+
+alter table degrees drop constraint if exists degrees_title_length;
+alter table degrees add constraint degrees_title_length
+  check (char_length(title) <= 120);
+
+alter table degrees drop constraint if exists degrees_institution_length;
+alter table degrees add constraint degrees_institution_length
+  check (institution is null or char_length(institution) <= 120);
+
+alter table semesters drop constraint if exists semesters_title_length;
+alter table semesters add constraint semesters_title_length
+  check (char_length(title) <= 80);
+
+alter table semesters drop constraint if exists semesters_term_length;
+alter table semesters add constraint semesters_term_length
+  check (term is null or char_length(term) <= 40);
+
+alter table modules drop constraint if exists modules_name_length;
+alter table modules add constraint modules_name_length
+  check (char_length(name) <= 120);
+
+alter table modules drop constraint if exists modules_grade_length;
+alter table modules add constraint modules_grade_length
+  check (char_length(grade) <= 32);
+
+alter table presets drop constraint if exists presets_title_length;
+alter table presets add constraint presets_title_length
+  check (char_length(title) <= 120);
+
+alter table presets drop constraint if exists presets_description_length;
+alter table presets add constraint presets_description_length
+  check (description is null or char_length(description) <= 500);
+
+alter table presets drop constraint if exists presets_institution_length;
+alter table presets add constraint presets_institution_length
+  check (institution is null or char_length(institution) <= 120);
+
+alter table preset_semesters drop constraint if exists preset_semesters_title_length;
+alter table preset_semesters add constraint preset_semesters_title_length
+  check (char_length(title) <= 80);
+
+alter table preset_modules drop constraint if exists preset_modules_name_length;
+alter table preset_modules add constraint preset_modules_name_length
+  check (char_length(name) <= 120);
+
+alter table grade_scales drop constraint if exists grade_scales_label_length;
+alter table grade_scales add constraint grade_scales_label_length
+  check (char_length(label) <= 80);
+
+alter table grade_scales drop constraint if exists grade_scales_grades_shape;
+alter table grade_scales add constraint grade_scales_grades_shape
+  check (grade_list_within_limits(grades));
+
+create or replace function enforce_module_count()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  if (
+    select count(*)
+    from modules
+    where semester_id = new.semester_id
+      and id is distinct from new.id
+  ) >= 60 then
+    raise exception 'A semester can have at most 60 modules';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists modules_limit_per_semester on modules;
+create trigger modules_limit_per_semester
+  before insert or update of semester_id on modules
+  for each row
+  execute function enforce_module_count();

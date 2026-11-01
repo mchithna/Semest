@@ -13,15 +13,25 @@ import { Button } from '@/components/ui/button'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { friendlyError } from '@/lib/errors'
+import { LIMITS } from '@/lib/limits'
 import { hasFinishedOnboarding, rememberOnboarded } from '@/lib/queries/profiles'
 
 const signInSchema = z.object({
   email: z.string().email('Enter a valid email'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  password: z.string().min(LIMITS.signInPasswordMin, 'Password must be at least 6 characters'),
 })
 
-const signUpSchema = signInSchema.extend({
-  displayName: z.string().trim().min(2, 'Enter your name'),
+const signUpSchema = z.object({
+  email: z.string().email('Enter a valid email'),
+  password: z
+    .string()
+    .min(LIMITS.passwordMin, 'Password must be at least 8 characters')
+    .max(LIMITS.passwordMax, 'Password must be 72 characters or fewer'),
+  displayName: z
+    .string()
+    .trim()
+    .min(2, 'Enter your name')
+    .max(LIMITS.displayName, 'Name must be 80 characters or fewer'),
 })
 
 type SignInData = z.infer<typeof signInSchema>
@@ -115,8 +125,12 @@ export default function AuthPage() {
 
   const saveNewPassword = async (event: React.FormEvent) => {
     event.preventDefault()
-    if (newPassword.length < 6) {
-      toast.error('Password must be at least 6 characters')
+    if (newPassword.length < LIMITS.passwordMin) {
+      toast.error('Password must be at least 8 characters')
+      return
+    }
+    if (newPassword.length > LIMITS.passwordMax) {
+      toast.error('Password must be 72 characters or fewer')
       return
     }
     setBusy(true)
@@ -187,7 +201,7 @@ export default function AuthPage() {
               <h2 className="font-display text-2xl font-semibold tracking-tight">Choose a new password</h2>
               <div className="space-y-2 text-left">
                 <Label htmlFor="new-password" className="text-sm text-muted-foreground">New password</Label>
-                <Input id="new-password" type="password" required value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password" className="rounded-xl" />
+                <Input id="new-password" type="password" required minLength={LIMITS.passwordMin} maxLength={LIMITS.passwordMax} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password" className="rounded-xl" />
               </div>
               <Button type="submit" disabled={busy} className="w-full">
                 {busy && <Loader2 className="animate-spin" aria-hidden="true" />}
@@ -289,6 +303,7 @@ export default function AuthPage() {
                     type="text"
                     placeholder="Your name"
                     autoComplete="name"
+                    maxLength={LIMITS.displayName}
                     aria-invalid={!!signUpForm.formState.errors.displayName}
                     aria-describedby={signUpForm.formState.errors.displayName ? 'signup-name-error' : undefined}
                     className="rounded-xl"
@@ -326,6 +341,7 @@ export default function AuthPage() {
                       type={showPassword ? 'text' : 'password'}
                       placeholder="••••••••"
                       autoComplete="new-password"
+                      maxLength={LIMITS.passwordMax}
                       aria-invalid={!!signUpForm.formState.errors.password}
                       aria-describedby={signUpForm.formState.errors.password ? 'signup-password-error' : undefined}
                       className="rounded-xl pr-10"

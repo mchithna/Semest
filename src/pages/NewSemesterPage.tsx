@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { MiniRuler } from '@/components/ruler/MiniRuler'
 import { bandsForScale, classBandsOf } from '@/lib/bands'
+import { LIMITS } from '@/lib/limits'
 import { loadGuestDraft, sameGradeScale } from '@/lib/guestDraft'
 import { toast } from 'sonner'
 
@@ -115,6 +116,7 @@ export default function NewSemesterPage() {
                   value={title}
                   onChange={(event) => setTitle(event.target.value)}
                   placeholder="e.g. Year 1, Semester 1"
+                  maxLength={LIMITS.semesterTitle}
                   className="rounded-xl"
                 />
               </div>
@@ -125,6 +127,7 @@ export default function NewSemesterPage() {
                   value={term}
                   onChange={(event) => setTerm(event.target.value)}
                   placeholder="e.g. Fall 2026"
+                  maxLength={LIMITS.term}
                   className="rounded-xl"
                 />
               </div>

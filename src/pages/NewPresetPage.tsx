@@ -9,6 +9,7 @@ import { useDegrees } from '@/hooks/useDegrees'
 import { useCreatePreset } from '@/hooks/usePresets'
 import { toast } from 'sonner'
 import { friendlyError } from '@/lib/errors'
+import { LIMITS } from '@/lib/limits'
 
 export default function NewPresetPage() {
   const navigate = useNavigate()
@@ -84,6 +85,7 @@ export default function NewPresetPage() {
                 value={title}
                 onChange={e => setTitle(e.target.value)}
                 placeholder="e.g. BSc Computer Science (2024)"
+                maxLength={LIMITS.presetTitle}
                 className="rounded-xl"
               />
             </div>
@@ -94,6 +96,7 @@ export default function NewPresetPage() {
                 value={institution}
                 onChange={e => setInstitution(e.target.value)}
                 placeholder="e.g. University of Oxford"
+                maxLength={LIMITS.institution}
                 className="rounded-xl"
               />
             </div>
@@ -104,6 +107,7 @@ export default function NewPresetPage() {
                 value={description}
                 onChange={e => setDescription(e.target.value)}
                 placeholder="Briefly describe the focus of this degree..."
+                maxLength={LIMITS.presetDescription}
                 className="min-h-[100px] w-full rounded-xl border border-input bg-transparent px-3 py-2 text-sm focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-hidden"
               />
             </div>

@@ -1,3 +1,4 @@
+import { assertGradeScale } from '../limits'
 import { getSystemClassificationSchemes, matchingScheme, type ClassificationScheme } from './classificationSchemes'
 import { supabase } from '../supabase'
 
@@ -51,6 +52,7 @@ async function schemeIdForGrades(grades: GradeRow[], currentSchemeId?: string | 
 }
 
 export async function createGradeScale(label: string, grades: GradeRow[]): Promise<GradeScale> {
+  assertGradeScale(label, grades)
   const { data: userData, error: authError } = await supabase.auth.getUser()
   if (authError) throw authError
 
@@ -72,6 +74,7 @@ export async function createGradeScale(label: string, grades: GradeRow[]): Promi
 }
 
 export async function updateGradeScale(id: string, label: string, grades: GradeRow[]): Promise<GradeScale> {
+  assertGradeScale(label, grades)
   const { data: existing, error: existingError } = await supabase
     .from('grade_scales')
     .select('classification_scheme_id')
