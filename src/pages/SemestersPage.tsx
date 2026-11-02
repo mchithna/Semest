@@ -8,6 +8,7 @@ import { computeScore, formatGpa, hasGradedWork, totalCredits } from '@/lib/scor
 import { bandAt, bandsForScale, classBandsOf, standingSentence, type RulerMarker } from '@/lib/bands'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { MiniRuler } from '@/components/ruler/MiniRuler'
+import { EmptyState } from '@/components/EmptyState'
 import { Ruler } from '@/components/ruler/Ruler'
 import { BAND_BORDER_CLASS, BAND_TEXT_CLASS } from '@/components/ruler/tone'
 import { cn } from '@/lib/utils'
@@ -181,7 +182,7 @@ function SemesterCard({
           <>
             <MiniRuler className="min-w-0 flex-1" track={track} value={null} />
             <Button variant="outline" size="sm" className="relative z-10 w-fit shrink-0" asChild>
-              <Link to={editPath}>Add grades</Link>
+              <Link to={editPath}>{stats.moduleCount === 0 ? 'Add modules' : 'Add grades'}</Link>
             </Button>
           </>
         )}
@@ -238,7 +239,7 @@ function SemesterCard({
         <div className="mt-8 flex flex-1 flex-col justify-end">
           <MiniRuler className="mb-5" track={track} value={null} />
           <Button variant="outline" size="sm" className="relative z-10 w-fit" asChild>
-            <Link to={editPath}>Add grades</Link>
+            <Link to={editPath}>{stats.moduleCount === 0 ? 'Add modules' : 'Add grades'}</Link>
           </Button>
         </div>
       )}
@@ -336,20 +337,17 @@ export default function SemestersPage() {
         </div>
 
         {semesters.length === 0 ? (
-          <div className="mt-12 rounded-[22px] border border-dashed border-foreground/20 px-8 py-12 text-center">
-            <MiniRuler track={track} value={null} className="mx-auto mb-8 max-w-sm" />
-            <h2 className="font-display text-2xl font-semibold tracking-tight">No semesters yet</h2>
-            <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
-              Create the first semester to start calculating a GPA.
-            </p>
-            <Button
-              variant="outline"
-              className="mt-6"
-              onClick={() => navigate(`/degrees/${degreeId}/semesters/new`)}
-            >
-              Add semester
-            </Button>
-          </div>
+          <EmptyState
+            className="mt-12 rounded-[22px] border border-dashed border-foreground/20 px-8 py-12 text-center"
+            title="No semesters yet"
+            body="Add a semester to put a mark on the ruler."
+            ruler={<MiniRuler track={track} value={null} className="mx-auto mb-8 max-w-sm" />}
+            action={
+              <Button variant="outline" onClick={() => navigate(`/degrees/${degreeId}/semesters/new`)}>
+                Add semester
+              </Button>
+            }
+          />
         ) : (
           <>
             <Ruler className="mt-10" track={track} markers={semesterPins(semesters, scale)} />

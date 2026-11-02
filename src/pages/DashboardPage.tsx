@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { getProfile } from '@/lib/queries/profiles'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useDegrees } from '@/hooks/useDegrees'
 import { useSemesters } from '@/hooks/useSemesters'
 import { useAuth } from '@/context/AuthContext'
@@ -8,6 +9,8 @@ import { getCumulativeMetrics } from '@/lib/analytics'
 import { computeScore, formatGpa, hasGradedWork, totalCredits } from '@/lib/score'
 import { bandsForScale, classBandsOf, nextBandSentence, standingSentence, type RulerMarker } from '@/lib/bands'
 import { MiniRuler } from '@/components/ruler/MiniRuler'
+import { EmptyState } from '@/components/EmptyState'
+import { CreateDegreeDialog } from '@/components/degrees/CreateDegreeDialog'
 import { Ruler } from '@/components/ruler/Ruler'
 import { TargetPredictor } from '@/components/dashboard/TargetPredictor'
 import { ExportReportModal } from '@/components/export/ExportReportModal'
@@ -36,11 +39,11 @@ function formatCredits(value: number): string {
 }
 
 export default function DashboardPage() {
-  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const { user } = useAuth()
-  const { degrees, isLoading: isDegreesLoading } = useDegrees()
+  const { degrees, isLoading: isDegreesLoading, createDegree } = useDegrees()
   const [activeDegreeId, setActiveDegreeId] = useState(rememberedDegreeId)
+  const [createOpen, setCreateOpen] = useState(false)
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
   const [studentName, setStudentName] = useState('')
   const [target, setTarget] = useState<number | null>(null)
@@ -98,18 +101,30 @@ export default function DashboardPage() {
 
   if (degrees.length === 0) {
     return (
+      <>
       <div className="mx-auto flex min-h-[70vh] max-w-lg items-center px-4">
-        <div className="w-full rounded-[22px] border border-dashed border-foreground/20 px-8 py-12 text-center">
-          <MiniRuler track={bandsForScale([])} value={null} className="mb-8" />
-          <h1 className="font-display text-3xl font-semibold tracking-tight">No degrees yet</h1>
-          <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
-            Set up a degree before tracking a GPA.
-          </p>
-          <Button variant="outline" className="mt-6" onClick={() => navigate('/degrees')}>
-            Set up a degree
-          </Button>
-        </div>
+        <EmptyState
+          heading="h1"
+          className="w-full rounded-[22px] border border-dashed border-foreground/20 px-8 py-12 text-center"
+          title="No degrees yet"
+          body="Create a degree to start a GPA."
+          ruler={<MiniRuler track={bandsForScale([])} value={null} className="mb-8" />}
+          action={
+            <Button variant="outline" onClick={() => setCreateOpen(true)}>
+              Create degree
+            </Button>
+          }
+        />
       </div>
+      <CreateDegreeDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onSave={async (data) => {
+          await createDegree(data)
+          toast.success('Degree created')
+        }}
+      />
+      </>
     )
   }
 
@@ -181,13 +196,19 @@ export default function DashboardPage() {
 
             <div className="mt-12">
               <h2 className="mb-2 text-lg font-semibold">Semesters</h2>
-              <div className="grid items-start gap-10 lg:grid-cols-[1.3fr_0.9fr]">
+              <div className={graded ? 'grid items-start gap-10 lg:grid-cols-[1.3fr_0.9fr]' : 'grid items-start gap-10'}>
               <section>
                 {semesters.length === 0 ? (
-                  <div className="rounded-[22px] border border-dashed border-foreground/20 px-6 py-10 text-center">
-                    <MiniRuler track={track} value={null} className="mb-6" />
-                    <p className="text-sm text-muted-foreground">No semesters yet.</p>
-                  </div>
+                  <EmptyState
+                    title="No semesters yet"
+                    body="Add a semester to put a mark on the ruler."
+                    ruler={<MiniRuler track={track} value={null} className="mb-6" />}
+                    action={
+                      <Button variant="outline" asChild>
+                        <Link to={`/degrees/${activeDegreeId}/semesters/new`}>Add semester</Link>
+                      </Button>
+                    }
+                  />
                 ) : (
                   <ul className="divide-y divide-border/70">
                     {semesters.map((semester) => {
@@ -207,7 +228,11 @@ export default function DashboardPage() {
                           <div className="min-w-0 flex-1">
                             <MiniRuler track={track} value={semesterGraded ? score : null} />
                           </div>
-                          {semesterGraded ? (
+                          {semester.modules.length === 0 ? (
+                            <Button variant="outline" size="sm" asChild>
+                              <Link to={`/degrees/${activeDegreeId}/semesters/${semester.id}/edit`}>Add modules</Link>
+                            </Button>
+                          ) : semesterGraded ? (
                             <p className="font-display text-2xl font-semibold tabular-nums sm:w-16 sm:text-right">
                               {formatGpa(score)}
                             </p>
@@ -223,6 +248,7 @@ export default function DashboardPage() {
                 )}
               </section>
 
+              {graded ? (
               <TargetPredictor
                 currentCgpa={metrics.cgpa}
                 gradedCredits={metrics.attemptedCredits}
@@ -233,6 +259,7 @@ export default function DashboardPage() {
                 target={target}
                 onTargetChange={setTarget}
               />
+              ) : null}
               </div>
             </div>
           </>

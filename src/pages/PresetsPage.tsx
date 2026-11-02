@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { usePublicPresets } from '@/hooks/usePresets'
 import { useAuth } from '@/context/AuthContext'
 import { cardAccentClass } from '@/components/ruler/tone'
+import { EmptyState } from '@/components/EmptyState'
 import { toast } from 'sonner'
 
 export default function PresetsPage() {
@@ -91,12 +92,26 @@ export default function PresetsPage() {
             ))}
           </div>
         ) : filteredPresets.length === 0 ? (
-          <div className="mt-10 rounded-[22px] border border-dashed border-foreground/20 px-8 py-12 text-center">
-            <h2 className="font-display text-2xl font-semibold tracking-tight">No presets found</h2>
-            <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
-              Nothing public matches that search.
-            </p>
-          </div>
+          <EmptyState
+            className="mt-10 rounded-[22px] border border-dashed border-foreground/20 px-8 py-12 text-center"
+            title={searchQuery.trim() ? 'No matches' : 'No public presets yet'}
+            body={
+              searchQuery.trim()
+                ? 'Nothing public matches that search.'
+                : 'Publish a degree when you want someone else to copy its modules.'
+            }
+            action={
+              searchQuery.trim() ? (
+                <Button variant="outline" onClick={() => setSearchQuery('')}>
+                  Clear search
+                </Button>
+              ) : session ? (
+                <Button variant="outline" onClick={() => navigate('/presets/new')}>
+                  Publish preset
+                </Button>
+              ) : null
+            }
+          />
         ) : (
           <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {filteredPresets.map((preset, index) => (
@@ -104,9 +119,9 @@ export default function PresetsPage() {
                 <div className={`h-[3px] shrink-0 ${cardAccentClass(index)}`} aria-hidden="true" />
                 <div className="flex flex-1 flex-col p-5">
                   <h2 className="text-lg font-semibold">{preset.title}</h2>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {preset.institution?.trim() || 'Unknown institution'}
-                  </p>
+                    {preset.institution?.trim() ? (
+                      <p className="mt-1 text-sm text-muted-foreground">{preset.institution.trim()}</p>
+                    ) : null}
                   <p className="mt-3 text-xs text-muted-foreground">
                     {preset.use_count} {preset.use_count === 1 ? 'clone' : 'clones'}
                   </p>

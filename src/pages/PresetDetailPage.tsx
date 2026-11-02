@@ -114,7 +114,9 @@ export default function PresetDetailPage() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0 flex-1">
             <h1 className="font-display text-5xl font-semibold tracking-tight sm:text-6xl">{preset.title}</h1>
-            <p className="mt-3 text-sm text-muted-foreground">{preset.institution?.trim() || 'Unknown institution'}</p>
+            {preset.institution?.trim() ? (
+              <p className="mt-3 text-sm text-muted-foreground">{preset.institution.trim()}</p>
+            ) : null}
             {preset.description && (
               <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">{preset.description}</p>
             )}

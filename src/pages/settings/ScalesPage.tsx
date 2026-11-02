@@ -13,6 +13,7 @@ import { GradeScaleEditor } from '@/components/settings/GradeScaleEditor'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { BAND_TEXT_CLASS, cardAccentClass } from '@/components/ruler/tone'
+import { EmptyState } from '@/components/EmptyState'
 import { useAuth } from '@/context/AuthContext'
 import { useDegrees } from '@/hooks/useDegrees'
 import { supabase } from '@/lib/supabase'
@@ -362,12 +363,17 @@ export default function ScalesPage() {
           {showCustomScales && (
             <div className="border-t border-border px-5 py-5">
               {userScales.length === 0 ? (
-                <div className="rounded-[22px] border border-dashed border-foreground/20 px-8 py-10 text-center">
-                  <h3 className="font-display text-2xl font-semibold tracking-tight">No custom scales yet</h3>
-                  <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-                    Built-in scales are used by default. Create a custom scale if your university uses its own point values.
-                  </p>
-                </div>
+                <EmptyState
+                  heading="h3"
+                  title="No custom scales yet"
+                  body="The built-in scales are enough for most degrees."
+                  action={
+                    <Button variant="outline" onClick={handleCreate}>
+                      <Plus />
+                      New scale
+                    </Button>
+                  }
+                />
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2">
                   {userScales.map((scale, index) => (

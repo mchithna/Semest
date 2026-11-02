@@ -78,9 +78,9 @@ export default function MyPresetsPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <h2 className="text-lg font-semibold">{preset.title}</h2>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {preset.institution?.trim() || 'Unknown institution'}
-                      </p>
+                      {preset.institution?.trim() ? (
+                        <p className="mt-1 text-sm text-muted-foreground">{preset.institution.trim()}</p>
+                      ) : null}
                     </div>
                     <span className="shrink-0 rounded-full bg-background px-2.5 py-1 text-xs tracking-wide">
                       {preset.code}

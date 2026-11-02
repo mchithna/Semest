@@ -11,6 +11,7 @@ import type { DegreeWithScale } from '@/lib/queries/degrees'
 import type { GradeRow } from '@/lib/queries/gradeScales'
 import { CreateDegreeDialog } from '@/components/degrees/CreateDegreeDialog'
 import { MiniRuler } from '@/components/ruler/MiniRuler'
+import { EmptyState } from '@/components/EmptyState'
 import { Button } from '@/components/ui/button'
 
 function DegreeTrack({ degreeId, grades, classBands }: { degreeId: string; grades: GradeRow[]; classBands: Band[] }) {
@@ -88,16 +89,17 @@ export default function DegreesPage() {
         </div>
 
         {degrees.length === 0 ? (
-          <div className="mt-12 rounded-[22px] border border-dashed border-foreground/20 px-8 py-12 text-center">
-            <MiniRuler track={bandsForScale([])} value={null} className="mx-auto mb-8 max-w-sm" />
-            <h2 className="font-display text-2xl font-semibold tracking-tight">No degrees yet</h2>
-            <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
-              Create a degree before tracking a GPA.
-            </p>
-            <Button variant="outline" className="mt-6" onClick={handleCreate}>
-              Create degree
-            </Button>
-          </div>
+          <EmptyState
+            className="mt-12 rounded-[22px] border border-dashed border-foreground/20 px-8 py-12 text-center"
+            title="No degrees yet"
+            body="Create a degree to start a GPA."
+            ruler={<MiniRuler track={bandsForScale([])} value={null} className="mx-auto mb-8 max-w-sm" />}
+            action={
+              <Button variant="outline" onClick={handleCreate}>
+                Create degree
+              </Button>
+            }
+          />
         ) : (
           <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {degrees.map((degree) => (
@@ -110,8 +112,23 @@ export default function DegreesPage() {
                       </Link>
                     </h2>
                     <p className="mt-1 truncate text-sm text-muted-foreground">
-                      {degree.institution?.trim() || 'Unknown institution'}
-                      {degree.started_year ? ` · ${degree.started_year}` : ''}
+                      {degree.institution?.trim() ? (
+                        <>
+                          {degree.institution.trim()}
+                          {degree.started_year ? ` · ${degree.started_year}` : ''}
+                        </>
+                      ) : (
+                        <>
+                          {degree.started_year ? `${degree.started_year} · ` : null}
+                          <button
+                            type="button"
+                            className="relative z-10 hover:text-foreground"
+                            onClick={(event) => handleEdit(degree, event)}
+                          >
+                            Add institution
+                          </button>
+                        </>
+                      )}
                     </p>
                   </div>
                   <div className="relative z-10 flex gap-0.5 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
