@@ -213,14 +213,10 @@ export default function OnboardingPage() {
   const sourceNote = startPath === 'draft' && guestDraft
     ? `These modules are from your calculator draft on ${guestDraft.scaleLabel}.`
     : ''
-  const showEditor = step === 3 && startPath !== 'preset'
 
   return (
-    <div className={cn(
-      'min-h-screen bg-background text-foreground flex justify-center p-4',
-      showEditor ? 'items-start py-8 sm:py-10' : 'items-center',
-    )}>
-      <div className="w-full max-w-6xl">
+    <div className="bg-background px-4 pb-12 pt-8 text-foreground sm:pt-10">
+      <div className="mx-auto w-full max-w-6xl">
 
         <div className="mb-8 flex gap-2">
           {[1, 2, 3].map((i) => (
@@ -400,21 +396,21 @@ export default function OnboardingPage() {
         )}
 
         {step === 3 && startPath === 'preset' && (
-          <div className="overflow-hidden rounded-[22px] bg-card text-center">
+          <div className="overflow-hidden rounded-[22px] bg-card">
             <div className={`h-[3px] ${cardAccentClass(3)}`} aria-hidden="true" />
-            <div className="px-6 py-12 sm:px-8">
+            <div className="p-6 text-center sm:p-8">
               <CheckCircle className="mx-auto mb-6 size-10 text-band-first" />
               <h2 className="font-display text-3xl font-semibold tracking-tight">You're all set</h2>
-              <p className="mx-auto mb-10 mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">
+              <p className="mx-auto mb-8 mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">
                 Browse presets and clone one. The degree lands on your account with its modules ready for grades.
               </p>
-              <div className="flex flex-col items-center gap-3">
-                <Button onClick={handleBrowsePresets} disabled={isFinishing} size="lg">
-                  {isFinishing ? <Loader2 className="animate-spin" /> : null}
-                  Browse presets <ArrowRight />
-                </Button>
+              <div className="flex justify-between">
                 <Button variant="ghost" onClick={() => setStep(2)} disabled={isFinishing}>
                   Back
+                </Button>
+                <Button onClick={handleBrowsePresets} disabled={isFinishing}>
+                  {isFinishing ? <Loader2 className="animate-spin" /> : null}
+                  Browse presets <ArrowRight />
                 </Button>
               </div>
             </div>
@@ -422,9 +418,10 @@ export default function OnboardingPage() {
         )}
 
         {step === 3 && startPath !== 'preset' && (
-          <div>
-            <div className="mb-6 flex items-start justify-between gap-4">
-              <div>
+          <div className="overflow-hidden rounded-[22px] bg-card">
+            <div className={`h-[3px] ${cardAccentClass(2)}`} aria-hidden="true" />
+            <div className="p-6 sm:p-8">
+              <div className="mb-6">
                 <h2 className="font-display text-3xl font-semibold tracking-tight">Your first semester</h2>
                 {sourceNote ? (
                   <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">{sourceNote}</p>
@@ -440,10 +437,6 @@ export default function OnboardingPage() {
                   </p>
                 ) : null}
               </div>
-              <Button variant="ghost" onClick={() => setStep(2)} disabled={isSavingSemester}>
-                Back
-              </Button>
-            </div>
 
             <Calculator
                 key={startPath}
@@ -454,6 +447,18 @@ export default function OnboardingPage() {
                 requireGrade={startPath === 'blank' && Boolean(selectedChoice)}
                 onSave={handleSaveSemester}
                 isSaving={isSavingSemester}
+                summaryClassName="bg-background"
+                footer={({ save, canSave, saving, saved }) => (
+                  <div className="mt-6 flex justify-between">
+                    <Button variant="ghost" onClick={() => setStep(2)} disabled={saving}>
+                      Back
+                    </Button>
+                    <Button onClick={save} disabled={saving || saved || !canSave}>
+                      {saving ? <Loader2 className="animate-spin" /> : null}
+                      {saving ? 'Saving...' : saved ? 'Saved' : 'Save semester'}
+                    </Button>
+                  </div>
+                )}
                 details={
                   <div className="grid gap-4 sm:grid-cols-[minmax(0,1.4fr)_minmax(12rem,0.8fr)]">
                     <div className="space-y-2">
@@ -484,6 +489,7 @@ export default function OnboardingPage() {
                   </div>
                 }
               />
+            </div>
           </div>
         )}
 

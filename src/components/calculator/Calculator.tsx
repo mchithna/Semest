@@ -36,11 +36,18 @@ type CalculatorProps = {
   /** Title and term fields, rendered above the module list. */
   details?: ReactNode
   /**
+   * Replaces the save button in the GPA card. Used when Back and Save need
+   * the same bottom-left / bottom-right placement as the rest of a wizard.
+   */
+  footer?: (actions: { save: () => void; canSave: boolean; saving: boolean; saved: boolean }) => ReactNode
+  /**
    * Modules from the rest of the degree. When set, the result card shows the
    * cumulative GPA before and after this draft is saved. Omit it for the guest calculator.
    */
   savedElsewhere?: RetakeModule[]
   className?: string
+  /** Surface for the GPA panel. Defaults to the card color used on a page background. */
+  summaryClassName?: string
 }
 
 export function Calculator({
@@ -55,8 +62,10 @@ export function Calculator({
   detailsChanged = false,
   requireGrade = false,
   details,
+  footer,
   savedElsewhere,
   className,
+  summaryClassName = 'bg-card',
 }: CalculatorProps) {
   const { session } = useAuth()
   const [modules, setModules] = useState<ModuleData[]>(
@@ -142,10 +151,11 @@ export function Calculator({
     savedTimer.current = window.setTimeout(() => onComplete?.(), 420)
   }
   // Signed-out visitors keep the result in the card. The pinned bar is for a signed-in save.
-  const pinSave = Boolean(onSave && session)
+  const pinSave = Boolean(onSave && session && !footer)
 
   return (
-    <div className={cn('grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]', pinSave && 'pb-24 lg:pb-0', className)}>
+    <div className={className}>
+    <div className={cn('grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]', pinSave && 'pb-24 lg:pb-0')}>
       <div>
         {details}
         <div className={cn('flex items-baseline justify-between gap-3', details ? 'mt-8' : undefined)}>
@@ -183,7 +193,7 @@ export function Calculator({
         </button>
       </div>
 
-      <aside className="rounded-[22px] bg-card p-6 lg:sticky lg:top-24">
+      <aside className={cn('rounded-[22px] p-6 lg:sticky lg:top-24', summaryClassName)}>
         <p className="text-sm text-muted-foreground">Semester GPA</p>
         <p className="mt-1 font-display text-6xl font-semibold tabular-nums tracking-tight">
           {graded ? <AnimatedNumber value={score} decimals={2} /> : '—'}
@@ -207,7 +217,7 @@ export function Calculator({
           </div>
         )}
 
-        {onSave && (
+        {onSave && !footer && (
           <Button className={cn('mt-6 w-full', pinSave && 'hidden lg:inline-flex', saved && 'disabled:opacity-100')} onClick={save} disabled={isSaving || saved || !canSave}>
             <SaveLabel saving={isSaving} saved={saved} />
           </Button>
@@ -227,6 +237,8 @@ export function Calculator({
           </div>
         </div>
       )}
+    </div>
+    {footer?.({ save, canSave, saving: isSaving, saved })}
     </div>
   )
 }
