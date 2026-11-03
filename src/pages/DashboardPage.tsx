@@ -185,14 +185,18 @@ export default function DashboardPage() {
                   {standing && (
                     <p className="font-display text-2xl font-semibold tracking-tight sm:text-[1.7rem]">{standing}</p>
                   )}
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    {[next, creditSentence(metrics.attemptedCredits, metrics.ungradedCredits)].filter(Boolean).join(' ')}
-                  </p>
+                  {graded ? (
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      {[next, creditSentence(metrics.attemptedCredits, metrics.ungradedCredits)].filter(Boolean).join(' ')}
+                    </p>
+                  ) : null}
                 </div>
               </div>
             </div>
 
-            <Ruler className="mt-8" track={track} markers={rulerMarkers(metrics.cgpa, graded, target, semesters, scale)} />
+            {graded ? (
+              <Ruler className="mt-8" track={track} markers={rulerMarkers(metrics.cgpa, graded, target, semesters, scale)} />
+            ) : null}
 
             <div className="mt-12">
               <h2 className="mb-2 text-lg font-semibold">Semesters</h2>
@@ -270,7 +274,7 @@ export default function DashboardPage() {
 }
 
 function creditSentence(gradedCredits: number, ungradedCredits: number): string {
-  if (gradedCredits <= 0) return 'No credits are graded yet.'
+  if (gradedCredits <= 0) return ''
   const graded = formatCredits(gradedCredits)
   if (ungradedCredits > 0) {
     return `${graded} graded, ${formatCredits(ungradedCredits)} still unmarked.`
@@ -287,7 +291,7 @@ function rulerMarkers(
 ): RulerMarker[] {
   const markers: RulerMarker[] = []
   if (graded) markers.push({ id: 'you', value: cgpa, label: `You ${formatGpa(cgpa)}`, kind: 'you' })
-  if (target !== null && Number.isFinite(target)) {
+  if (graded && target !== null && Number.isFinite(target)) {
     markers.push({ id: 'target', value: target, label: `Target ${formatGpa(target)}`, kind: 'target' })
   }
   semesters.forEach((semester) => {

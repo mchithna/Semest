@@ -31,6 +31,8 @@ type CalculatorProps = {
   baselineModules?: ModuleData[]
   /** Title or term differs from the values the page opened with. */
   detailsChanged?: boolean
+  /** Save stays off until one module has a grade on the scale. */
+  requireGrade?: boolean
   /** Title and term fields, rendered above the module list. */
   details?: ReactNode
   /**
@@ -51,6 +53,7 @@ export function Calculator({
   isSaving = false,
   baselineModules,
   detailsChanged = false,
+  requireGrade = false,
   details,
   savedElsewhere,
   className,
@@ -65,10 +68,10 @@ export function Calculator({
   const modulesChanged = baselineModules
     ? !modulesMatch(modules, baselineModules)
     : !isUntouchedDraft(modules)
-  const canSave = (modulesChanged || detailsChanged) && modules.length > 0
   const score = computeScore(modules, gradeScale)
   const credits = totalCredits(modules)
   const graded = hasGradedWork(modules, gradeScale)
+  const canSave = (modulesChanged || detailsChanged) && modules.length > 0 && (!requireGrade || graded)
   const previousScore = useRef<{ score: number; credits: number } | null>(null)
   const track = bandsForScale(gradeScale, classBands)
   const firstMin = track.bands.find((item) => item.tone === 'first')?.min
