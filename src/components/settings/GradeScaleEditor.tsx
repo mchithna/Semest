@@ -21,6 +21,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import type { GradeScale, GradeRow } from '@/lib/queries/gradeScales'
+import { scaleDisplayName } from '@/lib/scaleNames'
 
 interface GradeScaleEditorProps {
   open: boolean
@@ -44,7 +45,7 @@ export function GradeScaleEditor({
   // Reset form when dialog opens/closes
   useEffect(() => {
     if (open) {
-      setLabel(initialData?.label ?? '')
+      setLabel(initialData ? scaleDisplayName(initialData) : '')
       setGrades(initialData?.grades ?? [{ grade: 'A', points: 4.0 }])
     }
   }, [open, initialData])

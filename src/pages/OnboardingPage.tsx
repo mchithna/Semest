@@ -19,21 +19,11 @@ import { isUntouchedDraft } from '@/lib/semesterDraft'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { SYSTEM_SCALES } from '@/lib/scaleNames'
 
 const GUEST_DRAFT_KEY = 'semest_guest_draft'
 
-const SCALE_CHOICES = [
-  {
-    match: 'Standard 4.0',
-    name: 'Standard GPA Scale',
-    body: 'Standard A+ (4.0) to F grading scale used by most universities.',
-  },
-  {
-    match: 'Sri Lankan UGC GPA',
-    name: '4.2 UGC Scale ( A+ = 4.2 )',
-    body: 'Enhanced scale used by state & technical faculties (e.g., Moratuwa) where A+ awards 4.2 points.',
-  },
-] as const
+const SCALE_CHOICES = SYSTEM_SCALES
 
 type StartPath = 'blank' | 'draft' | 'preset'
 

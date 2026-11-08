@@ -23,6 +23,7 @@ import { createDegree } from '@/lib/queries/degrees'
 import { createGradeScale } from '@/lib/queries/gradeScales'
 import { saveSemester } from '@/lib/queries/semesters'
 import { queryClient } from '@/lib/queryClient'
+import { scaleDisplayName } from '@/lib/scaleNames'
 
 export default function ScalesPage() {
   const { scales, isLoading, createScale, updateScale, deleteScale } = useGradeScales()
@@ -69,7 +70,7 @@ export default function ScalesPage() {
     setEditingScale({
       ...scale,
       id: '',
-      label: `${scale.label} (Copy)`
+      label: `${scaleDisplayName(scale)} (Copy)`
     })
     setIsReadOnly(false)
     setEditorOpen(true)
@@ -290,7 +291,7 @@ export default function ScalesPage() {
               <div>
                 <h2 className="font-semibold">Built-in scales ({systemScales.length})</h2>
                 <p className="mt-0.5 text-sm text-muted-foreground">
-                  Standard grading systems, including the 4.0 scale and Sri Lankan UGC.
+                  Standard GPA Scale and the 4.2 UGC scale.
                 </p>
               </div>
             </div>
@@ -303,7 +304,7 @@ export default function ScalesPage() {
                 <article key={scale.id} className="flex h-full flex-col overflow-hidden rounded-[22px] bg-background">
                   <div className={`h-[3px] ${cardAccentClass(index)}`} aria-hidden="true" />
                   <div className="flex flex-1 flex-col p-4">
-                    <h3 className="font-semibold">{scale.label}</h3>
+                    <h3 className="font-semibold">{scaleDisplayName(scale)}</h3>
                     <p className="mt-1 text-sm text-muted-foreground">{scale.grades.length} letter grades</p>
                     <div className="mt-3 flex flex-wrap gap-1.5">
                       {scale.grades.slice(0, 6).map((grade, gradeIndex) => (
