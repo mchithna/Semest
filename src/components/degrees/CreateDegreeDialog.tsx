@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/select'
 import { useGradeScales } from '@/hooks/useGradeScales'
 import type { DegreeWithScale } from '@/lib/queries/degrees'
-import { scaleDisplayName } from '@/lib/scaleNames'
+import { scaleMenuName } from '@/lib/scaleNames'
 
 interface CreateDegreeDialogProps {
   open: boolean
@@ -128,7 +128,7 @@ export function CreateDegreeDialog({
                 <SelectItem value="none">None</SelectItem>
                 {scales.map(scale => (
                   <SelectItem key={scale.id} value={scale.id}>
-                    {scaleDisplayName(scale)} {scale.is_system ? '(System)' : ''}
+                    {scaleMenuName(scale)}
                   </SelectItem>
                 ))}
               </SelectContent>
