@@ -15,8 +15,8 @@ export const SYSTEM_SCALES = [
   },
 ] as const
 
-const byLabel = new Map(SYSTEM_SCALES.map((scale) => [scale.match, scale.name]))
-const byShort = new Map(SYSTEM_SCALES.map((scale) => [scale.match, scale.short]))
+const byLabel = new Map<string, string>(SYSTEM_SCALES.map((scale) => [scale.match, scale.name]))
+const byShort = new Map<string, string>(SYSTEM_SCALES.map((scale) => [scale.match, scale.short]))
 
 export function scaleDisplayName(scale: { label: string; is_system?: boolean }) {
   if (scale.is_system === false) return scale.label
