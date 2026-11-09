@@ -16,12 +16,13 @@ describe('plannerView', () => {
 
     expect(view).toEqual({
       kind: 'statement',
-      title: 'Already secured',
-      detail: 'The 15 credits left cannot drop you below Pass.',
+      title: 'Pass is already secured',
+      tone: 'secured',
+      detail: 'The 15 credits left cannot drop you below it.',
     })
   })
 
-  it('says the target is out of reach and names the average the scale cannot give', () => {
+  it('says the target is out of reach and names the class', () => {
     const required = requiredAverage(3.47, 45, 3.7, 15)
     const view = plannerView({
       requiredGpa: required,
@@ -35,14 +36,15 @@ describe('plannerView', () => {
 
     expect(view).toEqual({
       kind: 'statement',
-      title: 'Out of reach',
-      detail: 'The 15 credits left would need to average 4.39 to reach First. This scale tops out at 4.00.',
+      title: 'First is out of reach',
+      tone: 'unreachable',
+      detail: 'Even a 4.00 on the 15 credits left is not enough. Reaching it would take 4.39.',
     })
   })
 
-  it('keeps a reachable average as a number', () => {
+  it('calls an average below the best semester within reach', () => {
     const view = plannerView({
-      requiredGpa: 3.2,
+      requiredGpa: 2.8,
       target: 3.3,
       targetLabel: 'Second upper',
       remaining: 15,
@@ -51,7 +53,32 @@ describe('plannerView', () => {
       highestGpa: 3.8,
     })
 
-    expect(view.kind).toBe('number')
-    if (view.kind === 'number') expect(view.value).toBe(3.2)
+    expect(view).toEqual({
+      kind: 'number',
+      value: 2.8,
+      title: 'Within reach',
+      tone: 'reach',
+      detail: 'Average this on the 15 credits left to reach Second upper. That is below your best semester, 3.80.',
+    })
+  })
+
+  it('calls an average above the best semester hard', () => {
+    const view = plannerView({
+      requiredGpa: 3.9,
+      target: 3.7,
+      targetLabel: 'First',
+      remaining: 15,
+      remainingText: '15',
+      maxPoints: 4,
+      highestGpa: 3.2,
+    })
+
+    expect(view).toEqual({
+      kind: 'number',
+      value: 3.9,
+      title: 'This is hard',
+      tone: 'hard',
+      detail: 'Average this on the 15 credits left to reach First. That is above your best semester, 3.20.',
+    })
   })
 })

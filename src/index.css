@@ -58,6 +58,7 @@
   --color-band-second-lower: #38b6c9;
   --color-band-second-upper: #e6b84a;
   --color-band-first: #f07a5a;
+  --color-band-secured: #3dbe86;
 
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);

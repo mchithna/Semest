@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import type { GradeRow } from '@/lib/queries/gradeScales'
 import { bandsForScale, type Band } from '@/lib/bands'
 import { GPA_DECIMALS } from '@/lib/score'
-import { plannerView, requiredAverage } from '@/lib/targetPlanner'
+import { plannerView, requiredAverage, type PlannerTone } from '@/lib/targetPlanner'
 import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
 
 type TargetPredictorProps = {
@@ -77,13 +77,13 @@ export function TargetPredictor({
       <div>
         {view.kind === 'number' ? (
           <>
-            <p className="text-sm text-muted-foreground">You need an average of</p>
-            <p className="mt-1 font-display text-5xl font-semibold tabular-nums tracking-tight text-band-first">
+            <p className={`text-sm ${plannerToneClass(view.tone)}`}>{view.title}</p>
+            <p className={`mt-1 font-display text-5xl font-semibold tabular-nums tracking-tight ${plannerToneClass(view.tone)}`}>
               <AnimatedNumber value={view.value} decimals={GPA_DECIMALS} />
             </p>
           </>
         ) : view.kind === 'statement' ? (
-          <p className="text-2xl font-semibold text-foreground">{view.title}</p>
+          <p className={`text-2xl font-semibold ${plannerToneClass(view.tone)}`}>{view.title}</p>
         ) : null}
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{view.detail}</p>
       </div>
@@ -125,5 +125,16 @@ export function TargetPredictor({
       )}
     </Card>
   )
+}
+
+const PLANNER_TONE_CLASS: Record<PlannerTone, string> = {
+  secured: 'text-band-secured',
+  reach: 'text-band-second-lower',
+  hard: 'text-band-second-upper',
+  unreachable: 'text-destructive',
+}
+
+function plannerToneClass(tone: PlannerTone) {
+  return PLANNER_TONE_CLASS[tone]
 }
 
