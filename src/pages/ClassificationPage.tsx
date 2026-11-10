@@ -24,6 +24,7 @@ import {
   previewCuts,
   runsToValue,
   scaleTopOf,
+  sortBandDraft,
   type BandDraft,
 } from '@/lib/classBandEditor'
 import { friendlyError } from '@/lib/errors'
@@ -161,7 +162,10 @@ function ClassificationEditor({
   const atLimit = rows.length >= BAND_LIMIT
 
   const updateRow = (key: string, patch: Partial<Pick<BandDraft, 'label' | 'min'>>) => {
-    setRows((current) => current.map((row) => (row.key === key ? { ...row, ...patch } : row)))
+    setRows((current) => {
+      const next = current.map((row) => (row.key === key ? { ...row, ...patch } : row))
+      return patch.min === undefined ? next : sortBandDraft(next)
+    })
   }
 
   const save = async () => {

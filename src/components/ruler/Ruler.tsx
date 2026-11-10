@@ -34,6 +34,22 @@ export function Ruler({
   }, [])
 
   const measured = width || 800
+  const span = track.max - track.min
+  const segments = track.bands.map((band, index) => {
+    const widthPct = span > 0 ? ((band.max - band.min) / span) * 100 : 0
+    const segmentPx = (measured * widthPct) / 100
+    const plain = band.tone === 'plain'
+    const showLabel = Boolean(band.label) && !plain && segmentPx >= estimateLabelWidth(band.label)
+    return {
+      band,
+      index,
+      widthPct,
+      plain,
+      showLabel,
+      color: plain ? undefined : bandColor(index, track.bands.length),
+    }
+  })
+  const unnamed = segments.filter((segment) => segment.band.label && !segment.showLabel && !segment.plain)
   const placement = placeMarkers(markers, track, measured)
   const hasAbove = markers.some((marker) => placement.get(marker.id) === 'above')
   const hasBelow = markers.some((marker) => placement.get(marker.id) === 'below')
@@ -57,26 +73,18 @@ export function Ruler({
 
         <div ref={trackRef} className="relative h-10">
           <div className="flex h-full overflow-hidden rounded-full">
-            {track.bands.map((band, index) => {
-              const span = track.max - track.min
-              const widthPct = span > 0 ? ((band.max - band.min) / span) * 100 : 0
-              const segmentPx = (measured * widthPct) / 100
-              const showLabel = Boolean(band.label) && segmentPx >= estimateLabelWidth(band.label)
-              const plain = band.tone === 'plain'
-              return (
+            {segments.map(({ band, widthPct, plain, showLabel, color }) => (
                 <div
                   key={band.id}
                   className={cn(
                     'flex h-full min-w-0 items-center px-3 text-xs font-medium text-primary-foreground',
                     plain && BAND_TONE_CLASS.plain,
                   )}
-                  style={{ width: `${widthPct}%`, backgroundColor: plain ? undefined : bandColor(index, track.bands.length) }}
+                  style={{ width: `${widthPct}%`, backgroundColor: color }}
                 >
                   {showLabel ? <span className="truncate">{band.label}</span> : null}
-                  {band.label && !showLabel ? <span className="sr-only">{band.label}</span> : null}
                 </div>
-              )
-            })}
+            ))}
           </div>
           {markers.map((marker) => {
             const collapsed = placement.get(marker.id) === 'legend'
@@ -115,6 +123,16 @@ export function Ruler({
       </div>
       {legend.length > 0 && (
         <p className="mt-2 text-xs text-muted-foreground">{legend.map((marker) => markerCaption(marker)).join(' · ')}</p>
+      )}
+      {unnamed.length > 0 && (
+        <ul className={cn('flex flex-wrap gap-x-4 gap-y-1', hasBelow ? 'mt-8' : 'mt-3')} aria-label="Band names">
+          {unnamed.map(({ band, color }) => (
+            <li key={band.id} className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span aria-hidden="true" className="size-2 rounded-full" style={{ backgroundColor: color }} />
+              {band.label}
+            </li>
+          ))}
+        </ul>
       )}
     </figure>
   )

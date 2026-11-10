@@ -10,6 +10,7 @@ import {
   lowestStart,
   runsToValue,
   scaleTopOf,
+  sortBandDraft,
 } from './classBandEditor'
 
 function row(id: string, label: string, min: string) {
@@ -33,11 +34,24 @@ describe('class band editor', () => {
     expect(scaleTopOf([])).toBeNull()
   })
 
-  it('rejects a start that is not above the band above it', () => {
+  it('lets a lower start move ahead of the bands already listed', () => {
+    const rows = [
+      row('pass', 'Pass', '2.00'),
+      row('first', 'First', '3.70'),
+      row('low', 'Low', '1.50'),
+    ]
+    expect(bandDraftIssues(rows, scaleTop)).toEqual([])
+    expect(sortBandDraft(rows).map((item) => item.id)).toEqual(['low', 'pass', 'first'])
+    expect(runsToValue(rows, 2, 4)).toBe(2)
+    expect(runsToValue(rows, 1, 4)).toBe(4)
+    expect(draftCuts(rows, 4)?.map((cut) => cut.label)).toEqual(['Low', 'Pass', 'First'])
+  })
+
+  it('rejects a start that matches another band', () => {
     const rows = [
       row('pass', 'Pass', '2.00'),
       row('merit', 'Pass with Merit', '2.70'),
-      row('second', 'Second lower', '2.50'),
+      row('second', 'Second lower', '2.70'),
     ]
     expect(bandDraftIssues(rows, scaleTop)).toEqual([
       { key: 'second', field: 'min', message: 'Must start higher than Pass with Merit (2.70).' },

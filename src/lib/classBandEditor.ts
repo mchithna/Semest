@@ -104,12 +104,25 @@ function rowIssue(
   const min = parseBandMin(minText)!
   if (min >= scaleTop) return { field: 'min', message: `Start below ${formatGpa(scaleTop)}. That is the top of this scale.` }
 
-  const previous = index > 0 ? parseBandMin(rows[index - 1].min) : null
-  if (previous != null && min <= previous) {
-    const previousName = rows[index - 1].label.trim() || 'the band above'
-    return { field: 'min', message: `Must start higher than ${previousName} (${formatGpa(previous)}).` }
+  const earlier = rows.slice(0, index).find((item) => parseBandMin(item.min) === min)
+  if (earlier) {
+    const name = earlier.label.trim() || 'the band above'
+    return { field: 'min', message: `Must start higher than ${name} (${formatGpa(min)}).` }
   }
   return null
+}
+
+/** Rows with a start move into order. A half-typed start stays at the bottom. */
+export function sortBandDraft(rows: BandDraft[]): BandDraft[] {
+  const placed: BandDraft[] = []
+  const pending: BandDraft[] = []
+  for (const row of rows) {
+    const min = parseBandMin(row.min)
+    if (min == null || min < 0) pending.push(row)
+    else placed.push(row)
+  }
+  placed.sort((a, b) => parseBandMin(a.min)! - parseBandMin(b.min)! || a.key.localeCompare(b.key))
+  return [...placed, ...pending]
 }
 
 /** Cuts ready to save. Null while a row is invalid or the count is outside 2–8. */
@@ -117,21 +130,24 @@ export function draftCuts(rows: BandDraft[], scaleTop: number): ClassCut[] | nul
   if (rows.length < BAND_FLOOR_COUNT || rows.length > BAND_LIMIT) return null
   if (!Number.isFinite(scaleTop) || scaleTop <= 0) return null
   if (bandDraftIssues(rows, scaleTop).length > 0) return null
-  return rows.map((row) => ({
-    id: row.id,
-    label: row.label.trim(),
-    min: parseBandMin(row.min)!,
-  }))
+  return rows
+    .map((row) => ({
+      id: row.id,
+      label: row.label.trim(),
+      min: parseBandMin(row.min)!,
+    }))
+    .sort((a, b) => a.min - b.min || a.id.localeCompare(b.id))
 }
 
-/** Where this row ends. The last row runs to the scale maximum. */
+/** Where this row ends: the next higher start, or the scale maximum. */
 export function runsToValue(rows: BandDraft[], index: number, scaleTop: number): number | null {
   const min = parseBandMin(rows[index]?.min ?? '')
   if (min == null || min < 0 || min >= scaleTop) return null
-  if (index === rows.length - 1) return scaleTop
-  const next = parseBandMin(rows[index + 1]?.min ?? '')
-  if (next == null || next <= min) return null
-  return next
+  const higher = rows
+    .map((row) => parseBandMin(row.min))
+    .filter((value): value is number => value != null && value > min && value < scaleTop)
+  if (higher.length === 0) return scaleTop
+  return Math.min(...higher)
 }
 
 export function previewCuts(rows: BandDraft[], scaleTop: number): ClassCut[] {
