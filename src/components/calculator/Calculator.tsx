@@ -10,7 +10,7 @@ import { prefersReducedMotion } from '@/lib/motion'
 import { isUntouchedDraft, modulesMatch } from '@/lib/semesterDraft'
 import { bandAt, bandsForScale, standingSentence, type Band } from '@/lib/bands'
 import { MiniRuler } from '@/components/ruler/MiniRuler'
-import { BAND_TEXT_CLASS } from '@/components/ruler/tone'
+import { bandColor } from '@/components/ruler/tone'
 import { projectCumulative } from '@/lib/semesterProjection'
 import { LIMITS } from '@/lib/limits'
 import { useAuth } from '@/context/AuthContext'
@@ -199,7 +199,12 @@ export function Calculator({
           {graded ? <AnimatedNumber value={score} decimals={2} /> : '—'}
         </p>
         {sentence && (
-          <p className={cn('mt-1 text-sm font-medium', BAND_TEXT_CLASS[band?.tone ?? 'plain'])}>{sentence}</p>
+          <p
+            className="mt-1 text-sm font-medium"
+            style={band ? { color: bandColor(Math.max(0, track.bands.findIndex((item) => item.id === band.id)), track.bands.length) } : undefined}
+          >
+            {sentence}
+          </p>
         )}
         <MiniRuler className="mt-5" track={track} value={graded ? score : null} />
 

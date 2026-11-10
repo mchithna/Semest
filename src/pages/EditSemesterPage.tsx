@@ -97,7 +97,7 @@ export default function EditSemesterPage() {
           key={semester.id}
           initialModules={initialModules}
           gradeScale={degree.grade_scale?.grades || []}
-          classBands={classBandsOf(degree.grade_scale)}
+          classBands={classBandsOf(degree)}
           priorModules={priorModules}
           baselineModules={initialModules}
           savedElsewhere={semesters.filter((item) => item.id !== semester.id).flatMap((item) => item.modules)}

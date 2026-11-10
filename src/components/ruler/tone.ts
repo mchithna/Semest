@@ -1,4 +1,13 @@
 import type { BandTone } from '@/lib/bands'
+import { sampleStops } from '@/lib/export/palette'
+
+/** Same blue, teal, gold, and coral as the ruler tokens, in order. */
+export const APP_BAND_STOPS = ['#5B6CFF', '#38B6C9', '#E6B84A', '#F07A5A'] as const
+
+/** Fill for the band at `index` of `count`. Four bands return the four stops unchanged. */
+export function bandColor(index: number, count: number): string {
+  return sampleStops(APP_BAND_STOPS, index, count)
+}
 
 export const BAND_TONE_CLASS: Record<BandTone, string> = {
   pass: 'bg-band-pass',

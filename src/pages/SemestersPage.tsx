@@ -10,7 +10,8 @@ import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { MiniRuler } from '@/components/ruler/MiniRuler'
 import { EmptyState } from '@/components/EmptyState'
 import { Ruler } from '@/components/ruler/Ruler'
-import { BAND_BORDER_CLASS, BAND_TEXT_CLASS } from '@/components/ruler/tone'
+import { bandColor } from '@/components/ruler/tone'
+import { withAlpha } from '@/lib/export/palette'
 import { cn } from '@/lib/utils'
 import type { SemesterWithModules } from '@/lib/queries/semesters'
 import type { GradeRow } from '@/lib/queries/gradeScales'
@@ -131,7 +132,8 @@ function SemesterCard({
   const editPath = `/degrees/${degreeId}/semesters/${semester.id}/edit`
   const band = stats.graded ? bandAt(stats.score, track) : null
   const sentence = standingSentence(stats.score, stats.graded, track)
-  const tone = band?.tone ?? 'plain'
+  const bandIndex = band ? track.bands.findIndex((item) => item.id === band.id) : -1
+  const bandFill = bandIndex >= 0 ? bandColor(bandIndex, track.bands.length) : null
   const detail = stats.moduleCount === 0
     ? 'No modules added'
     : `${formatCredits(stats.credits)} ${stats.credits === 1 ? 'credit' : 'credits'}`
@@ -142,9 +144,10 @@ function SemesterCard({
         className={cn(
           'group relative flex min-w-0 flex-col gap-3 rounded-[22px] px-4 py-3 sm:flex-row sm:items-center sm:gap-5',
           stats.graded
-            ? cn('border bg-card', BAND_BORDER_CLASS[tone])
+            ? 'border bg-card'
             : 'border border-dashed border-foreground/20',
         )}
+        style={bandFill ? { borderColor: withAlpha(bandFill, 0.8) } : undefined}
       >
         <div className="flex min-w-0 items-start justify-between gap-2 sm:w-44 sm:shrink-0">
           <div className="min-w-0">
@@ -172,7 +175,7 @@ function SemesterCard({
               {formatGpa(stats.score)}
             </p>
             {sentence && (
-              <p className={cn('truncate text-sm font-medium sm:w-60 sm:shrink-0', BAND_TEXT_CLASS[tone])}>
+              <p className="truncate text-sm font-medium sm:w-60 sm:shrink-0" style={bandFill ? { color: bandFill } : undefined}>
                 {sentence}
               </p>
             )}
@@ -202,9 +205,10 @@ function SemesterCard({
       className={cn(
         'group relative flex h-full min-w-0 flex-col rounded-[22px] p-5',
         stats.graded
-          ? cn('border bg-card', BAND_BORDER_CLASS[tone])
+          ? 'border bg-card'
           : 'border border-dashed border-foreground/20',
       )}
+      style={bandFill ? { borderColor: withAlpha(bandFill, 0.8) } : undefined}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
@@ -231,7 +235,7 @@ function SemesterCard({
             {formatGpa(stats.score)}
           </p>
           {sentence && (
-            <p className={cn('mt-1 text-sm font-medium', BAND_TEXT_CLASS[tone])}>{sentence}</p>
+            <p className="mt-1 text-sm font-medium" style={bandFill ? { color: bandFill } : undefined}>{sentence}</p>
           )}
           <MiniRuler className="mt-6" track={track} value={stats.score} />
         </div>
@@ -310,7 +314,7 @@ export default function SemestersPage() {
   }
 
   const scale = degree.grade_scale?.grades || []
-  const track = bandsForScale(scale, classBandsOf(degree.grade_scale))
+  const track = bandsForScale(scale, classBandsOf(degree))
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -331,9 +335,14 @@ export default function SemestersPage() {
           ) : (
             <span />
           )}
-          <Button className="ml-auto" onClick={() => navigate(`/degrees/${degreeId}/semesters/new`)}>
-            New semester
-          </Button>
+          <div className="ml-auto flex flex-wrap gap-2">
+            <Button variant="outline" onClick={() => navigate(`/degrees/${degreeId}/classification`)}>
+              Classification
+            </Button>
+            <Button onClick={() => navigate(`/degrees/${degreeId}/semesters/new`)}>
+              New semester
+            </Button>
+          </div>
         </div>
 
         {semesters.length === 0 ? (

@@ -45,6 +45,19 @@ export const SOCIAL_PX = {
   '9:16': { width: 1080, height: 1920 },
 } as const
 
+/** Even steps from the first stop to the last. Four stops at four places land on the stops themselves. */
+export function sampleStops(stops: readonly string[], index: number, count: number): string {
+  if (stops.length === 0) return '#000000'
+  if (count <= 1) return stops[0].toUpperCase()
+  const place = Math.min(Math.max(index, 0), count - 1)
+  const scaled = (place / (count - 1)) * (stops.length - 1)
+  const left = Math.min(stops.length - 1, Math.floor(scaled + 1e-9))
+  const right = Math.min(stops.length - 1, left + 1)
+  const amount = scaled - left
+  if (right === left || amount < 1e-6) return stops[left].toUpperCase()
+  return mix(stops[left], stops[right], amount)
+}
+
 /** Blend a hex colour toward another. `amount` 0 returns `from`, 1 returns `to`. */
 export function mix(from: string, to: string, amount: number): string {
   const a = parseHex(from)

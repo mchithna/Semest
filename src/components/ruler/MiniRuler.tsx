@@ -1,7 +1,7 @@
 import { markerPercent, type BandTrack } from '@/lib/bands'
 import { markerShift } from '@/lib/motion'
 import { cn } from '@/lib/utils'
-import { BAND_TONE_CLASS } from './tone'
+import { BAND_TONE_CLASS, bandColor } from './tone'
 
 export function MiniRuler({
   track,
@@ -33,13 +33,14 @@ export function MiniRuler({
       aria-label={graded ? `GPA ${value.toFixed(2)}` : 'Classification scale'}
     >
       <div className="flex h-full overflow-hidden rounded-full">
-        {track.bands.map((band) => {
+        {track.bands.map((band, index) => {
           const width = span > 0 ? ((band.max - band.min) / span) * 100 : 0
+          const plain = band.tone === 'plain'
           return (
             <div
               key={band.id}
-              className={cn('h-full', BAND_TONE_CLASS[band.tone])}
-              style={{ width: `${width}%` }}
+              className={cn('h-full', plain && BAND_TONE_CLASS.plain)}
+              style={{ width: `${width}%`, backgroundColor: plain ? undefined : bandColor(index, track.bands.length) }}
             />
           )
         })}

@@ -60,12 +60,12 @@ export default function DashboardPage() {
   const { semesters, isLoading: isSemestersLoading } = useSemesters(activeDegreeId)
   const degreeParam = searchParams.get('degree')
   const scale = activeDegree?.grade_scale?.grades || []
-  const classBands = classBandsOf(activeDegree?.grade_scale)
+  const classBands = classBandsOf(activeDegree)
   const track = bandsForScale(scale, classBands)
   const targetScope = [
     activeDegreeId,
     activeDegree?.grade_scale?.id ?? '',
-    activeDegree?.grade_scale?.classification_scheme_id ?? '',
+    JSON.stringify(activeDegree?.class_bands ?? []),
   ].join(':')
   const defaultTarget = track.bands.filter((band) => band.tone !== 'plain' && band.label).at(-1)?.min ?? null
   const [appliedTargetScope, setAppliedTargetScope] = useState<string | null>(null)

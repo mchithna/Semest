@@ -1,3 +1,4 @@
+import type { ClassCut } from '../bands'
 import { assertText, LIMITS } from '../limits'
 import { supabase } from '../supabase'
 import { GRADE_SCALE_SELECT, type GradeScale } from './gradeScales'
@@ -9,6 +10,8 @@ export type Degree = {
   institution: string | null
   started_year: number | null
   grade_scale_id: string | null
+  /** This degree's own class cuts. A missing copy falls back to the scale's scheme. */
+  class_bands?: ClassCut[] | null
   created_at: string
 }
 

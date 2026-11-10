@@ -1,3 +1,4 @@
+import { withPresetBands } from '../bands'
 import { assertText, LIMITS } from '../limits'
 import { supabase } from '../supabase'
 import { GRADE_SCALE_SELECT, type GradeScale } from './gradeScales'
@@ -69,7 +70,7 @@ export async function getPublicPresets(page = 0, search = ''): Promise<{ presets
 
   const presets = (data ?? []).map(d => ({
     ...d,
-    grade_scale: (Array.isArray(d.grade_scale) ? d.grade_scale[0] : d.grade_scale) || d.scale_snapshot
+    grade_scale: withPresetBands(Array.isArray(d.grade_scale) ? d.grade_scale[0] : d.grade_scale, d.scale_snapshot)
   })) as PresetWithScale[]
 
   return { presets, hasMore: (count ?? 0) > to + 1 }
@@ -92,7 +93,7 @@ export async function getMyPresets(): Promise<PresetWithScale[]> {
   
   return data?.map(d => ({
     ...d,
-    grade_scale: (Array.isArray(d.grade_scale) ? d.grade_scale[0] : d.grade_scale) || d.scale_snapshot
+    grade_scale: withPresetBands(Array.isArray(d.grade_scale) ? d.grade_scale[0] : d.grade_scale, d.scale_snapshot)
   })) as PresetWithScale[]
 }
 
@@ -107,7 +108,7 @@ export async function getPresetByCode(code: string): Promise<PresetFull> {
   // Map the new RPC format back to our PresetFull format for the frontend
   return {
     ...data.preset,
-    grade_scale: data.scale,
+    grade_scale: withPresetBands(data.scale, data.preset?.scale_snapshot),
     semesters: data.semesters || []
   } as PresetFull
 }

@@ -160,7 +160,28 @@ describe('export report model', () => {
     const credits = visible.reduce((sum, row) => sum + row.credits, 0)
     const points = visible.reduce((sum, row) => sum + (row.points ?? 0) * row.credits, 0)
     expect(Number((points / credits).toFixed(4))).toBe(report.cgpa)
-    expect(report.classification).toBe('First class')
+    expect(report.classification).toBe('First')
+  })
+
+  it('lists the degree’s saved class names and minimums', () => {
+    const report = buildReport({
+      degree: {
+        ...degree(),
+        class_bands: [
+          { id: 'merit', label: 'Pass with Merit', min: 2.5 },
+          { id: 'first', label: 'First', min: 3.7 },
+        ],
+      },
+      semesters: [semester('s1', 'Year 1, Semester 1', [module('a', 'Algorithms', 3, 'A')])],
+      theme: 'formal',
+      toggles,
+      title: 'Transcript',
+      studentName: 'Alex',
+      studentId: '1',
+      paper: 'A4',
+      aspect: '4:5',
+    })
+    expect(report.classificationList).toBe('Pass with Merit 2.50, First 3.70')
   })
 
   it('omits ungraded modules unless in-progress semesters are included', () => {

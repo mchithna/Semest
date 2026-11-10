@@ -181,7 +181,7 @@ export function paginate(
 }
 export function buildReport(input: BuildReportInput): ReportModel {
   const scale = input.degree.grade_scale?.grades ?? []
-  const track = bandsForScale(scale, classBandsOf(input.degree.grade_scale))
+  const track = bandsForScale(scale, classBandsOf(input.degree))
   const hasClassBands = track.bands.some((band) => band.tone !== 'plain')
   const show = { ...input.toggles }
   if (!hasClassBands) show.classificationRuler = false
