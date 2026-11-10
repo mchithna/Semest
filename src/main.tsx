@@ -15,6 +15,7 @@ import OnboardingPage from './pages/OnboardingPage'
 import DashboardPage from './pages/DashboardPage'
 import DegreesPage from './pages/DegreesPage'
 import SemestersPage from './pages/SemestersPage'
+import ClassificationPage from './pages/ClassificationPage'
 import NewSemesterPage from './pages/NewSemesterPage'
 import EditSemesterPage from './pages/EditSemesterPage'
 import ScalesPage from './pages/settings/ScalesPage'
@@ -46,6 +47,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/dashboard" element={<ProtectedRoute><><title>Dashboard · Semest</title><DashboardPage /></></ProtectedRoute>} />
               <Route path="/degrees" element={<ProtectedRoute><><title>Degrees · Semest</title><DegreesPage /></></ProtectedRoute>} />
               <Route path="/degrees/:degreeId/semesters" element={<ProtectedRoute><SemestersPage /></ProtectedRoute>} />
+              <Route path="/degrees/:degreeId/classification" element={<ProtectedRoute><><title>Classification · Semest</title><ClassificationPage /></></ProtectedRoute>} />
               <Route path="/degrees/:degreeId/semesters/new" element={<ProtectedRoute><><title>New semester · Semest</title><NewSemesterPage /></></ProtectedRoute>} />
               <Route path="/degrees/:degreeId/semesters/:id/edit" element={<ProtectedRoute><><title>Edit semester · Semest</title><EditSemesterPage /></></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><><title>Settings · Semest</title><ScalesPage /></></ProtectedRoute>} />

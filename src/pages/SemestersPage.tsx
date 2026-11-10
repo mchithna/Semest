@@ -331,9 +331,14 @@ export default function SemestersPage() {
           ) : (
             <span />
           )}
-          <Button className="ml-auto" onClick={() => navigate(`/degrees/${degreeId}/semesters/new`)}>
-            New semester
-          </Button>
+          <div className="ml-auto flex flex-wrap gap-2">
+            <Button variant="outline" onClick={() => navigate(`/degrees/${degreeId}/classification`)}>
+              Classification
+            </Button>
+            <Button onClick={() => navigate(`/degrees/${degreeId}/semesters/new`)}>
+              New semester
+            </Button>
+          </div>
         </div>
 
         {semesters.length === 0 ? (

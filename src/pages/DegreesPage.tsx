@@ -6,12 +6,14 @@ import { useDegrees } from '@/hooks/useDegrees'
 import { useSemesters } from '@/hooks/useSemesters'
 import { getCumulativeMetrics } from '@/lib/analytics'
 import { bandsForScale, classBandsOf, type Band } from '@/lib/bands'
+import { isCustomClassCuts } from '@/lib/classBandEditor'
 import { friendlyError } from '@/lib/errors'
 import type { DegreeWithScale } from '@/lib/queries/degrees'
 import type { GradeRow } from '@/lib/queries/gradeScales'
 import { CreateDegreeDialog } from '@/components/degrees/CreateDegreeDialog'
 import { MiniRuler } from '@/components/ruler/MiniRuler'
 import { EmptyState } from '@/components/EmptyState'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 
 function DegreeTrack({ degreeId, grades, classBands }: { degreeId: string; grades: GradeRow[]; classBands: Band[] }) {
@@ -111,6 +113,14 @@ export default function DegreesPage() {
                         {degree.title}
                       </Link>
                     </h2>
+                    {isCustomClassCuts(degree.class_bands) ? (
+                      <Badge variant="outline" className="mt-2">Custom bands</Badge>
+                    ) : null}
+                    <p className="relative z-10 mt-2">
+                      <Link to={`/degrees/${degree.id}/classification`} className="text-sm text-muted-foreground hover:text-foreground">
+                        Classification
+                      </Link>
+                    </p>
                     <p className="mt-1 truncate text-sm text-muted-foreground">
                       {degree.institution?.trim() ? (
                         <>
