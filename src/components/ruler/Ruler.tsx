@@ -9,7 +9,7 @@ import {
 } from '@/lib/bands'
 import { markerShift } from '@/lib/motion'
 import { cn } from '@/lib/utils'
-import { BAND_TONE_CLASS } from './tone'
+import { BAND_TONE_CLASS, bandColor } from './tone'
 
 export function Ruler({
   track,
@@ -57,19 +57,20 @@ export function Ruler({
 
         <div ref={trackRef} className="relative h-10">
           <div className="flex h-full overflow-hidden rounded-full">
-            {track.bands.map((band) => {
+            {track.bands.map((band, index) => {
               const span = track.max - track.min
               const widthPct = span > 0 ? ((band.max - band.min) / span) * 100 : 0
               const segmentPx = (measured * widthPct) / 100
               const showLabel = Boolean(band.label) && segmentPx >= estimateLabelWidth(band.label)
+              const plain = band.tone === 'plain'
               return (
                 <div
                   key={band.id}
                   className={cn(
                     'flex h-full min-w-0 items-center px-3 text-xs font-medium text-primary-foreground',
-                    BAND_TONE_CLASS[band.tone],
+                    plain && BAND_TONE_CLASS.plain,
                   )}
-                  style={{ width: `${widthPct}%` }}
+                  style={{ width: `${widthPct}%`, backgroundColor: plain ? undefined : bandColor(index, track.bands.length) }}
                 >
                   {showLabel ? <span className="truncate">{band.label}</span> : null}
                   {band.label && !showLabel ? <span className="sr-only">{band.label}</span> : null}

@@ -45,7 +45,7 @@ export function RulerReport({ model, pageIndex }: { model: ReportModel; pageInde
     >
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: `${RULER.stripH}pt` }}>
         {model.hasClassBands &&
-          geo.bands.map((band) => (
+          geo.bands.map((band, index) => (
             <span
               key={band.id}
               style={{
@@ -54,7 +54,7 @@ export function RulerReport({ model, pageIndex }: { model: ReportModel; pageInde
                 bottom: 0,
                 left: `${band.left}%`,
                 width: `${band.width}%`,
-                background: bandPaint(band, true, 'paper').fill,
+                background: bandPaint(band, true, 'paper', index, geo.bands.length).fill,
               }}
             />
           ))}

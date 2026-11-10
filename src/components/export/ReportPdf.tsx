@@ -233,8 +233,8 @@ function PdfRuler({
           overflow: 'hidden',
         }}
       >
-        {geo.bands.map((band) => {
-          const paint = bandPaint(band, bandReached(band, value), 'paper')
+        {geo.bands.map((band, index) => {
+          const paint = bandPaint(band, bandReached(band, value), 'paper', index, geo.bands.length)
           const bandW = (band.width / 100) * W
           const fit = fitBandLabel(band.label, bandW - metrics.labelPad * 2, metrics.label)
           const dashed = paint.edge
@@ -345,7 +345,7 @@ function PdfMini({ track, value, width }: { track: BandTrack; value: number | nu
           overflow: 'hidden',
         }}
       >
-        {geo.bands.map((band) => (
+        {geo.bands.map((band, index) => (
           <View
             key={band.id}
             style={{
@@ -354,7 +354,7 @@ function PdfMini({ track, value, width }: { track: BandTrack; value: number | nu
               left: (band.left / 100) * width,
               width: (band.width / 100) * width,
               height: trackH,
-              backgroundColor: bandPaint(band, bandReached(band, value), 'paper').fill,
+              backgroundColor: bandPaint(band, bandReached(band, value), 'paper', index, geo.bands.length).fill,
             }}
           />
         ))}
@@ -396,7 +396,7 @@ export function RulerPdf({ model }: { model: ReportModel }) {
           <Page key={page.index} size={pageSize(model)} style={ruler.page}>
             <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: RULER.stripH }}>
               {model.hasClassBands &&
-                geo.bands.map((band) => (
+                geo.bands.map((band, index) => (
                   <View
                     key={band.id}
                     style={{
@@ -405,7 +405,7 @@ export function RulerPdf({ model }: { model: ReportModel }) {
                       left: (band.left / 100) * PAGE_PT[model.paper].width,
                       width: (band.width / 100) * PAGE_PT[model.paper].width,
                       height: RULER.stripH,
-                      backgroundColor: bandPaint(band, true, 'paper').fill,
+                      backgroundColor: bandPaint(band, true, 'paper', index, geo.bands.length).fill,
                     }}
                   />
                 ))}

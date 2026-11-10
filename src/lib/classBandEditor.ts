@@ -1,4 +1,4 @@
-import { DEFAULT_CLASS_CUTS, expandClassCuts, parseClassCuts, type BandTone, type ClassCut } from './bands'
+import { DEFAULT_CLASS_CUTS, parseClassCuts, type ClassCut } from './bands'
 import { formatGpa } from './score'
 
 export const BAND_LIMIT = 8
@@ -140,18 +140,6 @@ export function previewCuts(rows: BandDraft[], scaleTop: number): ClassCut[] {
     if (min == null || min < 0 || min >= scaleTop) return []
     return [{ id: row.id, label: row.label.trim(), min }]
   })
-}
-
-/** Dot color follows the row. Known class ids keep their current color. */
-export function draftTones(rows: BandDraft[]): BandTone[] {
-  if (rows.length === 0) return []
-  const cuts = rows.map((row, index) => ({
-    id: row.id,
-    label: row.label.trim() || 'Band',
-    min: index,
-  }))
-  const byId = new Map(expandClassCuts(cuts, rows.length).map((band) => [band.id, band.tone]))
-  return rows.map((row) => byId.get(row.id) ?? 'plain')
 }
 
 export function lowestStart(rows: BandDraft[]): number | null {

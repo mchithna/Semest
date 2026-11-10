@@ -117,9 +117,9 @@ export function ClassRuler({
           overflow: 'hidden',
         }}
       >
-        {geo.bands.map((band) => {
+        {geo.bands.map((band, index) => {
           const reached = bandReached(band, value)
-          const paint = bandPaint(band, reached, variant)
+          const paint = bandPaint(band, reached, variant, index, geo.bands.length)
           const inner = metrics.width * (band.width / 100) - metrics.labelPad * 2
           const fit = fitBandLabel(band.label, inner, metrics.label)
           return (
@@ -241,8 +241,8 @@ export function ReportMiniRuler({ track, value, unit }: MiniProps) {
           overflow: 'hidden',
         }}
       >
-        {geo.bands.map((band) => {
-          const paint = bandPaint(band, bandReached(band, value), 'paper')
+        {geo.bands.map((band, index) => {
+          const paint = bandPaint(band, bandReached(band, value), 'paper', index, geo.bands.length)
           return (
             <div
               key={band.id}

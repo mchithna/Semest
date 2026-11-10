@@ -1,5 +1,5 @@
 import type { Band } from '@/lib/bands'
-import { AMBER, BAND_PRINT, BAND_SCREEN, INK, INK_MUTED, NIGHT, NIGHT_MUTED, NIGHT_TEXT, mix } from './palette'
+import { AMBER, BAND_PRINT, BAND_SCREEN, INK, INK_MUTED, NIGHT, NIGHT_MUTED, NIGHT_TEXT, mix, sampleStops } from './palette'
 
 export type RulerVariant = 'paper' | 'night'
 
@@ -10,18 +10,21 @@ export type BandPaint = {
   edge: string | null
 }
 
-/** Colours for a band. Both the HTML and the PDF renderer read this, so reached and unreached look the same. */
-export function bandPaint(band: Band, reached: boolean, variant: RulerVariant): BandPaint {
+const SCREEN_STOPS = [BAND_SCREEN.pass, BAND_SCREEN['second-lower'], BAND_SCREEN['second-upper'], BAND_SCREEN.first]
+const PRINT_STOPS = [BAND_PRINT.pass, BAND_PRINT['second-lower'], BAND_PRINT['second-upper'], BAND_PRINT.first]
+
+/** Colours for a band. Position picks the colour, so four bands keep the named stops and other counts step between them. */
+export function bandPaint(band: Band, reached: boolean, variant: RulerVariant, index = 0, count = 1): BandPaint {
+  const plain = variant === 'night' ? BAND_SCREEN.plain : BAND_PRINT.plain
+  const color = band.tone === 'plain' ? plain : sampleStops(variant === 'night' ? SCREEN_STOPS : PRINT_STOPS, index, count)
   if (variant === 'night') {
-    const color = BAND_SCREEN[band.tone]
     return reached
       ? { fill: color, text: NIGHT, edge: null }
       : { fill: mix(NIGHT, color, 0.22), text: color, edge: null }
   }
-  const tint = BAND_PRINT[band.tone]
   return reached
-    ? { fill: tint, text: INK, edge: null }
-    : { fill: mix(tint, '#FFFFFF', 0.55), text: INK_MUTED, edge: mix(tint, INK, 0.28) }
+    ? { fill: color, text: INK, edge: null }
+    : { fill: mix(color, '#FFFFFF', 0.55), text: INK_MUTED, edge: mix(color, INK, 0.28) }
 }
 
 export const RULER_COLORS = {

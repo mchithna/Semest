@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { CreateDegreeDialog } from '@/components/degrees/CreateDegreeDialog'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { Ruler } from '@/components/ruler/Ruler'
-import { BAND_TONE_CLASS } from '@/components/ruler/tone'
+import { bandColor } from '@/components/ruler/tone'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -19,7 +19,6 @@ import {
   cutsToDraft,
   draftCuts,
   draftMatchesCuts,
-  draftTones,
   isCustomClassCuts,
   lowestStart,
   previewCuts,
@@ -31,7 +30,6 @@ import { friendlyError } from '@/lib/errors'
 import type { DegreeWithScale } from '@/lib/queries/degrees'
 import type { GradeRow } from '@/lib/queries/gradeScales'
 import { formatGpa, hasGradedWork } from '@/lib/score'
-import { cn } from '@/lib/utils'
 
 function savedCuts(degree: DegreeWithScale): ClassCut[] {
   const own = parseClassCuts(degree.class_bands)
@@ -157,7 +155,6 @@ function ClassificationEditor({
   const cuts = draftCuts(rows, scaleTop)
   const dirty = !draftMatchesCuts(rows, saved)
   const canSave = cuts != null && dirty && !saving
-  const tones = draftTones(rows)
   const preview = previewCuts(rows, scaleTop)
   const track = bandsForScale(grades, preview.length > 0 ? expandClassCuts(preview, scaleTop) : [])
   const floor = lowestStart(rows)
@@ -216,7 +213,8 @@ function ClassificationEditor({
               <div className="grid grid-cols-[0.625rem_minmax(0,1fr)_2.25rem] items-center gap-x-3 gap-y-2 sm:grid-cols-[0.625rem_minmax(0,1fr)_6.5rem_5.75rem_2.25rem]">
                 <span
                   aria-hidden="true"
-                  className={cn('size-2.5 justify-self-center rounded-full', BAND_TONE_CLASS[tones[index] ?? 'plain'])}
+                  className="size-2.5 justify-self-center rounded-full"
+                  style={{ backgroundColor: bandColor(index, rows.length) }}
                 />
                 <Input
                   aria-label={`Name for ${name}`}
