@@ -101,6 +101,18 @@ function toneByPosition(index: number, count: number): Exclude<BandTone, 'plain'
 }
 
 /** The degree copy wins. A scale scheme is only the fallback for a degree that has no copy yet. */
+/** The cuts saved with a preset win over the live shared scheme on its grade scale. */
+export function withPresetBands<T extends object>(
+  scale: T | null | undefined,
+  snapshot: { classification_bands?: unknown } | null | undefined,
+): (T & { class_bands: unknown }) | T | { classification_bands?: unknown } | null {
+  const bands = snapshot?.classification_bands
+  if (scale && Array.isArray(bands) && bands.length > 0) {
+    return { ...scale, class_bands: bands }
+  }
+  return scale ?? snapshot ?? null
+}
+
 export function classBandsOf(source?: ScaleWithClasses | null): Band[] {
   if (!source) return []
   const own = parseClassCuts(source.class_bands)

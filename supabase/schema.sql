@@ -335,6 +335,7 @@ create policy "Creators manage own preset modules"
 -- ─────────────────────────────────────────────────
 
 -- Publish Preset
+-- Snapshots store the degree's own class cuts. Existing projects: run supabase/preset_degree_bands.sql.
 create or replace function publish_preset(
   p_degree_id   uuid,
   p_title       text,
@@ -370,7 +371,7 @@ begin
     'label', gs.label,
     'grades', gs.grades,
     'classification_scheme_id', gs.classification_scheme_id,
-    'classification_bands', cs.bands
+    'classification_bands', d.class_bands
   )
   into v_scale_id, v_scale_snap
   from degrees d
@@ -418,6 +419,7 @@ declare
   v_degree_id       uuid;
   v_scale_id        uuid;
   v_scheme_id       uuid;
+  v_class_bands     jsonb;
   v_next_sem_index  int;
   v_sem_record      record;
   v_new_sem_id      uuid;
@@ -473,10 +475,30 @@ begin
     v_scale_id := null;
   end if;
 
+  select jsonb_agg(
+    jsonb_build_object(
+      'id', band->>'id',
+      'label', band->>'label',
+      'min', (band->>'min')::numeric
+    )
+    order by (band->>'min')::numeric
+  )
+  into v_class_bands
+  from jsonb_array_elements(coalesce(v_preset.scale_snapshot->'classification_bands', '[]'::jsonb)) as band
+  where coalesce(band->>'id', '') <> ''
+    and coalesce(band->>'label', '') <> ''
+    and (band->>'min') ~ '^[0-9]+([.][0-9]+)?$';
+
   if p_target_degree_id is null then
-    insert into degrees (user_id, title, institution, grade_scale_id)
-    values (auth.uid(), coalesce(p_degree_title, v_preset.title), v_preset.institution, v_scale_id)
-    returning id into v_degree_id;
+    if v_class_bands is null then
+      insert into degrees (user_id, title, institution, grade_scale_id)
+      values (auth.uid(), coalesce(p_degree_title, v_preset.title), v_preset.institution, v_scale_id)
+      returning id into v_degree_id;
+    else
+      insert into degrees (user_id, title, institution, grade_scale_id, class_bands)
+      values (auth.uid(), coalesce(p_degree_title, v_preset.title), v_preset.institution, v_scale_id, v_class_bands)
+      returning id into v_degree_id;
+    end if;
     v_next_sem_index := 0;
   else
     if not exists (select 1 from degrees where id = p_target_degree_id and user_id = auth.uid()) then
@@ -533,7 +555,7 @@ begin
     'label', gs.label,
     'grades', gs.grades,
     'classification_scheme_id', gs.classification_scheme_id,
-    'classification_bands', cs.bands
+    'classification_bands', d.class_bands
   )
   into v_scale_id, v_scale_snap
   from degrees d
@@ -575,7 +597,7 @@ begin
                      'label', gs.label,
                      'grades', gs.grades,
                      'classification_scheme_id', gs.classification_scheme_id,
-                     'classification_bands', cs.bands
+                     'classification_bands', coalesce(p.scale_snapshot->'classification_bands', cs.bands)
                    )
                    from grade_scales gs
                    left join classification_schemes cs on cs.id = gs.classification_scheme_id
