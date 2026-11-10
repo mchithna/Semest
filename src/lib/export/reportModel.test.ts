@@ -160,7 +160,7 @@ describe('export report model', () => {
     const credits = visible.reduce((sum, row) => sum + row.credits, 0)
     const points = visible.reduce((sum, row) => sum + (row.points ?? 0) * row.credits, 0)
     expect(Number((points / credits).toFixed(4))).toBe(report.cgpa)
-    expect(report.classification).toBe('First class')
+    expect(report.classification).toBe('First')
   })
 
   it('omits ungraded modules unless in-progress semesters are included', () => {

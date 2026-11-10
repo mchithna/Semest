@@ -147,7 +147,7 @@ export default function DegreesPage() {
                   </div>
                 </div>
                 <div className="mt-6">
-                  <DegreeTrack degreeId={degree.id} grades={degree.grade_scale?.grades || []} classBands={classBandsOf(degree.grade_scale)} />
+                  <DegreeTrack degreeId={degree.id} grades={degree.grade_scale?.grades || []} classBands={classBandsOf(degree)} />
                 </div>
               </article>
             ))}

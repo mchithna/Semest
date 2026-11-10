@@ -139,7 +139,7 @@ export function ExportReportModal({
     saveOverrides(overrides)
   }, [overrides])
 
-  const hasClassBands = bandsForScale(degree?.grade_scale?.grades ?? [], classBandsOf(degree?.grade_scale)).bands.some((band) => band.tone !== 'plain')
+  const hasClassBands = bandsForScale(degree?.grade_scale?.grades ?? [], classBandsOf(degree)).bands.some((band) => band.tone !== 'plain')
   const resolved = resolveToggles(theme, overrides[theme], hasClassBands)
   const model =
     degree == null

@@ -310,7 +310,7 @@ export default function SemestersPage() {
   }
 
   const scale = degree.grade_scale?.grades || []
-  const track = bandsForScale(scale, classBandsOf(degree.grade_scale))
+  const track = bandsForScale(scale, classBandsOf(degree))
 
   return (
     <div className="min-h-screen bg-background text-foreground">

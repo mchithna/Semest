@@ -31,7 +31,7 @@ describe('export fixtures', () => {
     expect(model.semesters.map((semester) => semester.gpa)).toEqual([3.1, 3.54])
     expect(model.cgpa).toBe(3.32)
     expect(model.track.max).toBe(4.2)
-    expect(model.standing).toBe('Second class upper, by 0.02.')
+    expect(model.standing).toBe('Second upper, by 0.02.')
     expect(model.distanceToNext).toBe('0.38')
   })
 
@@ -115,7 +115,7 @@ describe('export fixtures', () => {
     const html = renderToStaticMarkup(<SocialCard model={model} />)
     const visible = text(html)
     expect(visible).not.toMatch(/\d\.\d\d/)
-    expect(visible).toContain('Second class upper')
+    expect(visible).toContain('Second upper')
     expect(visible).not.toContain('@')
   })
 
@@ -123,7 +123,8 @@ describe('export fixtures', () => {
     const model = report(FIXTURE_BY_ID.two, 'social')
     const visible = text(renderToStaticMarkup(<SocialCard model={model} />))
     expect(visible).toContain('3.32')
-    expect(visible).toContain('0.38 from First class')
+    expect(visible).toContain('0.38 from First')
+    expect(visible).not.toContain('First class')
     expect(visible).not.toContain('CS26-0142')
     expect(visible).not.toContain('Alex Morgan')
   })

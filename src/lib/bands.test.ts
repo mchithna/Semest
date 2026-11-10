@@ -3,7 +3,11 @@ import schemaSql from '../../supabase/schema.sql?raw'
 import { SRI_LANKAN_HONORS_BANDS } from './classBands.fixture'
 import {
   bandsForScale,
+  classBandsOf,
+  DEFAULT_CLASS_CUTS,
+  expandClassCuts,
   parseClassBands,
+  parseClassCuts,
   markerPercent,
   nextBandSentence,
   placeMarkers,
@@ -78,10 +82,33 @@ describe('bands', () => {
     expect(markerPercent(5, track)).toBe(100)
   })
 
+  it('keeps a degree copy even when the shared scheme differs', () => {
+    expect(parseClassCuts(DEFAULT_CLASS_CUTS)).toEqual(DEFAULT_CLASS_CUTS)
+    expect(expandClassCuts(DEFAULT_CLASS_CUTS).map((band) => [band.label, band.min, band.max])).toEqual([
+      ['Pass', 2, 3],
+      ['Second lower', 3, 3.3],
+      ['Second upper', 3.3, 3.7],
+      ['First', 3.7, 4],
+    ])
+
+    const own = classBandsOf({
+      class_bands: [
+        { id: 'merit', label: 'Pass with Merit', min: 2.7 },
+        { id: 'first', label: 'First', min: 3.7 },
+      ],
+      classification_scheme: { bands: SRI_LANKAN_HONORS_BANDS },
+    })
+    expect(own.map((band) => band.label)).toEqual(['Pass with Merit', 'First'])
+    expect(bandsForScale([{ points: 4.2 }], own).bands.at(-1)?.max).toBe(4.2)
+
+    const fallback = classBandsOf({ classification_scheme: { bands: SRI_LANKAN_HONORS_BANDS } })
+    expect(fallback.map((band) => band.min)).toEqual([2, 3, 3.3, 3.7])
+  })
+
   it('writes the standing sentence from the band floor', () => {
     const track = honorsTrack()
-    expect(standingSentence(3.32, true, track)).toBe('Second class upper, by 0.02.')
-    expect(nextBandSentence(3.32, track)).toBe('0.38 more reaches First class.')
+    expect(standingSentence(3.32, true, track)).toBe('Second upper, by 0.02.')
+    expect(nextBandSentence(3.32, track)).toBe('0.38 more reaches First.')
     expect(standingSentence(3.32, false, track)).toBeNull()
     expect(nextBandSentence(3.8, track)).toBeNull()
   })

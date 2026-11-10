@@ -100,7 +100,7 @@ export default function NewSemesterPage() {
           key={initialModules.length ? 'loaded' : 'empty'}
           initialModules={initialModules}
           gradeScale={degree.grade_scale?.grades || []}
-          classBands={classBandsOf(degree.grade_scale)}
+          classBands={classBandsOf(degree)}
           priorModules={earlierModuleOptions(semesters, null)}
           savedElsewhere={semesters.flatMap((semester) => semester.modules)}
           detailsChanged={detailsChanged}
